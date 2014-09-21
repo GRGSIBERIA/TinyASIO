@@ -68,6 +68,8 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Driver.hpp" />
+    <ClInclude Include="Interface.hpp" />
     <ClInclude Include="Registory.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

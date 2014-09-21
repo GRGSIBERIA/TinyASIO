@@ -3,8 +3,11 @@
 #include <iostream>
 
 #include "Registory.hpp"
+#include "Driver.hpp"
+
 
 #define TEST_HR(hr) if(!SUCCEEDED(hr)) return -1
+
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow)
 {
@@ -17,7 +20,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 	auto list = asio::ASIORegistory::GetAsioDriverPathes();
 	auto clsids = asio::ASIORegistory::GetCLSIDs(list);
 
-	
+	asio::ASIODriver((*clsids).at(0));
 
 	return 0;
 }
