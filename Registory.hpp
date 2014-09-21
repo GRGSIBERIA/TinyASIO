@@ -49,7 +49,6 @@ namespace asio
 	{
 	public:
 		typedef std::shared_ptr<std::vector<SubKey>> SubKeyList;
-		typedef GUID CLSID;
 		typedef std::shared_ptr<std::vector<CLSID>> CLSIDList;
 		
 	private:
