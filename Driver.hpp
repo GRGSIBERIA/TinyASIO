@@ -84,6 +84,7 @@ namespace asio
 
 		/**
 		* “ü—Í‚Ì’x‰„‚ğ•Ô‚·
+		* @return “ü—Í‚Ì’x‰„
 		*/
 		long InputLatency() const 
 		{
@@ -94,6 +95,7 @@ namespace asio
 
 		/**
 		* o—Í‚Ì’x‰„‚ğ•Ô‚·
+		* @return o—Í‚Ì’x‰„
 		*/
 		long OutputLatency() const 
 		{
@@ -102,6 +104,10 @@ namespace asio
 			return o;
 		}
 
+		/**
+		* “ü—Í‚Æo—Í‚Ì’x‰„‚ğ•Ô‚·
+		* @return “üo—Í‚Ì’x‰„
+		*/
 		Latency Latencies() const
 		{
 			Latency latency;
