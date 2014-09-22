@@ -77,6 +77,26 @@ namespace asio
 		*/
 		const IASIO& Interface() const { return *driver; }
 
+		/**
+		* 入力の遅延を返す
+		*/
+		long InputLatency() const 
+		{
+			long i, o;
+			ErrorCheck(driver->getLatencies(&i, &o));
+			return i;
+		}
+
+		/**
+		* 出力の遅延を返す
+		*/
+		long OutputLatency() const 
+		{
+			long i, o;
+			ErrorCheck(driver->getLatencies(&i, &o));
+			return o;
+		}
+
 	public:
 		/**
 		* バッファリング開始
