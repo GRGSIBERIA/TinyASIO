@@ -159,6 +159,26 @@ namespace asio
 			return channels;
 		}
 
+		/**
+		* サンプリング・レートを返す
+		* @return サンプリング・レート
+		*/
+		double SampleRate() const
+		{
+			double rate;
+			ErrorCheck(driver->getSampleRate(&rate));
+			return rate;
+		}
+
+		/**
+		* サンプリング・レートを設定する
+		* @params[in] rate サンプリング・レート
+		*/
+		void SampleRate(double rate)
+		{
+			ErrorCheck(driver->setSampleRate(rate));
+		}
+
 	public:
 		/**
 		* バッファリング開始
