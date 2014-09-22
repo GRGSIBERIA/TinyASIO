@@ -1,3 +1,6 @@
+/**
+* このファイルで定義されている内容はASIO SDKから拝借
+*/
 #pragma once
 
 #include <windows.h>
