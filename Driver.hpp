@@ -63,6 +63,22 @@ namespace asio
 
 	public:
 		/**
+		* 入出力の遅延を表す構造体
+		*/
+		struct IOLatency
+		{
+			long input, output;
+		};
+
+		/**
+		* チャンネル数を表す構造体
+		*/
+		struct IOChannels
+		{
+			long input, output;
+		};
+
+		/**
 		* ドライバ名を返す
 		*/
 		const std::string& Name() const { return driverName; }
@@ -76,11 +92,6 @@ namespace asio
 		* ドライバのインターフェースを返す
 		*/
 		const IASIO& Interface() const { return *driver; }
-
-		struct Latency
-		{
-			long input, output;
-		};
 
 		/**
 		* 入力の遅延を返す
@@ -108,11 +119,44 @@ namespace asio
 		* 入力と出力の遅延を返す
 		* @return 入出力の遅延
 		*/
-		Latency Latencies() const
+		IOLatency Latencies() const
 		{
-			Latency latency;
+			IOLatency latency;
 			ErrorCheck(driver->getLatencies(&latency.input, &latency.output));
 			return latency;
+		}
+
+		/**
+		* 入力のチャンネル数を返す
+		* @return 入力のチャンネル数
+		*/
+		long InputChannels() const
+		{
+			long i, o;
+			ErrorCheck(driver->getChannels(&i, &o));
+			return i;
+		}
+
+		/**
+		* 出力のチャンネル数を返す
+		* @return 出力のチャンネル数
+		*/
+		long OutputChannels() const
+		{
+			long i, o;
+			ErrorCheck(driver->getChannels(&i, &o));
+			return o;
+		}
+
+		/**
+		* 入出力のチャンネル数を返す
+		* @return 入出力のチャンネル数
+		*/
+		IOChannels Channels() const
+		{
+			IOChannels channels;
+			ErrorCheck(driver->getChannels(&channels.input, &channels.output));
+			return channels;
 		}
 
 	public:
@@ -150,6 +194,9 @@ namespace asio
 			driverVersion = driver->getDriverVersion();
 		}
 
+		/**
+		* ドライバの解放など
+		*/
 		virtual ~ASIODriver()
 		{
 			driver->Release();
