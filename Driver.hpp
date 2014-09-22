@@ -77,6 +77,11 @@ namespace asio
 		*/
 		const IASIO& Interface() const { return *driver; }
 
+		struct Latency
+		{
+			long input, output;
+		};
+
 		/**
 		* “ü—Í‚Ì’x‰„‚ğ•Ô‚·
 		*/
@@ -95,6 +100,13 @@ namespace asio
 			long i, o;
 			ErrorCheck(driver->getLatencies(&i, &o));
 			return o;
+		}
+
+		Latency Latencies() const
+		{
+			Latency latency;
+			ErrorCheck(driver->getLatencies(&latency.input, &latency.output));
+			return latency;
 		}
 
 	public:
