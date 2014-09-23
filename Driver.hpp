@@ -79,6 +79,17 @@ namespace asio
 		};
 
 		/**
+		* バッファの現在の設定を表す構造体
+		*/
+		struct BufferPreference
+		{
+			long maxSize;		// バッファサイズの最大値
+			long minSize;		// バッファサイズの最小値
+			long preferredSize;	// 設定中の値
+			long granularity;	// 設定の粒度
+		};
+
+		/**
 		* ドライバ名を返す
 		*/
 		const std::string& Name() const { return driverName; }
@@ -177,6 +188,18 @@ namespace asio
 		void SampleRate(double rate)
 		{
 			ErrorCheck(driver->setSampleRate(rate));
+		}
+
+		/**
+		* バッファの設定を取得
+		* @return バッファの現在の設定
+		* @note 必ずしも信用できる値を取得できるとは限らない
+		*/
+		BufferPreference GetBufferPreference() const
+		{
+			BufferPreference buf;
+			ErrorCheck(driver->getBufferSize(&buf.minSize, &buf.maxSize, &buf.preferredSize, &buf.granularity));
+			return buf;
 		}
 
 	public:
