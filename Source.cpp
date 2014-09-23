@@ -21,7 +21,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 	auto clsids = asio::ASIORegistory::GetCLSIDs(list);
 
 	auto a = asio::ASIODriver((*clsids).at(0));
-	auto ic = a.GetBufferPreference();
+	a.ChannelInfo();
 
 	return 0;
 }

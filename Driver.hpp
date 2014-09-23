@@ -4,6 +4,7 @@
 #include <string>
 
 #include "Interface.hpp"
+#include "Channel.hpp"
 
 namespace asio
 {
@@ -202,6 +203,18 @@ namespace asio
 			return buf;
 		}
 
+		/**
+		* チャンネルの情報を取得
+		* @return チャンネル情報
+		*/
+		Channel& ChannelInfo(const long channelNumber) const
+		{
+			ASIOChannelInfo info;
+			info.channel = channelNumber;
+			ErrorCheck(driver->getChannelInfo(&info));
+			return Channel(info);
+		}
+
 	public:
 		/**
 		* バッファリング開始
@@ -245,4 +258,18 @@ namespace asio
 			driver->Release();
 		}
 	};
+
+	// メモ
+	//virtual void getErrorMessage(char *string) = 0;
+	//virtual ASIOError canSampleRate(ASIOSampleRate sampleRate) = 0;
+	//virtual ASIOError getClockSources(ASIOClockSource *clocks, long *numSources) = 0;
+	//virtual ASIOError setClockSource(long reference) = 0;
+	//virtual ASIOError getSamplePosition(ASIOSamples *sPos, ASIOTimeStamp *tStamp) = 0;
+	//virtual ASIOError getChannelInfo(ASIOChannelInfo *info) = 0;
+	//virtual ASIOError createBuffers(ASIOBufferInfo *bufferInfos, long numChannels,
+	//	long bufferSize, ASIOCallbacks *callbacks) = 0;
+	//virtual ASIOError disposeBuffers() = 0;
+	//virtual ASIOError controlPanel() = 0;
+	//virtual ASIOError future(long selector, void *opt) = 0;
+	//virtual ASIOError outputReady() = 0;
 }

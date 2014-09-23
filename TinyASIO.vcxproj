@@ -68,6 +68,7 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Channel.hpp" />
     <ClInclude Include="Driver.hpp" />
     <ClInclude Include="Interface.hpp" />
     <ClInclude Include="Registory.hpp" />
