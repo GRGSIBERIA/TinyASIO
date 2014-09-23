@@ -1,7 +1,8 @@
 #pragma once
-
+#include <memory>
 #include "Interface.hpp"
 #include "Structure.hpp"
+#include "Driver.hpp"
 
 namespace asio
 {
@@ -9,15 +10,17 @@ namespace asio
 	* ASIOバッファ
 	* @tparam T バッファのデータの型
 	*/
-	template <typename T>
 	class ASIOBuffer
 	{
 		IOType ioType;
 		long channelNumber;
 		long bufferSize;
-		T* bufferData;
+		void* bufferData;
 
 	public:
+		ASIOBuffer(ASIOBufferInfo* info)
+		{
 
+		}
 	};
 }

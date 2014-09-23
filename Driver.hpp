@@ -5,6 +5,8 @@
 
 #include "Interface.hpp"
 #include "Structure.hpp"
+#include "Buffer.hpp"
+#include "Channel.hpp"
 
 namespace asio
 {
@@ -40,31 +42,7 @@ namespace asio
 		std::string driverName;
 		long driverVersion;
 
-	private:
-		void ErrorCheck(const ASIOError& error) const
-		{
-			switch (error)
-			{
-			case ASE_NotPresent:
-				throw CantProcessException("hardware input or output is not present or available");
-			case ASE_HWMalfunction:
-				throw CantProcessException("hardware is malfunctioning (can be returned by any ASIO function)");
-			case ASE_InvalidParameter:
-				throw CantProcessException("input parameter invalid");
-			case ASE_InvalidMode:
-				throw CantProcessException("hardware is in a bad mode or used in a bad mode");
-			case ASE_SPNotAdvancing:
-				throw CantProcessException("hardware is not running when sample position is inquired");
-			case ASE_NoClock:
-				throw CantProcessException("sample clock or rate cannot be determined or is not present");
-			case ASE_NoMemory:
-				throw CantProcessException("not enough memory for completing the request");
-			}
-		}
-
 	public:
-		
-
 		/**
 		* ドライバ名を返す
 		*/
@@ -114,39 +92,6 @@ namespace asio
 		}
 
 		/**
-		* 入力のチャンネル数を返す
-		* @return 入力のチャンネル数
-		*/
-		long InputChannels() const
-		{
-			long i, o;
-			ErrorCheck(driver->getChannels(&i, &o));
-			return i;
-		}
-
-		/**
-		* 出力のチャンネル数を返す
-		* @return 出力のチャンネル数
-		*/
-		long OutputChannels() const
-		{
-			long i, o;
-			ErrorCheck(driver->getChannels(&i, &o));
-			return o;
-		}
-
-		/**
-		* 入出力のチャンネル数を返す
-		* @return 入出力のチャンネル数
-		*/
-		IOChannels Channels() const
-		{
-			IOChannels channels;
-			ErrorCheck(driver->getChannels(&channels.input, &channels.output));
-			return channels;
-		}
-
-		/**
 		* サンプリング・レートを返す
 		* @return サンプリング・レート
 		*/
@@ -193,7 +138,7 @@ namespace asio
 		* @params[in] channelNumber 取得したいチャンネルの番号
 		* @return チャンネル情報
 		*/
-		Channel& ChannelInfo(const long channelNumber) const
+		Channel ChannelInfo(const long channelNumber) const
 		{
 			ASIOChannelInfo info;
 			info.channel = channelNumber;
@@ -201,10 +146,20 @@ namespace asio
 			return Channel(info);
 		}
 
+		
+
 		/**
-		* オーディオ機器のクロック周波数を取得
+		* バッファを取得
 		*/
-		long ClockSource() const
+		ASIOBuffer GetBuffer(const long channelNumber, const long bufferSize) const
+		{
+
+		}
+
+		/**
+		* バッファを取得
+		*/
+		ASIOBuffer GetBuffer(const Channel& channel, const long bufferSize) const
 		{
 
 		}
@@ -224,11 +179,6 @@ namespace asio
 		void Stop()
 		{
 			ErrorCheck(driver->stop());
-		}
-
-		void OutputReady()
-		{
-
 		}
 
 		/**
