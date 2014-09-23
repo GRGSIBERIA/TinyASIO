@@ -4,7 +4,7 @@
 #include <string>
 
 #include "Interface.hpp"
-#include "Channel.hpp"
+#include "Structure.hpp"
 
 namespace asio
 {
@@ -63,32 +63,7 @@ namespace asio
 		}
 
 	public:
-		/**
-		* 入出力の遅延を表す構造体
-		*/
-		struct IOLatency
-		{
-			long input, output;
-		};
-
-		/**
-		* チャンネル数を表す構造体
-		*/
-		struct IOChannels
-		{
-			long input, output;
-		};
-
-		/**
-		* バッファの現在の設定を表す構造体
-		*/
-		struct BufferPreference
-		{
-			long maxSize;		// バッファサイズの最大値
-			long minSize;		// バッファサイズの最小値
-			long preferredSize;	// 設定中の値
-			long granularity;	// 設定の粒度
-		};
+		
 
 		/**
 		* ドライバ名を返す
@@ -192,6 +167,16 @@ namespace asio
 		}
 
 		/**
+		* サンプリング・レートを設定できるか試すらしい
+		* @params[in] rate サンプリング・レート
+		* @note よくわからないので非推奨関数
+		*/
+		void CanSampleRate(double rate)
+		{
+			ErrorCheck(driver->canSampleRate(rate));
+		}
+
+		/**
 		* バッファの設定を取得
 		* @return バッファの現在の設定
 		* @note 必ずしも信用できる値を取得できるとは限らない
@@ -205,6 +190,7 @@ namespace asio
 
 		/**
 		* チャンネルの情報を取得
+		* @params[in] channelNumber 取得したいチャンネルの番号
 		* @return チャンネル情報
 		*/
 		Channel& ChannelInfo(const long channelNumber) const
@@ -213,6 +199,14 @@ namespace asio
 			info.channel = channelNumber;
 			ErrorCheck(driver->getChannelInfo(&info));
 			return Channel(info);
+		}
+
+		/**
+		* オーディオ機器のクロック周波数を取得
+		*/
+		long ClockSource() const
+		{
+
 		}
 
 	public:
@@ -230,6 +224,11 @@ namespace asio
 		void Stop()
 		{
 			ErrorCheck(driver->stop());
+		}
+
+		void OutputReady()
+		{
+
 		}
 
 		/**
@@ -255,21 +254,22 @@ namespace asio
 		*/
 		virtual ~ASIODriver()
 		{
+			driver->disposeBuffers();
 			driver->Release();
 		}
 	};
 
 	// メモ
-	//virtual void getErrorMessage(char *string) = 0;
-	//virtual ASIOError canSampleRate(ASIOSampleRate sampleRate) = 0;
-	//virtual ASIOError getClockSources(ASIOClockSource *clocks, long *numSources) = 0;
-	//virtual ASIOError setClockSource(long reference) = 0;
 	//virtual ASIOError getSamplePosition(ASIOSamples *sPos, ASIOTimeStamp *tStamp) = 0;
-	//virtual ASIOError getChannelInfo(ASIOChannelInfo *info) = 0;
 	//virtual ASIOError createBuffers(ASIOBufferInfo *bufferInfos, long numChannels,
 	//	long bufferSize, ASIOCallbacks *callbacks) = 0;
 	//virtual ASIOError disposeBuffers() = 0;
 	//virtual ASIOError controlPanel() = 0;
 	//virtual ASIOError future(long selector, void *opt) = 0;
 	//virtual ASIOError outputReady() = 0;
+
+	// 必要なのかどうかわからないので保留
+	//virtual ASIOError getClockSources(ASIOClockSource *clocks, long *numSources) = 0;
+	//virtual ASIOError setClockSource(long reference) = 0;
+	//virtual void getErrorMessage(char *string) = 0;
 }
