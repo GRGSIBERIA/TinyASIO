@@ -59,69 +59,6 @@ namespace asio
 		const IASIO& Interface() const { return *driver; }
 
 		/**
-		* 入力の遅延を返す
-		* @return 入力の遅延
-		*/
-		long InputLatency() const 
-		{
-			long i, o;
-			ErrorCheck(driver->getLatencies(&i, &o));
-			return i;
-		}
-
-		/**
-		* 出力の遅延を返す
-		* @return 出力の遅延
-		*/
-		long OutputLatency() const 
-		{
-			long i, o;
-			ErrorCheck(driver->getLatencies(&i, &o));
-			return o;
-		}
-
-		/**
-		* 入力と出力の遅延を返す
-		* @return 入出力の遅延
-		*/
-		IOLatency Latencies() const
-		{
-			IOLatency latency;
-			ErrorCheck(driver->getLatencies(&latency.input, &latency.output));
-			return latency;
-		}
-
-		/**
-		* サンプリング・レートを返す
-		* @return サンプリング・レート
-		*/
-		double SampleRate() const
-		{
-			double rate;
-			ErrorCheck(driver->getSampleRate(&rate));
-			return rate;
-		}
-
-		/**
-		* サンプリング・レートを設定する
-		* @params[in] rate サンプリング・レート
-		*/
-		void SampleRate(double rate)
-		{
-			ErrorCheck(driver->setSampleRate(rate));
-		}
-
-		/**
-		* サンプリング・レートを設定できるか試すらしい
-		* @params[in] rate サンプリング・レート
-		* @note よくわからないので非推奨関数
-		*/
-		void CanSampleRate(double rate)
-		{
-			ErrorCheck(driver->canSampleRate(rate));
-		}
-
-		/**
 		* バッファの設定を取得
 		* @return バッファの現在の設定
 		* @note 必ずしも信用できる値を取得できるとは限らない
@@ -131,37 +68,6 @@ namespace asio
 			BufferPreference buf;
 			ErrorCheck(driver->getBufferSize(&buf.minSize, &buf.maxSize, &buf.preferredSize, &buf.granularity));
 			return buf;
-		}
-
-		/**
-		* チャンネルの情報を取得
-		* @params[in] channelNumber 取得したいチャンネルの番号
-		* @return チャンネル情報
-		*/
-		Channel ChannelInfo(const long channelNumber) const
-		{
-			ASIOChannelInfo info;
-			info.channel = channelNumber;
-			ErrorCheck(driver->getChannelInfo(&info));
-			return Channel(info);
-		}
-
-		
-
-		/**
-		* バッファを取得
-		*/
-		ASIOBuffer GetBuffer(const long channelNumber, const long bufferSize) const
-		{
-
-		}
-
-		/**
-		* バッファを取得
-		*/
-		ASIOBuffer GetBuffer(const Channel& channel, const long bufferSize) const
-		{
-
 		}
 
 	public:
