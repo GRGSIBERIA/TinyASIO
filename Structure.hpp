@@ -17,7 +17,7 @@ namespace asio
 	{
 		long maxSize;		// バッファサイズの最大値
 		long minSize;		// バッファサイズの最小値
-		long preferredSize;	// 設定中の値
+		long preferredSize;	// 最適な値
 		long granularity;	// 設定の粒度
 	};
 }

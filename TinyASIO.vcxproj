@@ -69,6 +69,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buffer.hpp" />
+    <ClInclude Include="Channel.hpp" />
+    <ClInclude Include="Preference.hpp" />
     <ClInclude Include="Structure.hpp" />
     <ClInclude Include="Driver.hpp" />
     <ClInclude Include="Interface.hpp" />

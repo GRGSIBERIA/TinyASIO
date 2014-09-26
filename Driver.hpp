@@ -42,6 +42,20 @@ namespace asio
 		std::string driverName;
 		long driverVersion;
 
+		ChannelManager* channelManager;
+		BufferManager* bufferManager;
+
+	private:
+		ASIOCallbacks InitNullCallbacks()
+		{
+			ASIOCallbacks callback;
+			callback.asioMessage = NULL;
+			callback.bufferSwitch = NULL;
+			callback.bufferSwitchTimeInfo = NULL;
+			callback.sampleRateDidChange = NULL;
+			return callback;
+		}
+
 	public:
 		/**
 		* ドライバ名を返す
@@ -70,7 +84,6 @@ namespace asio
 			return buf;
 		}
 
-	public:
 		/**
 		* バッファリング開始
 		*/
@@ -88,6 +101,16 @@ namespace asio
 		}
 
 		/**
+		* バッファの生成
+		* @note この関数を使うとドライバ側で設定されているバッファサイズを利用します
+		*/
+		const BufferArray& CreateBuffer(ASIOCallbacks* callbacks = nullptr)
+		{
+			return bufferManager->CreateBuffer(GetBufferPreference(), callbacks);
+		}
+
+	public:
+		/**
 		* @params[in] clsid ロードしたいCLSID
 		*/
 		ASIODriver(const CLSID& clsid)
@@ -103,6 +126,9 @@ namespace asio
 			driver->getDriverName(buffer);
 			driverName = buffer;
 			driverVersion = driver->getDriverVersion();
+
+			channelManager = new ChannelManager(driver);
+			bufferManager = new BufferManager(driver);
 		}
 
 		/**
@@ -112,6 +138,9 @@ namespace asio
 		{
 			driver->disposeBuffers();
 			driver->Release();
+
+			delete channelManager;
+			delete bufferManager;
 		}
 	};
 
