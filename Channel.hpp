@@ -13,7 +13,7 @@ namespace asio
 	{
 		long number;				// チャンネル番号
 		IOType ioType;				// 入出力のどちらか
-		bool isActive;				// チャンネルが有効か無効か
+		ASIOBool isActive;				// チャンネルが有効か無効か
 		long group;					// チャンネルが所属しているグループ
 		std::string name;			// チャンネル名
 		ASIOSampleType sampleType;	// サンプリングの種類

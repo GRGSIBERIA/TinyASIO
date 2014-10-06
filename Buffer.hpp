@@ -4,6 +4,7 @@
 #include "Interface.hpp"
 #include "Structure.hpp"
 #include "Driver.hpp"
+#include "Channel.hpp"
 
 
 namespace asio
@@ -28,15 +29,13 @@ namespace asio
 		}
 	};
 
+	typedef std::vector<Buffer> BufferArray;
+
 	/**
 	* バッファを管理するクラス
 	*/
 	class BufferManager
 	{
-	public:
-		typedef std::vector<Buffer> BufferArray;
-
-	private:
 		IASIO* iasio;
 
 		BufferArray buffers;
@@ -46,7 +45,7 @@ namespace asio
 		void InitBuffers(const long& bufferSize, ASIOCallbacks* callbacks)
 		{
 			buffers.clear();
-			for (int i = 0; i < bufferInfos.size(); ++i)
+			for (unsigned i = 0; i < bufferInfos.size(); ++i)
 			{
 				const auto& info = bufferInfos[i];
 				buffers.emplace_back(info, bufferSize, callbacks);
@@ -62,7 +61,8 @@ namespace asio
 
 		~BufferManager()
 		{
-			ErrorCheck(iasio->disposeBuffers());
+			if (bufferInfos.size() > 0)
+				ErrorCheck(iasio->disposeBuffers());
 		}
 
 		/**

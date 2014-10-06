@@ -204,6 +204,16 @@ namespace asio
 		virtual ASIOError outputReady() = 0;
 	};
 
+	/**
+	* ƒhƒ‰ƒCƒo‚ª“®‚©‚È‚¢Žž‚ÉŒÄ‚Î‚ê‚é
+	*/
+	class CantProcessException : std::exception
+	{
+	public:
+		CantProcessException(const std::string& message)
+			: exception(message.c_str()) {}
+	};
+
 	void ErrorCheck(const ASIOError& error)
 	{
 		switch (error)

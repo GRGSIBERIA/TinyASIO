@@ -20,7 +20,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 	auto list = asio::ASIORegistory::GetAsioDriverPathes();
 	auto clsids = asio::ASIORegistory::GetCLSIDs(list);
 
-	auto a = asio::ASIODriver((*clsids).at(0));
+	auto a = asio::Driver((*clsids).at(0));
 
 	return 0;
 }

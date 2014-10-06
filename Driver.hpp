@@ -21,19 +21,9 @@ namespace asio
 	};
 
 	/**
-	* ドライバが動かない時に呼ばれる
-	*/
-	class CantProcessException : std::exception
-	{
-	public:
-		CantProcessException(const std::string& message)
-			: exception(message.c_str()) {}
-	};
-
-	/**
 	* ASIOドライバのインターフェースのラッパクラス
 	*/
-	class ASIODriver
+	class Driver
 	{
 	private:
 		IASIO *driver;			// インターフェースへのポインタ
@@ -113,7 +103,7 @@ namespace asio
 		/**
 		* @params[in] clsid ロードしたいCLSID
 		*/
-		ASIODriver(const CLSID& clsid)
+		Driver(const CLSID& clsid)
 		{
 			HRESULT hr = CoCreateInstance(clsid, 0, CLSCTX_INPROC_SERVER, clsid, (LPVOID*)&driver);
 			if (FAILED(hr))
@@ -134,7 +124,7 @@ namespace asio
 		/**
 		* ドライバの解放など
 		*/
-		virtual ~ASIODriver()
+		virtual ~Driver()
 		{
 			driver->disposeBuffers();
 			driver->Release();
