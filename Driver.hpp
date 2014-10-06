@@ -75,22 +75,6 @@ namespace asio
 		}
 
 		/**
-		* バッファリング開始
-		*/
-		void Start()
-		{
-			ErrorCheck(iasio->start());
-		}
-
-		/**
-		* バッファリング終了
-		*/
-		void Stop()
-		{
-			ErrorCheck(iasio->stop());
-		}
-
-		/**
 		* バッファの生成
 		* @note この関数を使うとドライバ側で設定されているバッファサイズを利用します
 		*/

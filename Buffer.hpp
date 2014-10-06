@@ -66,6 +66,22 @@ namespace asio
 		}
 
 		/**
+		* バッファリング開始
+		*/
+		void Start()
+		{
+			ErrorCheck(iasio->start());
+		}
+
+		/**
+		* バッファリング終了
+		*/
+		void Stop()
+		{
+			ErrorCheck(iasio->stop());
+		}
+
+		/**
 		* バッファリングしたいチャンネルを追加
 		*/
 		void AddChannel(const IOType& ioType, const long& channelNumber)
