@@ -26,7 +26,7 @@ namespace asio
 	class Driver
 	{
 	private:
-		IASIO *driver;			// インターフェースへのポインタ
+		IASIO *iasio;			// インターフェースへのポインタ
 		void *systemHandle;		// 謎のシステムハンドル
 
 		std::string driverName;
@@ -60,7 +60,7 @@ namespace asio
 		/**
 		* ドライバのインターフェースを返す
 		*/
-		const IASIO& Interface() const { return *driver; }
+		const IASIO& Interface() const { return *iasio; }
 
 		/**
 		* バッファの設定を取得
@@ -70,7 +70,7 @@ namespace asio
 		BufferPreference GetBufferPreference() const
 		{
 			BufferPreference buf;
-			ErrorCheck(driver->getBufferSize(&buf.minSize, &buf.maxSize, &buf.preferredSize, &buf.granularity));
+			ErrorCheck(iasio->getBufferSize(&buf.minSize, &buf.maxSize, &buf.preferredSize, &buf.granularity));
 			return buf;
 		}
 
@@ -79,7 +79,7 @@ namespace asio
 		*/
 		void Start()
 		{
-			ErrorCheck(driver->start());
+			ErrorCheck(iasio->start());
 		}
 
 		/**
@@ -87,7 +87,7 @@ namespace asio
 		*/
 		void Stop()
 		{
-			ErrorCheck(driver->stop());
+			ErrorCheck(iasio->stop());
 		}
 
 		/**
@@ -105,20 +105,20 @@ namespace asio
 		*/
 		Driver(const CLSID& clsid)
 		{
-			HRESULT hr = CoCreateInstance(clsid, 0, CLSCTX_INPROC_SERVER, clsid, (LPVOID*)&driver);
+			HRESULT hr = CoCreateInstance(clsid, 0, CLSCTX_INPROC_SERVER, clsid, (LPVOID*)&iasio);
 			if (FAILED(hr))
 				throw CantCreateInstance("ドライバのインスタンス生成に失敗しました");
 
-			driver->init(systemHandle);
+			iasio->init(systemHandle);
 
 			// 名前とドライバのバージョンだけ取得
 			char buffer[360];
-			driver->getDriverName(buffer);
+			iasio->getDriverName(buffer);
 			driverName = buffer;
-			driverVersion = driver->getDriverVersion();
+			driverVersion = iasio->getDriverVersion();
 
-			channelManager = new ChannelManager(driver);
-			bufferManager = new BufferManager(driver);
+			channelManager = new ChannelManager(iasio);
+			bufferManager = new BufferManager(iasio);
 		}
 
 		/**
@@ -126,8 +126,8 @@ namespace asio
 		*/
 		virtual ~Driver()
 		{
-			driver->disposeBuffers();
-			driver->Release();
+			iasio->disposeBuffers();
+			iasio->Release();
 
 			delete channelManager;
 			delete bufferManager;
