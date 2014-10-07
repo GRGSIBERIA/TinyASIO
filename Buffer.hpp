@@ -111,12 +111,14 @@ namespace asio
 		/**
 		* バッファの生成
 		* @params[in] bufferSize バッファの設定
-		* @params[in, out] callbacks 自己責任，バッファリング等の通知のために利用される
+		* @params[in, out] callbacks バッファリング等の通知のために利用
 		* @note bufferSizeは自由に数値を決められないので注意, (bufferSize % granularity == 0)以外の数値は保障できない
 		*/
-		const BufferArray& CreateBuffer(const long& bufferSize, ASIOCallbacks* callbacks = nullptr)
+		const BufferArray& CreateBuffer(const long& bufferSize, ASIOCallbacks* callbacks)
 		{
-			ErrorCheck(iasio->createBuffers(&bufferInfos.at(0), bufferInfos.size(), bufferSize, callbacks));
+			asio::ASIOBufferInfo* infos = &bufferInfos.at(0);
+			auto result = iasio->createBuffers(infos, bufferInfos.size(), bufferSize, callbacks);
+			ErrorCheck(result);
 			InitBuffers(bufferSize, callbacks);
 			return buffers;
 		}
@@ -124,10 +126,10 @@ namespace asio
 		/**
 		* バッファの生成
 		* @params[in] bufferPreference バッファの設定
-		* @params[in, out] callbacks 自己責任，バッファリング等の通知のために利用される
+		* @params[in, out] callbacks バッファリング等の通知のために利用
 		* @note bufferSizeは自由に数値を決められないので注意, (bufferSize % granularity == 0)以外の数値は保障できない
 		*/
-		const BufferArray& CreateBuffer(const BufferPreference& bufferPreference, ASIOCallbacks* callbacks = nullptr)
+		const BufferArray& CreateBuffer(const BufferPreference& bufferPreference, ASIOCallbacks* callbacks)
 		{
 			CreateBuffer(bufferPreference.preferredSize, callbacks);
 			return buffers;

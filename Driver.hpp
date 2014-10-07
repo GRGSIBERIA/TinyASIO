@@ -47,6 +47,11 @@ namespace asio
 		}
 
 	public:
+
+		ChannelManager& Channel() { return *channelManager; }
+
+		BufferManager& Buffer() { return *bufferManager; }
+
 		/**
 		* ドライバ名を返す
 		*/
@@ -78,9 +83,9 @@ namespace asio
 		* バッファの生成
 		* @note この関数を使うとドライバ側で設定されているバッファサイズを利用します
 		*/
-		const BufferArray& CreateBuffer(ASIOCallbacks* callbacks = nullptr)
+		const BufferArray& CreateBuffer(ASIOCallbacks& callbacks)
 		{
-			return bufferManager->CreateBuffer(GetBufferPreference(), callbacks);
+			return bufferManager->CreateBuffer(GetBufferPreference(), &callbacks);
 		}
 
 	public:

@@ -58,6 +58,14 @@ namespace asio
 		*/
 		const long NumberOfOutputChannels() const { return numOutputChannels; }
 
+		const std::vector<Channel>& Inputs() { return inputChannels; }
+
+		const std::vector<Channel>& Outputs() { return outputChannels; }
+
+		const Channel& Inputs(const long i) { return inputChannels[i]; }
+
+		const Channel& Outputs(const long i) { return outputChannels[i]; }
+
 	private:
 		void InitNumberOfChannels()
 		{
