@@ -48,10 +48,6 @@ namespace asio
 
 	public:
 
-		ChannelManager& Channel() { return *channelManager; }
-
-		BufferManager& Buffer() { return *bufferManager; }
-
 		/**
 		* ドライバ名を返す
 		*/
@@ -66,6 +62,68 @@ namespace asio
 		* ドライバのインターフェースを返す
 		*/
 		const IASIO& Interface() const { return *iasio; }
+
+
+	public:		// チャンネル周り
+		/**
+		* 入力チャンネルの数を返す
+		* @return 入力チャンネルの数
+		*/
+		inline const long NumberOfInputChannels() const { return channelManager->NumberOfInputChannels(); }
+
+		/**
+		* 出力チャンネルの数を返す
+		* @return 出力チャンネルの数
+		*/
+		inline const const long NumberOfOutputChannels() const { return channelManager->NumberOfOutputChannels(); }
+
+		/**
+		* 入力チャンネルの配列を返す
+		* @return 入力チャンネルの配列
+		*/
+		inline const std::vector<Channel>& InputChannels() const { return channelManager->Inputs(); }
+		
+		/**
+		* 出力チャンネルの配列を返す
+		* @return 出力チャンネルの配列
+		*/
+		inline const std::vector<Channel>& OutputChannels() const { return channelManager->Outputs(); }
+
+		/**
+		* 添字から入力チャンネルを返す
+		* @return 入力チャンネル
+		*/
+		inline const Channel& InputChannel(const long i) const { return channelManager->Inputs(i); }
+
+		/**
+		* 添字から出力チャンネルを返す
+		* @return 出力チャンネル
+		*/
+		inline const Channel& OutputChannel(const long i) const { return channelManager->Outputs(i); }
+
+		/**
+		* バッファリングしたいチャンネルを追加する
+		*/
+		inline void AddChannel(const Channel& channel)
+		{
+			bufferManager->AddChannel(channel);
+		}
+
+		/**
+		* バッファリングするチャンネルを返す
+		*/
+		inline const std::vector<ASIOBufferInfo>& BufferingChannels() const { return bufferManager->BufferingChannels(); }
+
+		/**
+		* バッファリングするチャンネルをクリアする
+		*/
+		inline void ClearChannel()
+		{
+			bufferManager->ClearChannel();
+		}
+		
+
+	public:		// バッファ周り
 
 		/**
 		* バッファの設定を取得

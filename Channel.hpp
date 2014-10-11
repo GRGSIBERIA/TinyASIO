@@ -58,13 +58,25 @@ namespace asio
 		*/
 		const long NumberOfOutputChannels() const { return numOutputChannels; }
 
-		const std::vector<Channel>& Inputs() { return inputChannels; }
+		/**
+		* 入力チャンネルの配列を返す
+		*/
+		const std::vector<Channel>& Inputs() const { return inputChannels; }
 
-		const std::vector<Channel>& Outputs() { return outputChannels; }
+		/**
+		* 出力チャンネルの配列を返す
+		*/
+		const std::vector<Channel>& Outputs() const { return outputChannels; }
 
-		const Channel& Inputs(const long i) { return inputChannels[i]; }
+		/**
+		* 添字から入力チャンネルを返す
+		*/
+		const Channel& Inputs(const long i) const { return inputChannels[i]; }
 
-		const Channel& Outputs(const long i) { return outputChannels[i]; }
+		/**
+		* 添字から出力チャンネルを返す
+		*/
+		const Channel& Outputs(const long i) const { return outputChannels[i]; }
 
 	private:
 		void InitNumberOfChannels()

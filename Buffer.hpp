@@ -109,6 +109,11 @@ namespace asio
 		}
 
 		/**
+		* バッファリングするチャンネルを返す
+		*/
+		const std::vector<ASIOBufferInfo>& BufferingChannels() const { return bufferInfos; }
+
+		/**
 		* バッファの生成
 		* @params[in] bufferSize バッファの設定
 		* @params[in, out] callbacks バッファリング等の通知のために利用
