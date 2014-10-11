@@ -49,16 +49,6 @@ namespace asio
 
 	public:
 		/**
-		* 入力のチャンネル数を得る
-		*/
-		const long NumberOfInputChannels() const { return numInputChannels; }
-
-		/**
-		* 出力のチャンネル数を得る
-		*/
-		const long NumberOfOutputChannels() const { return numOutputChannels; }
-
-		/**
 		* 入力チャンネルの配列を返す
 		*/
 		const std::vector<Channel>& Inputs() const { return inputChannels; }
@@ -77,6 +67,7 @@ namespace asio
 		* 添字から出力チャンネルを返す
 		*/
 		const Channel& Outputs(const long i) const { return outputChannels[i]; }
+
 
 	private:
 		void InitNumberOfChannels()

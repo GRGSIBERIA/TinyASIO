@@ -65,17 +65,6 @@ namespace asio
 
 
 	public:		// チャンネル周り
-		/**
-		* 入力チャンネルの数を返す
-		* @return 入力チャンネルの数
-		*/
-		inline const long NumberOfInputChannels() const { return channelManager->NumberOfInputChannels(); }
-
-		/**
-		* 出力チャンネルの数を返す
-		* @return 出力チャンネルの数
-		*/
-		inline const const long NumberOfOutputChannels() const { return channelManager->NumberOfOutputChannels(); }
 
 		/**
 		* 入力チャンネルの配列を返す
