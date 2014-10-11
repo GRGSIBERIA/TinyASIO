@@ -24,8 +24,8 @@ public:
 		callbacks.bufferSwitchTimeInfo = &CallbackTest::switchedWithTimeInfo;
 		callbacks.sampleRateDidChange = &CallbackTest::changeSampleRate;
 
-		auto& in = driver->Channel().Inputs(0);
-		driver->Buffer().AddChannel(in);
+		auto& in = driver->InputChannel(0);
+		driver->AddChannel(in);
 
 		driver->CreateBuffer(callbacks);
 	}

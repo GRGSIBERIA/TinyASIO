@@ -51,22 +51,22 @@ namespace asio
 		/**
 		* 入力チャンネルの配列を返す
 		*/
-		const std::vector<Channel>& Inputs() const { return inputChannels; }
+		inline const std::vector<Channel>& Inputs() const { return inputChannels; }
 
 		/**
 		* 出力チャンネルの配列を返す
 		*/
-		const std::vector<Channel>& Outputs() const { return outputChannels; }
+		inline const std::vector<Channel>& Outputs() const { return outputChannels; }
 
 		/**
 		* 添字から入力チャンネルを返す
 		*/
-		const Channel& Inputs(const long i) const { return inputChannels[i]; }
+		inline const Channel& Inputs(const long i) const { return inputChannels[i]; }
 
 		/**
 		* 添字から出力チャンネルを返す
 		*/
-		const Channel& Outputs(const long i) const { return outputChannels[i]; }
+		inline const Channel& Outputs(const long i) const { return outputChannels[i]; }
 
 
 	private:
