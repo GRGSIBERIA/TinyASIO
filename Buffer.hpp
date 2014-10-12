@@ -20,6 +20,29 @@ namespace asio
 		void* bufferData[2];
 		ASIOCallbacks* callbacks;
 
+	private:
+		static Buffer* currentBuffer;
+
+		static void BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
+		{
+
+		}
+
+		static void SampleRateDidChange(ASIOSampleRate sRate)
+		{
+
+		}
+
+		static long AsioMessage(long selector, long value, void* message, double* opt)
+		{
+
+		}
+		
+		static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
+		{
+			return params;
+		}
+
 	public:
 		Buffer(const ASIOBufferInfo& info, const long bufferSize, ASIOCallbacks* callbacks)
 			: ioType((IOType)info.isInput), channelNumber(info.channelNum), bufferSize(bufferSize), callbacks(callbacks)
@@ -27,9 +50,23 @@ namespace asio
 			bufferData[0] = info.buffers[0];
 			bufferData[1] = info.buffers[1];
 		}
+
+		
+
+		static ASIOCallbacks CreateCallbacks(const Buffer& buffer)
+		{
+			ASIOCallbacks callback;
+			callback.bufferSwitch = &Buffer::BufferSwitch;
+			callback.sampleRateDidChange = &Buffer::SampleRateDidChange;
+			callback.asioMessage = &Buffer::AsioMessage;
+			callback.bufferSwitchTimeInfo = &Buffer::BufferSwitchTimeInfo;
+			return callback;
+		}
 	};
 
 	typedef std::vector<Buffer> BufferArray;
+
+	Buffer* Buffer::currentBuffer = nullptr;
 
 	/**
 	* バッファを管理するクラス
