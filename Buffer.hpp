@@ -44,14 +44,14 @@ namespace asio
 		}
 
 	public:
+
+
 		Buffer(const ASIOBufferInfo& info, const long bufferSize, ASIOCallbacks* callbacks)
 			: ioType((IOType)info.isInput), channelNumber(info.channelNum), bufferSize(bufferSize), callbacks(callbacks)
 		{
 			bufferData[0] = info.buffers[0];
 			bufferData[1] = info.buffers[1];
 		}
-
-		
 
 		static ASIOCallbacks CreateCallbacks()
 		{
