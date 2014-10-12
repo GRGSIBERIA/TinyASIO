@@ -90,27 +90,6 @@ namespace asio
 		*/
 		inline const Channel& OutputChannel(const long i) const { return channelManager->Outputs(i); }
 
-		/**
-		* バッファリングしたいチャンネルを追加する
-		*/
-		inline void AddChannel(const Channel& channel)
-		{
-			bufferManager->AddChannel(channel);
-		}
-
-		/**
-		* バッファリングするチャンネルを返す
-		*/
-		inline const std::vector<ASIOBufferInfo>& BufferingChannels() const { return bufferManager->BufferingChannels(); }
-
-		/**
-		* バッファリングするチャンネルをクリアする
-		*/
-		inline void ClearChannel()
-		{
-			bufferManager->ClearChannel();
-		}
-		
 
 	public:		// バッファ周り
 
@@ -130,9 +109,28 @@ namespace asio
 		* バッファの生成
 		* @note この関数を使うとドライバ側で設定されているバッファサイズを利用します
 		*/
-		const BufferArray& CreateBuffer(ASIOCallbacks& callbacks)
+		const BufferArray& CreateBuffer(const Channel& channel, ASIOCallbacks& callbacks)
 		{
-			return bufferManager->CreateBuffer(GetBufferPreference(), &callbacks);
+			bufferManager->AddChannel(channel);
+			auto retval = bufferManager->CreateBuffer(GetBufferPreference(), &callbacks);
+			bufferManager->ClearChannel();
+			return retval;
+		}
+
+		/**
+		* バッファリング開始
+		*/
+		const void Start() const
+		{
+			iasio->start();
+		}
+
+		/**
+		* バッファリング一時停止
+		*/
+		const void Stop() const
+		{
+			iasio->stop();
 		}
 
 	public:
