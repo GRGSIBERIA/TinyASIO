@@ -94,7 +94,7 @@ namespace asio
 	public:		// バッファ周り
 
 		/**
-		* バッファの設定を取得
+		* ASIOのバッファの設定を取得
 		* @return バッファの現在の設定
 		* @note 必ずしも信用できる値を取得できるとは限らない
 		*/
@@ -109,11 +109,14 @@ namespace asio
 		* バッファの生成
 		* @note この関数を使うとドライバ側で設定されているバッファサイズを利用します
 		*/
-		const BufferArray& CreateBuffer(const Channel& channel, ASIOCallbacks& callbacks)
+		const BufferArray& CreateBuffer(const Channel& channel)
 		{
+			ASIOCallbacks callback = Buffer::CreateCallbacks();
+
 			bufferManager->AddChannel(channel);
-			auto retval = bufferManager->CreateBuffer(GetBufferPreference(), &callbacks);
+			auto retval = bufferManager->CreateBuffer(GetBufferPreference(), &callback);
 			bufferManager->ClearChannel();
+			
 			return retval;
 		}
 

@@ -53,7 +53,7 @@ namespace asio
 
 		
 
-		static ASIOCallbacks CreateCallbacks(const Buffer& buffer)
+		static ASIOCallbacks CreateCallbacks()
 		{
 			ASIOCallbacks callback;
 			callback.bufferSwitch = &Buffer::BufferSwitch;
