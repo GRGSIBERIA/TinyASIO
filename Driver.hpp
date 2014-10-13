@@ -26,6 +26,8 @@ namespace asio
 	class Driver
 	{
 	private:
+		static std::shared_ptr<Driver> driver;	// シングルトン変数
+
 		IASIO *iasio;			// インターフェースへのポインタ
 		void *systemHandle;		// 謎のシステムハンドル
 
@@ -45,6 +47,32 @@ namespace asio
 			callback.sampleRateDidChange = NULL;
 			return callback;
 		}
+
+		/**
+		* @params[in] clsid ロードしたいCLSID
+		*/
+		Driver(const CLSID& clsid)
+		{
+			HRESULT hr = CoCreateInstance(clsid, 0, CLSCTX_INPROC_SERVER, clsid, (LPVOID*)&iasio);
+			if (FAILED(hr))
+				throw CantCreateInstance("ドライバのインスタンス生成に失敗しました");
+
+			iasio->init(systemHandle);
+
+			// 名前とドライバのバージョンだけ取得
+			char buffer[360];
+			iasio->getDriverName(buffer);
+			driverName = buffer;
+			driverVersion = iasio->getDriverVersion();
+
+			channelManager = new ChannelManager(iasio);
+			bufferManager = new BufferManager(iasio);
+		}
+
+		/**
+		* コピー禁止
+		*/
+		Driver(const Driver& hoge) {}
 
 	public:
 
@@ -138,24 +166,12 @@ namespace asio
 
 	public:
 		/**
-		* @params[in] clsid ロードしたいCLSID
+		* シングルトンメソッド
 		*/
-		Driver(const CLSID& clsid)
+		static Driver& Get(const CLSID& clsid)
 		{
-			HRESULT hr = CoCreateInstance(clsid, 0, CLSCTX_INPROC_SERVER, clsid, (LPVOID*)&iasio);
-			if (FAILED(hr))
-				throw CantCreateInstance("ドライバのインスタンス生成に失敗しました");
-
-			iasio->init(systemHandle);
-
-			// 名前とドライバのバージョンだけ取得
-			char buffer[360];
-			iasio->getDriverName(buffer);
-			driverName = buffer;
-			driverVersion = iasio->getDriverVersion();
-
-			channelManager = new ChannelManager(iasio);
-			bufferManager = new BufferManager(iasio);
+			if (Driver::driver == nullptr)
+				Driver::driver = std::make_shared<Driver>(clsid);
 		}
 
 		/**
@@ -170,6 +186,8 @@ namespace asio
 			delete bufferManager;
 		}
 	};
+
+	std::shared_ptr<Driver> Driver::driver = std::make_shared<Driver>(nullptr);
 
 	// メモ
 	//virtual ASIOError getSamplePosition(ASIOSamples *sPos, ASIOTimeStamp *tStamp) = 0;
