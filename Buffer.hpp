@@ -20,6 +20,27 @@ namespace asio
 	};
 
 	/**
+	* バッファリング用のリスト
+	*/
+	template <typename T>
+	class BufferingList
+	{
+		std::vector<T> buffer;
+
+	public:
+		BufferingList(const void* buffer, const long size)
+			: buffer((T*)buffer, (T*)buffer + size)
+		{
+			
+		}
+
+		void Push(const BufferingList<T>& target)
+		{
+			buffer.insert(buffer.end(), target.buffer.begin(), target.buffer.end());
+		}
+	};
+
+	/**
 	* バッファクラス
 	*/
 	class Buffer
