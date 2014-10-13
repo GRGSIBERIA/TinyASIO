@@ -103,25 +103,25 @@ namespace asio
 		* 入力チャンネルの配列を返す
 		* @return 入力チャンネルの配列
 		*/
-		inline const std::vector<Channel>& InputChannels() const { return channelManager->Inputs(); }
+		inline const std::vector<InputChannel>& InputChannels() const { return channelManager->Inputs(); }
 		
 		/**
 		* 出力チャンネルの配列を返す
 		* @return 出力チャンネルの配列
 		*/
-		inline const std::vector<Channel>& OutputChannels() const { return channelManager->Outputs(); }
+		inline const std::vector<OutputChannel>& OutputChannels() const { return channelManager->Outputs(); }
 
 		/**
 		* 添字から入力チャンネルを返す
 		* @return 入力チャンネル
 		*/
-		inline const Channel& InputChannel(const long i) const { return channelManager->Inputs(i); }
+		inline const InputChannel& InputChannel(const long i) const { return channelManager->Input(i); }
 
 		/**
 		* 添字から出力チャンネルを返す
 		* @return 出力チャンネル
 		*/
-		inline const Channel& OutputChannel(const long i) const { return channelManager->Outputs(i); }
+		inline const OutputChannel& OutputChannel(const long i) const { return channelManager->Output(i); }
 
 
 	public:		// バッファ周り
