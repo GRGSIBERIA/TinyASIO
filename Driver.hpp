@@ -149,7 +149,7 @@ namespace asio
 			ASIOCallbacks callback = Buffer::CreateCallbacks();
 
 			bufferManager->AddChannel(channel);
-			auto bufferArray = bufferManager->CreateBuffer(bufferPref, &callback);
+			auto bufferArray = bufferManager->CreateBuffer(bufferPref, channel.sampleType, &callback);
 			bufferManager->ClearChannel();
 
 			return bufferArray[0];
