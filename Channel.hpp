@@ -33,6 +33,30 @@ namespace asio
 		}
 	};
 
+	/**
+	* 入力チャンネルの情報
+	*/
+	struct InputChannel : public Channel
+	{
+		InputChannel(const ASIOChannelInfo& info)
+			: Channel(info)
+		{
+			ioType = IOType::Input;
+		}
+	};
+
+	/**
+	* 出力チャンネルの情報
+	*/
+	struct OutputChannel : public Channel
+	{
+		OutputChannel(const ASIOChannelInfo& info)
+			: Channel(info)
+		{
+			ioType = IOType::Output;
+		}
+	};
+
 
 	/**
 	* デバイスで利用可能なチャンネルの管理クラス
@@ -44,29 +68,29 @@ namespace asio
 		long numInputChannels;
 		long numOutputChannels;
 
-		std::vector<Channel> inputChannels;
-		std::vector<Channel> outputChannels;
+		std::vector<InputChannel> inputChannels;
+		std::vector<OutputChannel> outputChannels;
 
 	public:
 		/**
 		* 入力チャンネルの配列を返す
 		*/
-		inline const std::vector<Channel>& Inputs() const { return inputChannels; }
+		inline const std::vector<InputChannel>& Inputs() const { return inputChannels; }
 
 		/**
 		* 出力チャンネルの配列を返す
 		*/
-		inline const std::vector<Channel>& Outputs() const { return outputChannels; }
+		inline const std::vector<OutputChannel>& Outputs() const { return outputChannels; }
 
 		/**
 		* 添字から入力チャンネルを返す
 		*/
-		inline const Channel& Inputs(const long i) const { return inputChannels[i]; }
+		inline const InputChannel& Input(const long i) const { return inputChannels[i]; }
 
 		/**
 		* 添字から出力チャンネルを返す
 		*/
-		inline const Channel& Outputs(const long i) const { return outputChannels[i]; }
+		inline const OutputChannel& Output(const long i) const { return outputChannels[i]; }
 
 
 	private:
