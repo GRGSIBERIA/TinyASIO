@@ -129,6 +129,7 @@ namespace asio
 		/**
 		* ASIOのバッファの設定を取得
 		* @return バッファの現在の設定
+		* @note BufferPreferenceの値を変更してCreateBufferへ渡す
 		* @note 必ずしも信用できる値を取得できるとは限らない
 		*/
 		BufferPreference GetBufferPreference() const
@@ -140,17 +141,28 @@ namespace asio
 
 		/**
 		* バッファの生成
-		* @note この関数を使うとドライバ側で設定されているバッファサイズを利用します
+		* @params[in] channel バッファを生成したいチャンネル
+		* @params[in] bufferPref バッファの設定
 		*/
-		const BufferArray& CreateBuffer(const Channel& channel)
+		const Buffer& CreateBuffer(const Channel& channel, const BufferPreference& bufferPref)
 		{
 			ASIOCallbacks callback = Buffer::CreateCallbacks();
 
 			bufferManager->AddChannel(channel);
-			auto retval = bufferManager->CreateBuffer(GetBufferPreference(), &callback);
+			auto bufferArray = bufferManager->CreateBuffer(bufferPref, &callback);
 			bufferManager->ClearChannel();
-			
-			return retval;
+
+			return bufferArray[0];
+		}
+
+		/**
+		* バッファの生成
+		* @params[in] channel バッファを生成したいチャンネル
+		* @note この関数を使うとドライバ側で設定されているバッファサイズを利用します
+		*/
+		const Buffer& CreateBuffer(const Channel& channel)
+		{
+			return CreateBuffer(channel, GetBufferPreference());
 		}
 
 		/**
