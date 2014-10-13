@@ -64,8 +64,6 @@ namespace asio
 		}
 	};
 
-	typedef std::vector<Buffer> BufferArray;
-
 	Buffer* Buffer::currentBuffer = nullptr;
 
 	/**
@@ -75,7 +73,7 @@ namespace asio
 	{
 		IASIO* iasio;
 
-		BufferArray buffers;
+		std::vector<Buffer> buffers;
 		std::vector<ASIOBufferInfo> bufferInfos;
 
 	private:
@@ -156,7 +154,7 @@ namespace asio
 		* @params[in, out] callbacks バッファリング等の通知のために利用
 		* @note bufferSizeは自由に数値を決められないので注意, (bufferSize % granularity == 0)以外の数値は保障できない
 		*/
-		const BufferArray& CreateBuffer(const long& bufferSize, ASIOCallbacks* callbacks)
+		const std::vector<Buffer>& CreateBuffer(const long& bufferSize, ASIOCallbacks* callbacks)
 		{
 			asio::ASIOBufferInfo* infos = &bufferInfos.at(0);
 			auto result = iasio->createBuffers(infos, bufferInfos.size(), bufferSize, callbacks);
@@ -171,7 +169,7 @@ namespace asio
 		* @params[in, out] callbacks バッファリング等の通知のために利用
 		* @note bufferSizeは自由に数値を決められないので注意, (bufferSize % granularity == 0)以外の数値は保障できない
 		*/
-		const BufferArray& CreateBuffer(const BufferPreference& bufferPreference, ASIOCallbacks* callbacks)
+		const std::vector<Buffer>& CreateBuffer(const BufferPreference& bufferPreference, ASIOCallbacks* callbacks)
 		{
 			CreateBuffer(bufferPreference.preferredSize, callbacks);
 			return buffers;
