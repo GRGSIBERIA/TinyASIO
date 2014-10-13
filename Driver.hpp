@@ -21,6 +21,16 @@ namespace asio
 	};
 
 	/**
+	* 二回以上初期化されたりなどで呼び出される
+	*/
+	class OverTwiceCallException : std::exception
+	{
+	public:
+		OverTwiceCallException(const std::string& message)
+			: exception(message.c_str()) {}
+	};
+
+	/**
 	* ASIOドライバのインターフェースのラッパクラス
 	*/
 	class Driver
@@ -68,11 +78,6 @@ namespace asio
 			channelManager = new ChannelManager(iasio);
 			bufferManager = new BufferManager(iasio);
 		}
-
-		/**
-		* コピー禁止
-		*/
-		Driver(const Driver& hoge) {}
 
 	public:
 
@@ -166,12 +171,22 @@ namespace asio
 
 	public:
 		/**
-		* シングルトンメソッド
+		* ドライバの初期化
+		* @params[in] clsid ASIOドライバのCLSID
+		* @note 以前に生成されたドライバは破棄される
 		*/
-		static Driver& Get(const CLSID& clsid)
+		static void Init(const CLSID& clsid)
 		{
-			if (Driver::driver == nullptr)
-				Driver::driver = std::make_shared<Driver>(clsid);
+			Driver::driver.reset(new Driver(clsid), [](Driver *p) { delete p; });
+		}
+
+		/**
+		* ドライバインスタンスの取得
+		* @return ドライバインスタンス
+		*/
+		static Driver& Get()
+		{
+			return *Driver::driver;
 		}
 
 		/**
@@ -187,7 +202,7 @@ namespace asio
 		}
 	};
 
-	std::shared_ptr<Driver> Driver::driver = std::make_shared<Driver>(nullptr);
+	std::shared_ptr<Driver> Driver::driver;
 
 	// メモ
 	//virtual ASIOError getSamplePosition(ASIOSamples *sPos, ASIOTimeStamp *tStamp) = 0;
