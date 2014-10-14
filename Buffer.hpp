@@ -73,9 +73,9 @@ namespace asio
 		}
 
 		/**
-		* リトルエンディアンの処理
+		* バッファに追加する
 		*/
-		void Store(const void* buffer, const long size)
+		void StoreBuffer(const void* buffer, const long size)
 		{
 			switch (sample.type)
 			{
@@ -101,11 +101,14 @@ namespace asio
 		BufferList(pack::Sample& sample)
 			: sample(sample) { }
 
+		/**
+		* バッファに蓄積する
+		*/
 		void Store(const void* buffer, const long size)
 		{
 			if (sample.isMSB)
 				ReversibleMSB(buffer, size);
-			Store(buffer, size);
+			StoreBuffer(buffer, size);
 		}
 	};
 
@@ -134,6 +137,11 @@ namespace asio
 			bufferData[0] = info.buffers[0];
 			bufferData[1] = info.buffers[1];
 		}
+
+		void Store(const long index, const long size)
+		{
+			bufferList.Store(bufferData[index], size);
+		}
 	};
 
 	class BufferManager;	// フレンドにするための前方宣言
@@ -148,9 +156,17 @@ namespace asio
 	private:
 		static std::vector<Buffer> buffers;
 
+		static void BufferingLoop(long doubleBufferIndex, ASIOBool directProcess)
+		{
+			for (int i = 0; i < buffers.size(); ++i)
+			{
+				
+			}
+		}
+
 		static void BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 		{
-
+			BufferingLoop(doubleBufferIndex, directProcess);
 		}
 
 		static void SampleRateDidChange(ASIOSampleRate sRate)
@@ -160,22 +176,13 @@ namespace asio
 
 		static long AsioMessage(long selector, long value, void* message, double* opt)
 		{
-
+			return 0;
 		}
 
 		static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
 		{
+			BufferingLoop(doubleBufferIndex, directProcess);
 			return params;
-		}
-
-		static ASIOCallbacks CreateCallbacks()
-		{
-			ASIOCallbacks callback;
-			callback.bufferSwitch = &BufferController::BufferSwitch;
-			callback.sampleRateDidChange = &BufferController::SampleRateDidChange;
-			callback.asioMessage = &BufferController::AsioMessage;
-			callback.bufferSwitchTimeInfo = &BufferController::BufferSwitchTimeInfo;
-			return callback;
 		}
 
 	private:
@@ -188,6 +195,22 @@ namespace asio
 		{
 			buffers.clear();
 		}
+
+	public:
+		static ASIOCallbacks CreateCallbacks()
+		{
+			ASIOCallbacks callback;
+			callback.bufferSwitch = &BufferController::BufferSwitch;
+			callback.sampleRateDidChange = &BufferController::SampleRateDidChange;
+			callback.asioMessage = &BufferController::AsioMessage;
+			callback.bufferSwitchTimeInfo = &BufferController::BufferSwitchTimeInfo;
+			return callback;
+		}
+
+		/**
+		* バッファの配列を取得
+		*/
+		const std::vector<Buffer>& Buffers() const { return buffers; }
 	};
 
 	std::vector<Buffer> BufferController::buffers;
@@ -229,7 +252,7 @@ namespace asio
 		/**
 		* バッファリング開始
 		*/
-		void Start()
+		inline void Start()
 		{
 			ErrorCheck(iasio->start());
 		}
@@ -237,7 +260,7 @@ namespace asio
 		/**
 		* バッファリング終了
 		*/
-		void Stop()
+		inline void Stop()
 		{
 			ErrorCheck(iasio->stop());
 		}
@@ -245,7 +268,7 @@ namespace asio
 		/**
 		* バッファリングしたいチャンネルを追加
 		*/
-		void AddChannel(const IOType& ioType, const long& channelNumber)
+		inline void AddChannel(const IOType& ioType, const long& channelNumber)
 		{
 			ASIOBufferInfo info;
 			info.channelNum = channelNumber;
@@ -256,7 +279,7 @@ namespace asio
 		/**
 		* バッファリングしたいチャンネルを追加
 		*/
-		void AddChannel(const Channel& channel)
+		inline void AddChannel(const Channel& channel)
 		{
 			AddChannel(channel.ioType, channel.ioType);
 		}
@@ -264,7 +287,7 @@ namespace asio
 		/**
 		* バッファリングしたいチャンネルをやっぱなしにする
 		*/
-		void ClearChannel()
+		inline void ClearChannel()
 		{
 			bufferInfos.clear();
 		}
@@ -282,9 +305,7 @@ namespace asio
 		*/
 		const BufferController& CreateBuffer(const long& bufferSize, const ASIOSampleType sampleType, ASIOCallbacks* callbacks)
 		{
-			asio::ASIOBufferInfo* infos = &bufferInfos.at(0);
-			auto result = iasio->createBuffers(infos, bufferInfos.size(), bufferSize, callbacks);
-			ErrorCheck(result);
+			ErrorCheck(iasio->createBuffers(&bufferInfos[0], bufferInfos.size(), bufferSize, callbacks));
 			InitBuffers(bufferSize, sampleType, callbacks);
 			return bufferController;
 		}
@@ -300,14 +321,5 @@ namespace asio
 			CreateBuffer(bufferPreference.preferredSize, sampleType, callbacks);
 			return bufferController;
 		}
-
-		/**
-		* 明示的にバッファを解放
-		*/
-		void DisposeBuffers() const
-		{
-			ErrorCheck(iasio->disposeBuffers());
-		}
-		
 	};
 }

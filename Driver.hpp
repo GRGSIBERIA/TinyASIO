@@ -76,7 +76,7 @@ namespace asio
 			driverVersion = iasio->getDriverVersion();
 
 			channelManager = new ChannelManager(iasio);
-			bufferManager = new BufferManager(iasio);
+			bufferManager = nullptr;
 		}
 
 	public:
@@ -112,16 +112,14 @@ namespace asio
 		inline const std::vector<OutputChannel>& OutputChannels() const { return channelManager->Outputs(); }
 
 		/**
-		* 添字から入力チャンネルを返す
-		* @return 入力チャンネル
+		* チャンネルを追加
 		*/
-		inline const InputChannel& InputChannel(const long i) const { return channelManager->Input(i); }
+		inline const void AddChannel(const Channel& channel) { bufferManager->AddChannel(channel); }
 
 		/**
-		* 添字から出力チャンネルを返す
-		* @return 出力チャンネル
+		* 登録したチャンネルを削除
 		*/
-		inline const OutputChannel& OutputChannel(const long i) const { return channelManager->Output(i); }
+		inline const void ClearChannels() { bufferManager->ClearChannel(); }
 
 
 	public:		// バッファ周り
@@ -144,15 +142,17 @@ namespace asio
 		* @params[in] channel バッファを生成したいチャンネル
 		* @params[in] bufferPref バッファの設定
 		*/
-		const Buffer& CreateBuffer(const Channel& channel, const BufferPreference& bufferPref)
+		const BufferController& CreateBuffer(const Channel& channel, const BufferPreference& bufferPref)
 		{
 			ASIOCallbacks callback = BufferController::CreateCallbacks();
 
-			bufferManager->AddChannel(channel);
-			auto bufferArray = bufferManager->CreateBuffer(bufferPref, channel.sampleType, &callback);
-			bufferManager->ClearChannel();
+			if (bufferManager != nullptr)	// バッファを重複して利用させない作戦
+				delete bufferManager;
+			bufferManager = new BufferManager(iasio);
 
-			return bufferArray[0];
+			auto bufferCtrl = bufferManager->CreateBuffer(bufferPref, channel.sampleType, &callback);
+			
+			return bufferCtrl;
 		}
 
 		/**
@@ -160,7 +160,7 @@ namespace asio
 		* @params[in] channel バッファを生成したいチャンネル
 		* @note この関数を使うとドライバ側で設定されているバッファサイズを利用します
 		*/
-		const Buffer& CreateBuffer(const Channel& channel)
+		const BufferController& CreateBuffer(const Channel& channel)
 		{
 			return CreateBuffer(channel, GetBufferPreference());
 		}
@@ -206,11 +206,10 @@ namespace asio
 		*/
 		virtual ~Driver()
 		{
-			iasio->disposeBuffers();
-			iasio->Release();
-
 			delete channelManager;
 			delete bufferManager;
+
+			iasio->Release();
 		}
 	};
 
