@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <exception>
 #include "Interface.hpp"
 
@@ -6,7 +7,6 @@ namespace asio
 {
 	namespace pack
 	{
-
 		/**
 		* バッファの1サンプルの大きさが未対応
 		*/
