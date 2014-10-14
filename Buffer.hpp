@@ -6,7 +6,6 @@
 #include "Driver.hpp"
 #include "Channel.hpp"
 #include "SamplePack.hpp"
-#include "BufferingList.hpp"
 
 namespace asio
 {
