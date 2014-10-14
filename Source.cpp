@@ -22,5 +22,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 
 	asio::Driver::Init(clsids->at(0));
 
+	asio::BufferingList *a;
+	asio::IntBufferingList b(nullptr, 0);
+
+	a = &b;
+
 	return 0;
 }
