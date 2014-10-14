@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include <algorithm>
+
 #include "Interface.hpp"
 #include "Structure.hpp"
 #include "Driver.hpp"
@@ -9,6 +11,104 @@
 
 namespace asio
 {
+	class BufferList
+	{
+		std::vector<float> floatBuffer;
+		std::vector<int> intBuffer;
+		std::vector<double> doubleBuffer;
+		std::vector<short> shortBuffer;
+
+		pack::Sample sample;
+
+	private:
+
+		template <typename T>
+		void Insert(std::vector<T> buffer, const void* buffer, const long size)
+		{
+			buffer.insert(buffer.end(), buffer, buffer + size);
+		}
+
+		template <typename T>
+		void ReverseEndian(T* p)
+		{
+			std::reverse(
+				reinterpret_cast<BYTE*>(p),
+				reinterpret_cast<BYTE*>(p) + sizeof(T));
+		}
+
+		template <typename T>
+		void FormatBigEndian(const void* buffer, const long size)
+		{
+			T *start = reinterpret_cast<T*>(buffer);
+			const size_t num = size / sizeof(T);
+			for (size_t i = 0; i < num; ++i)
+			{
+				ReverseEndian(start + i * sizeof(T));
+			}
+		}
+
+		/**
+		* ビッグエンディアンの処理
+		*/
+		void ReversibleMSB(const void* buffer, const long size)
+		{
+			switch (sample.isMSB)
+			{
+			case pack::Int:
+				FormatBigEndian<int>(buffer, size);
+				break;
+
+			case pack::Short:
+				FormatBigEndian<short>(buffer, size);
+				break;
+
+			case pack::Float:
+				FormatBigEndian<float>(buffer, size);
+				break;
+
+			case pack::Double:
+				FormatBigEndian<double>(buffer, size);
+				break;
+			}
+		}
+
+		/**
+		* リトルエンディアンの処理
+		*/
+		void Store(const void* buffer, const long size)
+		{
+			switch (sample.type)
+			{
+			case pack::Int:
+				Insert(intBuffer, buffer, size);
+				break;
+
+			case pack::Short:
+				Insert(shortBuffer, buffer, size);
+				break;
+
+			case pack::Float:
+				Insert(floatBuffer, buffer, size);
+				break;
+
+			case pack::Double:
+				Insert(doubleBuffer, buffer, size);
+				break;
+			}
+		}
+
+	public:
+		BufferList(pack::Sample& sample)
+			: sample(sample) { }
+
+		void Store(const void* buffer, const long size)
+		{
+			if (sample.isMSB)
+				ReversibleMSB(buffer, size);
+			Store(buffer, size);
+		}
+	};
+
 	/**
 	* バッファクラス
 	*/
@@ -17,17 +117,40 @@ namespace asio
 		IOType ioType;
 		long channelNumber;
 		long bufferSize;
-		ASIOSampleType sampleType;
+		const ASIOSampleType sampleType;
 		void* bufferData[2];
-		ASIOCallbacks* callbacks;
+
+		BufferList bufferList;
+
+	public:
+		Buffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
+			: 
+			ioType((IOType)info.isInput),
+			channelNumber(info.channelNum),
+			bufferSize(bufferSize),
+			sampleType(sampleType), 
+			bufferList(pack::DetectSampleTypePackStruct(sampleType))
+		{
+			bufferData[0] = info.buffers[0];
+			bufferData[1] = info.buffers[1];
+		}
+	};
+
+	class BufferManager;	// フレンドにするための前方宣言
+
+	/**
+	* コールバック関数とバッファリングをまとめるためのクラス
+	*/
+	class BufferController
+	{
+		friend BufferManager;
 
 	private:
-		static Buffer* currentBuffer;	// バッファのインスタンスへのポインタ
-		static long doubleBufferIndex;
+		static std::vector<Buffer> buffers;
 
 		static void BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
 		{
-			Buffer::doubleBufferIndex = doubleBufferIndex;
+
 		}
 
 		static void SampleRateDidChange(ASIOSampleRate sRate)
@@ -39,42 +162,35 @@ namespace asio
 		{
 
 		}
-		
+
 		static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
 		{
-			Buffer::doubleBufferIndex = doubleBufferIndex;
 			return params;
-		}
-
-	private:
-		
-
-	public:
-		Buffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType, ASIOCallbacks* callbacks)
-			: ioType((IOType)info.isInput), channelNumber(info.channelNum), bufferSize(bufferSize), callbacks(callbacks), sampleType(sampleType)
-		{
-			Buffer::currentBuffer = this;
-
-			bufferData[0] = info.buffers[0];
-			bufferData[1] = info.buffers[1];
 		}
 
 		static ASIOCallbacks CreateCallbacks()
 		{
 			ASIOCallbacks callback;
-			callback.bufferSwitch = &Buffer::BufferSwitch;
-			callback.sampleRateDidChange = &Buffer::SampleRateDidChange;
-			callback.asioMessage = &Buffer::AsioMessage;
-			callback.bufferSwitchTimeInfo = &Buffer::BufferSwitchTimeInfo;
+			callback.bufferSwitch = &BufferController::BufferSwitch;
+			callback.sampleRateDidChange = &BufferController::SampleRateDidChange;
+			callback.asioMessage = &BufferController::AsioMessage;
+			callback.bufferSwitchTimeInfo = &BufferController::BufferSwitchTimeInfo;
 			return callback;
+		}
+
+	private:
+		inline void Add(const ASIOBufferInfo& info, const long& bufferSize, const ASIOSampleType& sampleType, ASIOCallbacks* callbacks)
+		{
+			buffers.emplace_back(info, bufferSize, sampleType, callbacks);
+		}
+
+		inline void Clear()
+		{
+			buffers.clear();
 		}
 	};
 
-
-	// 静的領域の初期化
-	Buffer* Buffer::currentBuffer;
-	long Buffer::doubleBufferIndex;
-
+	std::vector<Buffer> BufferController::buffers;
 
 	/**
 	* バッファを管理するクラス
@@ -83,17 +199,17 @@ namespace asio
 	{
 		IASIO* iasio;
 
-		std::vector<Buffer> buffers;
+		BufferController bufferController;
 		std::vector<ASIOBufferInfo> bufferInfos;
 
 	private:
-		void InitBuffers(const long& bufferSize, const ASIOSampleType sampleType, ASIOCallbacks* callbacks)
+		void InitBuffers(const long& bufferSize, const ASIOSampleType& sampleType, ASIOCallbacks* callbacks)
 		{
-			buffers.clear();
+			bufferController.Clear();
 			for (unsigned i = 0; i < bufferInfos.size(); ++i)
 			{
 				const auto& info = bufferInfos[i];
-				buffers.emplace_back(info, bufferSize, sampleType, callbacks);
+				bufferController.Add(info, bufferSize, sampleType, callbacks);
 			}
 		}
 
@@ -164,13 +280,13 @@ namespace asio
 		* @params[in, out] callbacks バッファリング等の通知のために利用
 		* @note bufferSizeは自由に数値を決められないので注意, (bufferSize % granularity == 0)以外の数値は保障できない
 		*/
-		const std::vector<Buffer>& CreateBuffer(const long& bufferSize, const ASIOSampleType sampleType, ASIOCallbacks* callbacks)
+		const BufferController& CreateBuffer(const long& bufferSize, const ASIOSampleType sampleType, ASIOCallbacks* callbacks)
 		{
 			asio::ASIOBufferInfo* infos = &bufferInfos.at(0);
 			auto result = iasio->createBuffers(infos, bufferInfos.size(), bufferSize, callbacks);
 			ErrorCheck(result);
 			InitBuffers(bufferSize, sampleType, callbacks);
-			return buffers;
+			return bufferController;
 		}
 
 		/**
@@ -179,10 +295,10 @@ namespace asio
 		* @params[in, out] callbacks バッファリング等の通知のために利用
 		* @note bufferSizeは自由に数値を決められないので注意, (bufferSize % granularity == 0)以外の数値は保障できない
 		*/
-		const std::vector<Buffer>& CreateBuffer(const BufferPreference& bufferPreference, const ASIOSampleType sampleType, ASIOCallbacks* callbacks)
+		const BufferController& CreateBuffer(const BufferPreference& bufferPreference, const ASIOSampleType sampleType, ASIOCallbacks* callbacks)
 		{
 			CreateBuffer(bufferPreference.preferredSize, sampleType, callbacks);
-			return buffers;
+			return bufferController;
 		}
 
 		/**

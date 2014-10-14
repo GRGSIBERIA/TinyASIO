@@ -39,6 +39,10 @@ namespace asio
 			switch (sampleType)
 			{
 			case ASIOSTInt32MSB:
+			case ASIOSTInt32MSB16:		// 32 bit data with 16 bit alignment
+			case ASIOSTInt32MSB18:		// 32 bit data with 18 bit alignment
+			case ASIOSTInt32MSB20:		// 32 bit data with 20 bit alignment
+			case ASIOSTInt32MSB24:		// 32 bit data with 24 bit alignment
 				sample = Sample(Type::Int, true);
 				break;
 			case ASIOSTInt16MSB:
@@ -54,6 +58,10 @@ namespace asio
 				sample = Sample(Type::Short, false);
 				break;
 			case ASIOSTInt32LSB:
+			case ASIOSTInt32LSB16:		// 32 bit data with 18 bit alignment
+			case ASIOSTInt32LSB18:		// 32 bit data with 18 bit alignment
+			case ASIOSTInt32LSB20:		// 32 bit data with 20 bit alignment
+			case ASIOSTInt32LSB24:		// 32 bit data with 24 bit alignment
 				sample = Sample(Type::Int, false);
 				break;
 			case ASIOSTFloat32LSB:		// IEEE 754 32 bit float, as found on Intel x86 architecture
@@ -62,28 +70,6 @@ namespace asio
 			case ASIOSTFloat64LSB: 		// IEEE 754 64 bit double float, as found on Intel x86 architecture
 				sample = Sample(Type::Double, false);
 				break;
-
-				// these are used for 32 bit data buffer, with different alignment of the data inside
-				// 32 bit PCI bus systems can more easily used with these
-			case ASIOSTInt32LSB16:		// 32 bit data with 18 bit alignment
-				throw NotImplementSampleType("ASIOSTInt32LSB16");
-			case ASIOSTInt32LSB18:		// 32 bit data with 18 bit alignment
-				throw NotImplementSampleType("ASIOSTInt32LSB18");
-			case ASIOSTInt32LSB20:		// 32 bit data with 20 bit alignment
-				throw NotImplementSampleType("ASIOSTInt32LSB20");
-			case ASIOSTInt32LSB24:		// 32 bit data with 24 bit alignment
-				throw NotImplementSampleType("ASIOSTInt32LSB24");
-
-				// these are used for 32 bit data buffer, with different alignment of the data inside
-				// 32 bit PCI bus systems can be more easily used with these
-			case ASIOSTInt32MSB16:		// 32 bit data with 16 bit alignment
-				throw NotImplementSampleType("ASIOSTInt32MSB16");
-			case ASIOSTInt32MSB18:		// 32 bit data with 18 bit alignment
-				throw NotImplementSampleType("ASIOSTInt32MSB18");
-			case ASIOSTInt32MSB20:		// 32 bit data with 20 bit alignment
-				throw NotImplementSampleType("ASIOSTInt32MSB20");
-			case ASIOSTInt32MSB24:		// 32 bit data with 24 bit alignment
-				throw NotImplementSampleType("ASIOSTInt32MSB24");
 
 				// Not Implement Formats
 			case ASIOSTInt24MSB:		// used for 20 bits as well

@@ -146,7 +146,7 @@ namespace asio
 		*/
 		const Buffer& CreateBuffer(const Channel& channel, const BufferPreference& bufferPref)
 		{
-			ASIOCallbacks callback = Buffer::CreateCallbacks();
+			ASIOCallbacks callback = BufferController::CreateCallbacks();
 
 			bufferManager->AddChannel(channel);
 			auto bufferArray = bufferManager->CreateBuffer(bufferPref, channel.sampleType, &callback);
