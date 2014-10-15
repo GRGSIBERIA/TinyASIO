@@ -21,8 +21,9 @@ namespace asio
 		{
 			Short = 0,
 			Int = 1,
-			Float = 2,
-			Double = 3
+			Int24 = 2,
+			Float = 3,
+			Double = 4
 		};
 
 		struct Sample

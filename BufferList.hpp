@@ -33,13 +33,13 @@ namespace asio
 		}
 
 		template <typename T>
-		void FormatBigEndian(void* buffer, const long size)
+		void FormatBigEndian(void* buffer, const long size, const long typeSize = sizeof(T))
 		{
 			T *start = reinterpret_cast<T*>(buffer);
 			const size_t num = size / sizeof(T);
 			for (size_t i = 0; i < num; ++i)
 			{
-				ReverseEndian(start + i * sizeof(T));
+				ReverseEndian(start + i * typeSize);
 			}
 		}
 
@@ -52,6 +52,10 @@ namespace asio
 			{
 			case pack::Int:
 				FormatBigEndian<int>(buffer, size);
+				break;
+
+			case pack::Int24:
+				FormatBigEndian<int>(buffer, size, 3);
 				break;
 
 			case pack::Short:

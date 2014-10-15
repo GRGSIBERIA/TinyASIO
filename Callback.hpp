@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
 namespace asio
 {
@@ -13,24 +14,25 @@ namespace asio
 			static std::vector<Buffer*>* buffers;	// Buffer配列のポインタを参照しているだけなので，何度も初期化可能
 
 		private:
-			static void BufferingInputChannel()
+			
+			static void BufferingInputChannel(long doubleBufferIndex)
 			{
 
 			}
 
-			static void BufferingOutputChannel()
+			static void BufferingOutputChannel(long doubleBufferIndex)
 			{
 
 			}
 
-			static void BufferingLoop(long doubleBufferIndex, ASIOBool directProcess)
+			static void BufferingLoop(const long doubleBufferIndex, const ASIOBool directProcess)
 			{
 				for (size_t i = 0; i < buffers->size(); ++i)
 				{
 					if (buffers->at(i)->Type() == IOType::Input)
-						BufferingInputChannel();
+						BufferingInputChannel(doubleBufferIndex);
 					else
-						BufferingOutputChannel();
+						BufferingOutputChannel(doubleBufferIndex);
 				}
 			}
 
