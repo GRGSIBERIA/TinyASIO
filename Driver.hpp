@@ -165,22 +165,6 @@ namespace asio
 			return CreateBuffer(channel, GetBufferPreference());
 		}
 
-		/**
-		* バッファリング開始
-		*/
-		const void Start() const
-		{
-			iasio->start();
-		}
-
-		/**
-		* バッファリング一時停止
-		*/
-		const void Stop() const
-		{
-			iasio->stop();
-		}
-
 	public:
 		/**
 		* ドライバの初期化

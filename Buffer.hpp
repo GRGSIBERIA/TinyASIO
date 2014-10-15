@@ -8,110 +8,10 @@
 #include "Driver.hpp"
 #include "Channel.hpp"
 #include "SamplePack.hpp"
+#include "BufferList.hpp"
 
 namespace asio
 {
-	class BufferList
-	{
-		std::vector<float> floatBuffer;
-		std::vector<int> intBuffer;
-		std::vector<double> doubleBuffer;
-		std::vector<short> shortBuffer;
-
-		pack::Sample sample;
-
-	private:
-
-		template <typename T>
-		void Insert(std::vector<T> buffer, void* vbuffer, const long size)
-		{
-			buffer.insert(buffer.end(), reinterpret_cast<T*>(vbuffer), reinterpret_cast<T*>(vbuffer) + size);
-		}
-
-		template <typename T>
-		void ReverseEndian(T* p)
-		{
-			std::reverse(
-				reinterpret_cast<BYTE*>(p),
-				reinterpret_cast<BYTE*>(p) + sizeof(T));
-		}
-
-		template <typename T>
-		void FormatBigEndian(void* buffer, const long size)
-		{
-			T *start = reinterpret_cast<T*>(buffer);
-			const size_t num = size / sizeof(T);
-			for (size_t i = 0; i < num; ++i)
-			{
-				ReverseEndian(start + i * sizeof(T));
-			}
-		}
-
-		/**
-		* ビッグエンディアンの処理
-		*/
-		void ReversibleMSB(void* buffer, const long size)
-		{
-			switch (sample.type)
-			{
-			case pack::Int:
-				FormatBigEndian<int>(buffer, size);
-				break;
-
-			case pack::Short:
-				FormatBigEndian<short>(buffer, size);
-				break;
-
-			case pack::Float:
-				FormatBigEndian<float>(buffer, size);
-				break;
-
-			case pack::Double:
-				FormatBigEndian<double>(buffer, size);
-				break;
-			}
-		}
-
-		/**
-		* バッファに追加する
-		*/
-		void StoreBuffer(void* buffer, const long size)
-		{
-			switch (sample.type)
-			{
-			case pack::Int:
-				Insert(intBuffer, buffer, size);
-				break;
-
-			case pack::Short:
-				Insert(shortBuffer, buffer, size);
-				break;
-
-			case pack::Float:
-				Insert(floatBuffer, buffer, size);
-				break;
-
-			case pack::Double:
-				Insert(doubleBuffer, buffer, size);
-				break;
-			}
-		}
-
-	public:
-		BufferList(pack::Sample& sample)
-			: sample(sample) { }
-
-		/**
-		* バッファに蓄積する
-		*/
-		void Store(void* buffer, const long size)
-		{
-			if (sample.isMSB)
-				ReversibleMSB(buffer, size);
-			StoreBuffer(buffer, size);
-		}
-	};
-
 	class BufferController;
 
 	/**
@@ -119,6 +19,8 @@ namespace asio
 	*/
 	class Buffer
 	{
+		friend BufferController;
+
 		IOType ioType;
 		long channelNumber;
 		long bufferSize;
@@ -126,8 +28,6 @@ namespace asio
 		void* bufferData[2];
 
 		BufferList bufferList;
-
-		friend BufferController;
 
 	public:
 		/**
@@ -137,11 +37,11 @@ namespace asio
 
 	public:
 		Buffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
-			: 
+			:
 			ioType((IOType)info.isInput),
 			channelNumber(info.channelNum),
 			bufferSize(bufferSize),
-			sampleType(sampleType), 
+			sampleType(sampleType),
 			bufferList(pack::DetectSampleTypePackStruct(sampleType))
 		{
 			bufferData[0] = info.buffers[0];
@@ -159,7 +59,9 @@ namespace asio
 	*/
 	class InputBuffer : public Buffer
 	{
-
+	public:
+		InputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
+			: Buffer(info, bufferSize, sampleType) {}
 	};
 
 	/**
@@ -167,7 +69,9 @@ namespace asio
 	*/
 	class OutputBuffer : public Buffer
 	{
-
+	public:
+		OutputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
+			: Buffer(info, bufferSize, sampleType) {}
 	};
 
 	class BufferManager;	// フレンドにするための前方宣言
@@ -179,65 +83,33 @@ namespace asio
 	{
 		friend BufferManager;
 
-		static std::vector<Buffer> buffers;
+		static std::vector<Buffer*> buffers;
 
-		std::vector<Buffer> inputBuffers;
-		std::vector<Buffer> outputBuffers;
+		std::vector<InputBuffer> inputBuffers;
+		std::vector<OutputBuffer> outputBuffers;
 
-	private:
-
-		static void BufferingInputChannel()
-		{
-
-		}
-
-		static void BufferingOutputChannel()
-		{
-
-		}
-
-		static void BufferingLoop(long doubleBufferIndex, ASIOBool directProcess)
-		{
-			for (size_t i = 0; i < buffers.size(); ++i)
-			{
-				if (buffers[i].Type() == IOType::Input)
-					BufferingInputChannel();
-				else
-					BufferingOutputChannel();
-			}
-		}
-
-		static void BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
-		{
-			BufferingLoop(doubleBufferIndex, directProcess);
-		}
-
-		static void SampleRateDidChange(ASIOSampleRate sRate)
-		{
-
-		}
-
-		static long AsioMessage(long selector, long value, void* message, double* opt)
-		{
-			return 0;
-		}
-
-		static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
-		{
-			BufferingLoop(doubleBufferIndex, directProcess);
-			return params;
-		}
+		IASIO* iasio;
 
 	private:
-		void Add(const ASIOBufferInfo& info, const long& bufferSize, const ASIOSampleType& sampleType, ASIOCallbacks* callbacks)
-		{
-			buffers.emplace_back(info, bufferSize, sampleType);
+		BufferController(IASIO* iasio)
+			: iasio(iasio) {}
 
-			auto& buf = buffers[buffers.size()];
+	private:
+		void Add(const ASIOBufferInfo& info, const long& bufferSize, const ASIOSampleType& sampleType)
+		{
+			Buffer* ptr = nullptr;
+
 			if (info.isInput)
-				inputBuffers.push_back(buf);
+			{
+				inputBuffers.emplace_back(info, bufferSize, sampleType);
+				ptr = &inputBuffers[inputBuffers.size() - 1];
+			}
 			else
-				outputBuffers.push_back(buf);
+			{
+				outputBuffers.emplace_back(info, bufferSize, sampleType);
+				ptr = &outputBuffers[outputBuffers.size() - 1];
+			}
+			buffers.push_back(ptr);
 		}
 
 		void Clear()
@@ -247,7 +119,6 @@ namespace asio
 			outputBuffers.clear();
 		}
 
-	public:
 		static ASIOCallbacks CreateCallbacks()
 		{
 			ASIOCallbacks callback;
@@ -257,9 +128,95 @@ namespace asio
 			callback.bufferSwitchTimeInfo = &BufferController::BufferSwitchTimeInfo;
 			return callback;
 		}
+
+	public:
+
+		/**
+		* バッファリング開始
+		*/
+		inline void Start() const
+		{
+			ErrorCheck(iasio->start());
+		}
+
+		/**
+		* バッファリング停止
+		*/
+		inline void Stop() const
+		{
+			ErrorCheck(iasio->stop());
+		}
+
+		/**
+		* 入力バッファの配列を取得する
+		* @return 入力バッファの配列
+		*/
+		inline const std::vector<InputBuffer> InputBuffers() const { return inputBuffers; }
+
+		/**
+		* 出力バッファの配列を取得する
+		* @return 出力バッファの配列
+		*/
+		inline const std::vector<OutputBuffer> OutputBuffers() const { return outputBuffers; }
 	};
 
-	std::vector<Buffer> BufferController::buffers;
+	std::vector<Buffer*> BufferController::buffers;
+
+	namespace callback
+	{
+		/**
+		* コールバック関数を制御するためのクラス
+		*/
+		class CallbackManager
+		{
+			static std::vector<Buffer*>* buffers;
+
+		private:
+			static void BufferingInputChannel()
+			{
+
+			}
+
+			static void BufferingOutputChannel()
+			{
+
+			}
+
+			static void BufferingLoop(long doubleBufferIndex, ASIOBool directProcess)
+			{
+				for (size_t i = 0; i < buffers->size(); ++i)
+				{
+					if (buffers->at(i)->Type() == IOType::Input)
+						BufferingInputChannel();
+					else
+						BufferingOutputChannel();
+				}
+			}
+
+			static void BufferSwitch(long doubleBufferIndex, ASIOBool directProcess)
+			{
+				BufferingLoop(doubleBufferIndex, directProcess);
+			}
+
+			static void SampleRateDidChange(ASIOSampleRate sRate)
+			{
+
+			}
+
+			static long AsioMessage(long selector, long value, void* message, double* opt)
+			{
+				return 0;
+			}
+
+			static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
+			{
+				BufferingLoop(doubleBufferIndex, directProcess);
+				return params;
+			}
+		};
+
+		std::vector<Buffer*>* buffers;
+	}
 
 	/**
 	* バッファを管理するクラス
@@ -269,6 +226,7 @@ namespace asio
 		IASIO* iasio;
 
 		BufferController bufferController;
+		callback::CallbackManager callbackManager;
 		std::vector<ASIOBufferInfo> bufferInfos;
 
 	private:
@@ -278,13 +236,13 @@ namespace asio
 			for (unsigned i = 0; i < bufferInfos.size(); ++i)
 			{
 				const auto& info = bufferInfos[i];
-				bufferController.Add(info, bufferSize, sampleType, callbacks);
+				bufferController.Add(info, bufferSize, sampleType);
 			}
 		}
 
 	public:
 		BufferManager(IASIO* iasio)
-			: iasio(iasio)
+			: iasio(iasio), bufferController(iasio)
 		{
 
 		}
@@ -293,22 +251,6 @@ namespace asio
 		{
 			if (bufferInfos.size() > 0)
 				ErrorCheck(iasio->disposeBuffers());
-		}
-
-		/**
-		* バッファリング開始
-		*/
-		inline void Start()
-		{
-			ErrorCheck(iasio->start());
-		}
-
-		/**
-		* バッファリング終了
-		*/
-		inline void Stop()
-		{
-			ErrorCheck(iasio->stop());
 		}
 
 		/**
