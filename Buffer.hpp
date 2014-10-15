@@ -23,9 +23,9 @@ namespace asio
 	private:
 
 		template <typename T>
-		void Insert(std::vector<T> buffer, const void* buffer, const long size)
+		void Insert(std::vector<T> buffer, void* vbuffer, const long size)
 		{
-			buffer.insert(buffer.end(), buffer, buffer + size);
+			buffer.insert(buffer.end(), reinterpret_cast<T*>(vbuffer), reinterpret_cast<T*>(vbuffer) + size);
 		}
 
 		template <typename T>
@@ -37,7 +37,7 @@ namespace asio
 		}
 
 		template <typename T>
-		void FormatBigEndian(const void* buffer, const long size)
+		void FormatBigEndian(void* buffer, const long size)
 		{
 			T *start = reinterpret_cast<T*>(buffer);
 			const size_t num = size / sizeof(T);
@@ -50,9 +50,9 @@ namespace asio
 		/**
 		* ビッグエンディアンの処理
 		*/
-		void ReversibleMSB(const void* buffer, const long size)
+		void ReversibleMSB(void* buffer, const long size)
 		{
-			switch (sample.isMSB)
+			switch (sample.type)
 			{
 			case pack::Int:
 				FormatBigEndian<int>(buffer, size);
@@ -75,7 +75,7 @@ namespace asio
 		/**
 		* バッファに追加する
 		*/
-		void StoreBuffer(const void* buffer, const long size)
+		void StoreBuffer(void* buffer, const long size)
 		{
 			switch (sample.type)
 			{
@@ -104,13 +104,15 @@ namespace asio
 		/**
 		* バッファに蓄積する
 		*/
-		void Store(const void* buffer, const long size)
+		void Store(void* buffer, const long size)
 		{
 			if (sample.isMSB)
 				ReversibleMSB(buffer, size);
 			StoreBuffer(buffer, size);
 		}
 	};
+
+	class BufferController;
 
 	/**
 	* バッファクラス
@@ -124,6 +126,14 @@ namespace asio
 		void* bufferData[2];
 
 		BufferList bufferList;
+
+		friend BufferController;
+
+	public:
+		/**
+		* IOの種類を返す
+		*/
+		inline const IOType Type() const { return ioType; }
 
 	public:
 		Buffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
@@ -144,6 +154,22 @@ namespace asio
 		}
 	};
 
+	/**
+	* 入力バッファ管理クラス
+	*/
+	class InputBuffer : public Buffer
+	{
+
+	};
+
+	/**
+	* 出力バッファ管理クラス
+	*/
+	class OutputBuffer : public Buffer
+	{
+
+	};
+
 	class BufferManager;	// フレンドにするための前方宣言
 
 	/**
@@ -153,14 +179,31 @@ namespace asio
 	{
 		friend BufferManager;
 
-	private:
 		static std::vector<Buffer> buffers;
+
+		std::vector<Buffer> inputBuffers;
+		std::vector<Buffer> outputBuffers;
+
+	private:
+
+		static void BufferingInputChannel()
+		{
+
+		}
+
+		static void BufferingOutputChannel()
+		{
+
+		}
 
 		static void BufferingLoop(long doubleBufferIndex, ASIOBool directProcess)
 		{
-			for (int i = 0; i < buffers.size(); ++i)
+			for (size_t i = 0; i < buffers.size(); ++i)
 			{
-				
+				if (buffers[i].Type() == IOType::Input)
+					BufferingInputChannel();
+				else
+					BufferingOutputChannel();
 			}
 		}
 
@@ -186,14 +229,22 @@ namespace asio
 		}
 
 	private:
-		inline void Add(const ASIOBufferInfo& info, const long& bufferSize, const ASIOSampleType& sampleType, ASIOCallbacks* callbacks)
+		void Add(const ASIOBufferInfo& info, const long& bufferSize, const ASIOSampleType& sampleType, ASIOCallbacks* callbacks)
 		{
-			buffers.emplace_back(info, bufferSize, sampleType, callbacks);
+			buffers.emplace_back(info, bufferSize, sampleType);
+
+			auto& buf = buffers[buffers.size()];
+			if (info.isInput)
+				inputBuffers.push_back(buf);
+			else
+				outputBuffers.push_back(buf);
 		}
 
-		inline void Clear()
+		void Clear()
 		{
 			buffers.clear();
+			inputBuffers.clear();
+			outputBuffers.clear();
 		}
 
 	public:
@@ -206,11 +257,6 @@ namespace asio
 			callback.bufferSwitchTimeInfo = &BufferController::BufferSwitchTimeInfo;
 			return callback;
 		}
-
-		/**
-		* バッファの配列を取得
-		*/
-		const std::vector<Buffer>& Buffers() const { return buffers; }
 	};
 
 	std::vector<Buffer> BufferController::buffers;

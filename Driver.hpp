@@ -150,7 +150,7 @@ namespace asio
 				delete bufferManager;
 			bufferManager = new BufferManager(iasio);
 
-			auto bufferCtrl = bufferManager->CreateBuffer(bufferPref, channel.sampleType, &callback);
+			auto& bufferCtrl = bufferManager->CreateBuffer(bufferPref, channel.sampleType, &callback);
 			
 			return bufferCtrl;
 		}
