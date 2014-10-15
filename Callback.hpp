@@ -6,6 +6,7 @@ namespace asio
 	{
 		/**
 		* コールバック関数を制御するためのクラス
+		* @note このクラスはBufferクラスにfriendされている
 		*/
 		class CallbackManager
 		{
@@ -63,6 +64,11 @@ namespace asio
 				callback.asioMessage = &CallbackManager::AsioMessage;
 				callback.bufferSwitchTimeInfo = &CallbackManager::BufferSwitchTimeInfo;
 				return callback;
+			}
+
+			static void Init(std::vector<Buffer*>* buf)
+			{
+				buffers = buf;
 			}
 		};
 

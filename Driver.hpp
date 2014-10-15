@@ -144,7 +144,7 @@ namespace asio
 		*/
 		const BufferController& CreateBuffer(const Channel& channel, const BufferPreference& bufferPref)
 		{
-			ASIOCallbacks callback = BufferController::CreateCallbacks();
+			ASIOCallbacks callback = callback::CallbackManager::CreateCallbacks();
 
 			if (bufferManager != nullptr)	// バッファを重複して利用させない作戦
 				delete bufferManager;

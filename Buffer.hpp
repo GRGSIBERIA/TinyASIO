@@ -12,14 +12,14 @@
 
 namespace asio
 {
-	class BufferController;
+	class CallbackManager;
 
 	/**
 	* バッファクラス
 	*/
 	class Buffer
 	{
-		friend BufferController;
+		friend CallbackManager;
 
 		IOType ioType;
 		long channelNumber;
@@ -74,7 +74,9 @@ namespace asio
 			: Buffer(info, bufferSize, sampleType) {}
 	};
 
-	class BufferManager;	// フレンドにするための前方宣言
+
+
+	class BufferManager;	// コピー不可にするための仕組み
 
 	/**
 	* コールバック関数とバッファリングをまとめるためのクラス
@@ -83,7 +85,7 @@ namespace asio
 	{
 		friend BufferManager;
 
-		static std::vector<Buffer*> buffers;
+		std::vector<Buffer*> buffers;	// callback::CallbackManagerにポインタを渡してる
 
 		std::vector<InputBuffer> inputBuffers;
 		std::vector<OutputBuffer> outputBuffers;
@@ -91,8 +93,13 @@ namespace asio
 		IASIO* iasio;
 
 	private:
+		/**
+		* 無闇矢鱈とコピーされていい存在じゃない
+		*/
 		BufferController(IASIO* iasio)
 			: iasio(iasio) {}
+
+		BufferController(const BufferController& c) {}
 
 	private:
 		void Add(const ASIOBufferInfo& info, const long& bufferSize, const ASIOSampleType& sampleType)
@@ -149,10 +156,4 @@ namespace asio
 		*/
 		inline const std::vector<OutputBuffer> OutputBuffers() const { return outputBuffers; }
 	};
-
-	std::vector<Buffer*> BufferController::buffers;
-
-	
-
-	
 }
