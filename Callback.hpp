@@ -10,7 +10,7 @@ namespace asio
 		*/
 		class CallbackManager
 		{
-			static std::vector<Buffer*>* buffers;
+			static std::vector<Buffer*>* buffers;	// Buffer配列のポインタを参照しているだけなので，何度も初期化可能
 
 		private:
 			static void BufferingInputChannel()
@@ -66,7 +66,7 @@ namespace asio
 				return callback;
 			}
 
-			static void Init(std::vector<Buffer*>* buf)
+			void Init(std::vector<Buffer*>* buf)
 			{
 				buffers = buf;
 			}
