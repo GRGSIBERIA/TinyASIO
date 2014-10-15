@@ -5,8 +5,8 @@
 
 #include "Interface.hpp"
 #include "Structure.hpp"
-#include "Buffer.hpp"
 #include "Channel.hpp"
+#include "BufferManager.hpp"
 
 namespace asio
 {
