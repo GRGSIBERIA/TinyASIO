@@ -8,7 +8,7 @@
 #include "Driver.hpp"
 #include "Channel.hpp"
 #include "SamplePack.hpp"
-#include "BufferList.hpp"
+#include "StreamBuffer.hpp"
 
 namespace asio
 {
@@ -27,7 +27,7 @@ namespace asio
 		const ASIOSampleType sampleType;
 		void* bufferData[2];
 
-		BufferList bufferList;
+		StreamBuffer bufferList;
 
 	public:
 		/**

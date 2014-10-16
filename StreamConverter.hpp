@@ -8,6 +8,9 @@ namespace asio
 {
 	namespace conv
 	{
+		/**
+		* Option.hppで指定された型が変だったときに呼び出される
+		*/
 		class UnknownOptionType : public std::exception
 		{
 		public:
@@ -19,7 +22,7 @@ namespace asio
 		* bufferからsourceへ流し込む処理のためのクラス
 		* 適宜，型の変換処理も行っている
 		*/
-		class BufferPourer
+		class StreamConverter
 		{
 			static const long ResizeSource(std::vector<TINY_ASIO_BUFFER_TYPE>& source, const long count)
 			{
@@ -37,21 +40,21 @@ namespace asio
 
 				if (type == typeid(int))
 #if TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_INT
-					MAX_DIFF = 1.0;
+					MAX_DIFF = 1.0f;
 #elif TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_FLOAT
-					MAX_DIFF = 1.0 / 2147483647.0;
+					MAX_DIFF = 1.0f / 2147483647.0f;
 #endif
 				else if (type == typeid(short))
 #if TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_INT
-					MAX_DIFF = 65538.0;
+					MAX_DIFF = 65538.0f;
 #elif TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_FLOAT
-					MAX_DIFF = 1.0 / 32767.0;
+					MAX_DIFF = 1.0f / 32767.0f;
 #endif
 				else if (type == typeid(float) || type == typeid(double))
 #if TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_INT
-					MAX_DIFF = 2147483647.0;
+					MAX_DIFF = 2147483647.0f;
 #elif TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_FLOAT
-					MAX_DIFF = 1.0;
+					MAX_DIFF = 1.0f;
 #endif
 				else
 					throw UnknownOptionType("判別できないバッファの型が指定されています, see also Option.hpp");

@@ -73,8 +73,10 @@
     <ClInclude Include="BufferManager.hpp" />
     <ClInclude Include="Callback.hpp" />
     <ClInclude Include="Channel.hpp" />
+    <ClInclude Include="Option.hpp" />
     <ClInclude Include="Preference.hpp" />
     <ClInclude Include="SamplePack.hpp" />
+    <ClInclude Include="StreamConverter.hpp" />
     <ClInclude Include="Structure.hpp" />
     <ClInclude Include="Driver.hpp" />
     <ClInclude Include="Interface.hpp" />

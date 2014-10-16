@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include "SamplePack.hpp"
-#include "Option.hpp"
+#include "StreamConverter.hpp"
 
 namespace asio
 {
@@ -15,32 +15,6 @@ namespace asio
 		pack::Sample sample;
 
 	private:
-
-		template <typename T>
-		void Insert(void* vbuffer, const long size)
-		{
-			stream.insert(buffer.end(), reinterpret_cast<T*>(vbuffer), reinterpret_cast<T*>(vbuffer)+size);
-		}
-
-		template <typename T>
-		void ReverseEndian(T* p)
-		{
-			std::reverse(
-				reinterpret_cast<BYTE*>(p),
-				reinterpret_cast<BYTE*>(p)+sizeof(T));
-		}
-
-		template <typename T>
-		void FormatBigEndian(void* buffer, const long size, const long typeSize = sizeof(T))
-		{
-			T *start = reinterpret_cast<T*>(buffer);
-			const size_t num = size / sizeof(T);
-			for (size_t i = 0; i < num; ++i)
-			{
-				ReverseEndian(start + i * typeSize);
-			}
-		}
-
 		/**
 		* ビッグエンディアンの処理
 		*/
@@ -49,23 +23,23 @@ namespace asio
 			switch (sample.type)
 			{
 			case pack::Int:
-				FormatBigEndian<int>(buffer, size);
+				conv::StreamConverter::FormatBigEndian<int>(buffer, size);
 				break;
 
 			case pack::Int24:
-				FormatBigEndian<int>(buffer, size, 3);
+				conv::StreamConverter::FormatBigEndian<int>(buffer, size, 3);
 				break;
 
 			case pack::Short:
-				FormatBigEndian<short>(buffer, size);
+				conv::StreamConverter::FormatBigEndian<short>(buffer, size);
 				break;
 
 			case pack::Float:
-				FormatBigEndian<float>(buffer, size);
+				conv::StreamConverter::FormatBigEndian<float>(buffer, size);
 				break;
 
 			case pack::Double:
-				FormatBigEndian<double>(buffer, size);
+				conv::StreamConverter::FormatBigEndian<double>(buffer, size);
 				break;
 			}
 		}
@@ -78,11 +52,11 @@ namespace asio
 			switch (sample.type)
 			{
 			case pack::Int:
-				
+				conv::StreamConverter::ConvertToOptionType<int>(stream, buffer, size);
 				break;
 
 			case pack::Short:
-				
+				conv::StreamConverter::ConvertToOptionType<short>(stream, buffer, size);
 				break;
 
 			case pack::Int24:
@@ -96,16 +70,16 @@ namespace asio
 						BYTE* bytePtr = reinterpret_cast<BYTE*>(buffer) + i * 3;	// バイト型のポインタで位置を調整する
 						toInt32List[i] = *reinterpret_cast<int*>(bytePtr) & 0xFFFFFF;	// 24ビットマスクをかける
 					}
-					
+					conv::StreamConverter::ConvertToOptionType<int>(stream, reinterpret_cast<void*>(&toInt32List[0]), size);
 				}
 				break;
 
 			case pack::Float:
-				
+				conv::StreamConverter::ConvertToOptionType<float>(stream, buffer, size);
 				break;
 
 			case pack::Double:
-				
+				conv::StreamConverter::ConvertToOptionType<double>(stream, buffer, size);
 				break;
 			}
 		}
