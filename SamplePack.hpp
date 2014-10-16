@@ -74,9 +74,9 @@ namespace asio
 
 				// Not Implement Formats
 			case ASIOSTInt24MSB:		// used for 20 bits as well
-				throw NotImplementSampleType("ASIOSTInt24MSB");
+				sample = Sample(Type::Int24, true);
 			case ASIOSTInt24LSB:	  	// used for 20 bits as well
-				throw NotImplementSampleType("ASIOSTInt24LSB");
+				sample = Sample(Type::Int24, false);
 
 				//	ASIO DSD format.
 			case ASIOSTDSDInt8LSB1:		// DSD 1 bit data, 8 samples per byte. First sample in Least significant bit.

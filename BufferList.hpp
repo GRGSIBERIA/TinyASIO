@@ -1,27 +1,25 @@
 #pragma once
 #include <vector>
 #include "SamplePack.hpp"
+#include "Option.hpp"
 
 namespace asio
 {
 	/**
-	* バッファリングするためのリスト
+	* バッファ用のストリーム
 	*/
-	class BufferList
+	class StreamBuffer
 	{
-		std::vector<float> floatBuffer;
-		std::vector<int> intBuffer;
-		std::vector<double> doubleBuffer;
-		std::vector<short> shortBuffer;
+		std::vector<TINY_ASIO_BUFFER_TYPE> stream;
 
 		pack::Sample sample;
 
 	private:
 
 		template <typename T>
-		void Insert(std::vector<T> buffer, void* vbuffer, const long size)
+		void Insert(void* vbuffer, const long size)
 		{
-			buffer.insert(buffer.end(), reinterpret_cast<T*>(vbuffer), reinterpret_cast<T*>(vbuffer)+size);
+			stream.insert(buffer.end(), reinterpret_cast<T*>(vbuffer), reinterpret_cast<T*>(vbuffer)+size);
 		}
 
 		template <typename T>
@@ -80,25 +78,40 @@ namespace asio
 			switch (sample.type)
 			{
 			case pack::Int:
-				Insert(intBuffer, buffer, size);
+				
 				break;
 
 			case pack::Short:
-				Insert(shortBuffer, buffer, size);
+				
+				break;
+
+			case pack::Int24:
+				{
+					// ここでInt24bitからInt32bitに変換する
+					const long count = size / 3;
+					const long resize = count * 4;	// 24bit -> 32bitのサイズ
+					std::vector<int> toInt32List(count);
+					for (int i = 0; i < count; ++i)
+					{
+						BYTE* bytePtr = reinterpret_cast<BYTE*>(buffer) + i * 3;	// バイト型のポインタで位置を調整する
+						toInt32List[i] = *reinterpret_cast<int*>(bytePtr) & 0xFFFFFF;	// 24ビットマスクをかける
+					}
+					
+				}
 				break;
 
 			case pack::Float:
-				Insert(floatBuffer, buffer, size);
+				
 				break;
 
 			case pack::Double:
-				Insert(doubleBuffer, buffer, size);
+				
 				break;
 			}
 		}
 
 	public:
-		BufferList(pack::Sample& sample)
+		StreamBuffer(pack::Sample& sample)
 			: sample(sample) { }
 
 		/**
