@@ -69,7 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buffer.hpp" />
-    <ClInclude Include="BufferList.hpp" />
+    <ClInclude Include="StreamBuffer.hpp" />
     <ClInclude Include="BufferManager.hpp" />
     <ClInclude Include="Callback.hpp" />
     <ClInclude Include="Channel.hpp" />

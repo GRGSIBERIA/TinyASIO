@@ -66,7 +66,7 @@ namespace asio
 			static void PourIntoSource(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const long count)
 			{
 				const long prevSize = ResizeSource(source, count);
-				const float MAX_DIFF = DecideMaxDiffFromType<T>();
+				const float MAX_DIFF = DecideMaxDiffFromType(typeid(T));
 
 				for (long i = 0; i < count; ++i)
 					source[prevSize + i] = *(reinterpret_cast<T*>(buffer)+i) * MAX_DIFF;
