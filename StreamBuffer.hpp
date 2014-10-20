@@ -5,6 +5,9 @@
 
 namespace asio
 {
+	/**
+	* どういうわけか知らん型が投げられた場合の例外
+	*/
 	class UnrecognizedTypeException : public std::exception
 	{
 	public:
@@ -15,6 +18,7 @@ namespace asio
 
 	/**
 	* バッファリングするためのストリームクラス
+	* @note 子クラスは基本的にBufferControllerから見えなくなっているので，そんなに公開・非公開は気にしなくてもいいと思う
 	*/
 	class StreamBuffer
 	{
@@ -160,8 +164,6 @@ namespace asio
 				ReversibleMSB(buffer, size);
 			StoreBuffer(buffer, size);
 		}
-
-		
 	};
 
 
