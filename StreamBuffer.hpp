@@ -5,6 +5,14 @@
 
 namespace asio
 {
+	class UnrecognizedTypeException : public std::exception
+	{
+	public:
+		UnrecognizedTypeException(const std::string& message)
+			: std::exception(message.c_str()) {}
+	};
+
+
 	/**
 	* バッファリングするためのストリームクラス
 	*/
@@ -42,6 +50,9 @@ namespace asio
 			case pack::Double:
 				conv::StreamConverter::FormatBigEndian<double>(buffer, size);
 				break;
+
+			default:
+				throw UnrecognizedTypeException("利用不可能な量子化ビット数が指定されています");
 			}
 		}
 
@@ -71,6 +82,9 @@ namespace asio
 			case pack::Double:
 				count = bufferSize / sizeof(double);
 				break;
+
+			default:
+				throw UnrecognizedTypeException("利用不可能な量子化ビット数が指定されています");
 			}
 
 			if (count > stream.size())
@@ -127,6 +141,9 @@ namespace asio
 			case pack::Double:
 				conv::StreamConverter::ConvertToOptionType<double>(stream, buffer, size);
 				break;
+
+			default:
+				throw UnrecognizedTypeException("利用不可能な量子化ビット数が指定されています");
 			}
 		}
 
@@ -157,7 +174,26 @@ namespace asio
 		{
 			memset(buffer, 0, size);	// 最初にゼロ消去
 
+			switch (sample.type)
+			{
+			case pack::Short:
+				break;
 
+			case pack::Int:
+				break;
+
+			case pack::Int24:
+				break;
+
+			case pack::Float:
+				break;
+
+			case pack::Double:
+				break;
+
+			default:
+				throw UnrecognizedTypeException("利用不可能な量子化ビット数が指定されています");
+			}
 
 			if (sample.isMSB)			// 一番最後にエンディアンを逆転させる
 				ReversibleMSB(buffer, size);
