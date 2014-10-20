@@ -6,15 +6,16 @@
 namespace asio
 {
 	/**
-	* バッファ用のストリーム
+	* バッファリングするためのストリームクラス
 	*/
 	class StreamBuffer
 	{
+	protected:
 		std::vector<TINY_ASIO_BUFFER_TYPE> stream;
 
 		pack::Sample sample;
 
-	private:
+	protected:
 		/**
 		* ビッグエンディアンの処理
 		*/
@@ -44,6 +45,51 @@ namespace asio
 			}
 		}
 
+
+		void RemoveFront(const long bufferSize)
+		{
+			// 先頭からbufferSizeだけ消去する
+			long count;
+			switch (sample.type)
+			{
+			case pack::Short:
+				count = bufferSize / sizeof(short);
+				break;
+
+			case pack::Int:
+				count = bufferSize / sizeof(int);
+				break;
+
+			case pack::Int24:
+				count = bufferSize / 3;
+				break;
+
+			case pack::Float:
+				count = bufferSize / sizeof(float);
+				break;
+
+			case pack::Double:
+				count = bufferSize / sizeof(double);
+				break;
+			}
+
+			if (count > stream.size())
+				count = stream.size();
+
+			stream.erase(stream.begin(), stream.begin() + count);
+		}
+
+	public:
+		StreamBuffer(pack::Sample& samplePack)
+			: sample(samplePack) {}
+	};
+
+
+	/**
+	* デバイスからホストへ流すためのストリームクラス
+	*/
+	class DeviceToHostStream : public StreamBuffer
+	{
 		/**
 		* バッファに追加する
 		*/
@@ -84,41 +130,9 @@ namespace asio
 			}
 		}
 
-		void RemoveFront(const long bufferSize)
-		{
-			long count;
-			switch (sample.type)
-			{
-			case pack::Short:
-				count = bufferSize / sizeof(short);
-				break;
-
-			case pack::Int:
-				count = bufferSize / sizeof(int);
-				break;
-
-			case pack::Int24:
-				count = bufferSize / 3;
-				break;
-
-			case pack::Float:
-				count = bufferSize / sizeof(float);
-				break;
-
-			case pack::Double:
-				count = bufferSize / sizeof(double);
-				break;
-			}
-
-			if (count > stream.size())
-				count = stream.size();
-
-			stream.erase(stream.begin(), stream.begin() + count);
-		}
-
 	public:
-		StreamBuffer(pack::Sample& sample)
-			: sample(sample) { }
+		DeviceToHostStream(pack::Sample& sample)
+			: StreamBuffer(sample) { }
 
 		/**
 		* バッファの中身をストリームへ蓄積する
@@ -129,6 +143,29 @@ namespace asio
 				ReversibleMSB(buffer, size);
 			StoreBuffer(buffer, size);
 		}
+
+		
+	};
+
+
+	/**
+	* ホストからデバイスに送るためのストリームクラス
+	*/
+	class HostToDeviceStream : public StreamBuffer
+	{
+		void FetchBuffer(void* buffer, const long size)
+		{
+			memset(buffer, 0, size);	// 最初にゼロ消去
+
+
+
+			if (sample.isMSB)			// 一番最後にエンディアンを逆転させる
+				ReversibleMSB(buffer, size);
+		}
+
+	public:
+		HostToDeviceStream(pack::Sample& sample)
+			: StreamBuffer(sample) { }
 
 		/**
 		* ストリームの中身をバッファへ書き込む

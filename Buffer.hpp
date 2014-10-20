@@ -27,8 +27,6 @@ namespace asio
 		const ASIOSampleType sampleType;
 		void* bufferData[2];
 
-		StreamBuffer bufferList;
-
 	public:
 		/**
 		* IO‚ÌŽí—Þ‚ð•Ô‚·
@@ -36,21 +34,15 @@ namespace asio
 		inline const IOType Type() const { return ioType; }
 
 	public:
-		Buffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
+		Buffer(const ASIOBufferInfo& info, const long bufferSize)
 			:
 			ioType((IOType)info.isInput),
 			channelNumber(info.channelNum),
 			bufferSize(bufferSize),
-			sampleType(sampleType),
-			bufferList(pack::DetectSampleTypePackStruct(sampleType))
+			sampleType(sampleType)
 		{
 			bufferData[0] = info.buffers[0];
 			bufferData[1] = info.buffers[1];
-		}
-
-		void Store(const long index, const long size)
-		{
-			bufferList.Store(bufferData[index], size);
 		}
 	};
 
@@ -59,9 +51,11 @@ namespace asio
 	*/
 	class InputBuffer : public Buffer
 	{
+		StoreOnlyBuffer buffer;
+
 	public:
 		InputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
-			: Buffer(info, bufferSize, sampleType) {}
+			: Buffer(info, bufferSize), buffer(pack::DetectSampleTypePackStruct(sampleType)) {}
 
 		void Read() {}
 	};
@@ -73,7 +67,7 @@ namespace asio
 	{
 	public:
 		OutputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
-			: Buffer(info, bufferSize, sampleType) {}
+			: Buffer(info, bufferSize) {}
 
 		void Write() {}
 	};
