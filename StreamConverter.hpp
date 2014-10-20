@@ -27,8 +27,8 @@ namespace asio
 			static const long ResizeSource(std::vector<TINY_ASIO_BUFFER_TYPE>& source, const long count)
 			{
 				const long prevSize = source.size();
-				source.resize(prevSize + count);
-				return prevSize;
+source.resize(prevSize + count);
+return prevSize;
 			}
 
 			/**
@@ -116,10 +116,46 @@ namespace asio
 				}
 			}
 
-			template <typename T>
+			/**
+			* @tparam TO 変換先の型
+			*/
+			template <typename TO>
 			static void ConvertToVoidBuffer(std::vector<TINY_ASIO_BUFFER_TYPE>&source, void* buffer, pack::Sample& sample, const long size)
 			{
-				
+				const long sourceCount = source.size();
+				const long totalSize = sizeof(TINY_ASIO_BUFFER_TYPE) * sourceCount;
+
+				// void *bufferに書き込むのに，エンディアンの調整をここでまとめてやる
+				if (sample.isMSB)
+					FormatBigEndian<TINY_ASIO_BUFFER_TYPE>(&source[0], totalSize, sizeof(TINY_ASIO_BUFFER_TYPE));
+
+				long convertCount = sourceCount;
+
+				if (sizeof(TO) * sourceCount < size)
+					convertCount = size / sizeof(TO);
+
+				if (typeid(TINY_ASIO_BUFFER_TYPE) == typeid(int))
+				{
+					if (typeid(TO) == typeid(int))
+					{
+						
+					}
+					else
+					{
+
+					}
+				}
+				else if (TINY_ASIO_BUFFER_TYPE) == typeid(float))
+				{
+					if (typeid(TO) == typeid(float))
+					{
+
+					}
+					else
+					{
+
+					}
+				}
 			}
 		};
 	}
