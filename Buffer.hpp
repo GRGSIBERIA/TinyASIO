@@ -63,7 +63,7 @@ namespace asio
 		InputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
 			: Buffer(info, bufferSize, sampleType) {}
 
-		void Store() {}
+		void Read() {}
 	};
 
 	/**
@@ -75,7 +75,7 @@ namespace asio
 		OutputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
 			: Buffer(info, bufferSize, sampleType) {}
 
-		
+		void Write() {}
 	};
 
 

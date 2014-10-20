@@ -60,18 +60,18 @@ namespace asio
 				break;
 
 			case pack::Int24:
+			{
+				// ここでInt24bitからInt32bitに変換する
+				const long count = size / 3;
+				const long resize = count * 4;	// 24bit -> 32bitのサイズ
+				std::vector<int> toInt32List(count);
+				for (int i = 0; i < count; ++i)
 				{
-					// ここでInt24bitからInt32bitに変換する
-					const long count = size / 3;
-					const long resize = count * 4;	// 24bit -> 32bitのサイズ
-					std::vector<int> toInt32List(count);
-					for (int i = 0; i < count; ++i)
-					{
-						BYTE* bytePtr = reinterpret_cast<BYTE*>(buffer) + i * 3;	// バイト型のポインタで位置を調整する
-						toInt32List[i] = *reinterpret_cast<int*>(bytePtr) & 0xFFFFFF;	// 24ビットマスクをかける
-					}
-					conv::StreamConverter::ConvertToOptionType<int>(stream, reinterpret_cast<void*>(&toInt32List[0]), size);
+					BYTE* bytePtr = reinterpret_cast<BYTE*>(buffer)+i * 3;	// バイト型のポインタで位置を調整する
+					toInt32List[i] = *reinterpret_cast<int*>(bytePtr)& 0xFFFFFF;	// 24ビットマスクをかける
 				}
+				conv::StreamConverter::ConvertToOptionType<int>(stream, reinterpret_cast<void*>(&toInt32List[0]), size);
+			}
 				break;
 
 			case pack::Float:
@@ -84,18 +84,58 @@ namespace asio
 			}
 		}
 
+		void RemoveFront(const long bufferSize)
+		{
+			long count;
+			switch (sample.type)
+			{
+			case pack::Short:
+				count = bufferSize / sizeof(short);
+				break;
+
+			case pack::Int:
+				count = bufferSize / sizeof(int);
+				break;
+
+			case pack::Int24:
+				count = bufferSize / 3;
+				break;
+
+			case pack::Float:
+				count = bufferSize / sizeof(float);
+				break;
+
+			case pack::Double:
+				count = bufferSize / sizeof(double);
+				break;
+			}
+
+			if (count > stream.size())
+				count = stream.size();
+
+			stream.erase(stream.begin(), stream.begin() + count);
+		}
+
 	public:
 		StreamBuffer(pack::Sample& sample)
 			: sample(sample) { }
 
 		/**
-		* バッファに蓄積する
+		* バッファの中身をストリームへ蓄積する
 		*/
 		void Store(void* buffer, const long size)
 		{
 			if (sample.isMSB)
 				ReversibleMSB(buffer, size);
 			StoreBuffer(buffer, size);
+		}
+
+		/**
+		* ストリームの中身をバッファへ書き込む
+		*/
+		void Fetch(void* buffer, const long size)
+		{
+
 		}
 	};
 }

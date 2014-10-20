@@ -117,6 +117,7 @@ return prevSize;
 			}
 
 			/**
+			* std::vectorからTO型のvoid*へ変換する
 			* @tparam TO 変換先の型
 			*/
 			template <typename TO>
@@ -125,14 +126,9 @@ return prevSize;
 				const long sourceCount = source.size();
 				const long totalSize = sizeof(TINY_ASIO_BUFFER_TYPE) * sourceCount;
 
-				// void *bufferに書き込むのに，エンディアンの調整をここでまとめてやる
-				if (sample.isMSB)
-					FormatBigEndian<TINY_ASIO_BUFFER_TYPE>(&source[0], totalSize, sizeof(TINY_ASIO_BUFFER_TYPE));
+				// エンディアンの変更は，バッファに書き込んでから行う
 
 				long convertCount = sourceCount;
-
-				if (sizeof(TO) * sourceCount < size)
-					convertCount = size / sizeof(TO);
 
 				if (typeid(TINY_ASIO_BUFFER_TYPE) == typeid(int))
 				{
@@ -156,6 +152,9 @@ return prevSize;
 
 					}
 				}
+
+				if (sample.isMSB)
+					FormatBigEndian<TO>(buffer, size);
 			}
 		};
 	}
