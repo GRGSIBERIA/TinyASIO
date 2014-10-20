@@ -115,6 +115,12 @@ namespace asio
 					ReverseEndian(start + i * typeSize);
 				}
 			}
+
+			template <typename T>
+			static void ConvertToVoidBuffer(std::vector<TINY_ASIO_BUFFER_TYPE>&source, void* buffer, pack::Sample& sample, const long size)
+			{
+				
+			}
 		};
 	}
 }

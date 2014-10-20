@@ -97,5 +97,29 @@ namespace asio
 				ReversibleMSB(buffer, size);
 			StoreBuffer(buffer, size);
 		}
+
+		/**
+		* buffer‚É‘Î‚µ‚Ä‘‚«‚İ‚ğs‚¤
+		*/
+		void Write(void* buffer, const long size)
+		{
+			switch (sample.type)
+			{
+			case pack::Short:
+				break;
+
+			case pack::Int:
+				break;
+
+			case pack::Int24:
+				break;
+
+			case pack::Float:
+				break;
+
+			case pack::Double:
+				break;
+			}
+		}
 	};
 }
