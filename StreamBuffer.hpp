@@ -64,7 +64,7 @@ namespace asio
 		void RemoveFront(const long bufferSize)
 		{
 			// æ“ª‚©‚çbufferSize‚¾‚¯Á‹‚·‚é
-			long count;
+			unsigned long count;
 			switch (sample.type)
 			{
 			case pack::Short:

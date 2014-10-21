@@ -51,7 +51,7 @@ namespace asio
 	*/
 	class InputBuffer : public Buffer
 	{
-		StoreOnlyBuffer buffer;
+		DeviceToHostStream buffer;
 
 	public:
 		InputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
@@ -65,9 +65,11 @@ namespace asio
 	*/
 	class OutputBuffer : public Buffer
 	{
+		HostToDeviceStream buffer;
+
 	public:
 		OutputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
-			: Buffer(info, bufferSize) {}
+			: Buffer(info, bufferSize), buffer(pack::DetectSampleTypePackStruct(sampleType)) {}
 
 		void Write() {}
 	};

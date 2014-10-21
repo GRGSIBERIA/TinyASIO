@@ -83,6 +83,122 @@ return prevSize;
 					reinterpret_cast<BYTE*>(p)+sizeof(T));
 			}
 
+
+			static void CovertBit24(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const long size)
+			{
+				std::vector<BYTE> bit24Array(size, 0);
+				const long sourceCount = source.size();
+
+#if TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_INT
+				const float diff = 8388608.0f / 2147483647.0f;
+#elif TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_FLOAT
+				const float diff = 8388607.0f;
+#endif
+
+				for (int i = 0; i < sourceCount; ++i)
+				{
+					int num = (int)(source[i] * diff);
+					BYTE* top = reinterpret_cast<BYTE*>(&num);
+					bit24Array[i * 3 + 0] = top[1];
+					bit24Array[i * 3 + 1] = top[2];
+					bit24Array[i * 3 + 2] = top[3];
+				}
+
+				memcpy(buffer, &bit24Array[0], size);
+			}
+
+
+			static bool DoneUniqueRoutineAsIsDone(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const pack::Sample& sample, const long size)
+			{
+				const long sourceCount = source.size();
+				const long sourceSize = sizeof(TINY_ASIO_BUFFER_TYPE) * sourceCount;
+
+				// 型ごとに決まった処理へ分岐させる
+#if TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_INT
+				if (sample.type == pack::Int)
+				{
+					memcpy(buffer, &source[0], sourceSize);
+					return true;
+				}
+				if (sample.type == pack::Int24)
+				{
+					CovertBit24(source, buffer, size);
+					return true;
+				}
+#elif TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_FLOAT
+				if (sample.type == pack::Float)
+				{
+					memcpy(buffer, &source[0], sourceSize);
+					return true;
+				}
+				if (sample.type == pack::Int24)
+				{
+					// int24だけ特別な処理を行う
+					CovertBit24(source, buffer, size);
+					return true;		// ここから先の処理は不要なので強制的に退去させる
+				}
+#endif
+				return false;
+			}
+
+
+			/**
+			* @tparam TO 変換先の型
+			* @tparam COMP 比較する型
+			*/
+			template <typename TO>
+			static void SwitchingCompositTypeAtEachProcedure(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const pack::Sample& sample, const long size)
+			{
+				const long destCount = size / sizeof(TO);
+
+				// 固有の処理を行った後，退出するなら退出させる
+				if (DoneUniqueRoutineAsIsDone(source, buffer, sample, size))
+					return;
+
+				std::vector<TO> toArray(destCount, 0);
+				float diff;
+
+#if TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_INT
+
+				// int型から
+				switch (sample.type)
+				{
+				case pack::Short:
+					diff = 32767.0f / 2147483647.0f;
+					break;
+
+				case pack::Float:
+				case pack::Double:
+					diff = 1.0f / 2147483647.0f;
+					break;
+				}
+
+#elif TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_FLOAT
+
+				// float型から
+				switch (sample.type)
+				{
+				case pack::Short:
+					diff = 32767.0f;
+					break;
+
+				case pack::Int:
+					diff = 2147483647.0f;
+					break;
+
+				case pack::Double:
+					diff = 1.0f;
+					break;
+				}
+#endif
+
+				for (int i = 0; i < sourceCount; ++i)
+					toArray[i] = (TO)(source[i] * diff);
+
+				memcpy(buffer, &toArray[0], size);
+			}
+
+
 		public:
 			/**
 			* bufferからsourceへ流し込む処理
@@ -116,42 +232,16 @@ return prevSize;
 				}
 			}
 
+
 			/**
-			* std::vectorからTO型のvoid*へ変換する
+			* std::vectorからvoid*へ変換する
 			* @tparam TO 変換先の型
 			*/
 			template <typename TO>
-			static void ConvertToVoidBuffer(std::vector<TINY_ASIO_BUFFER_TYPE>&source, void* buffer, pack::Sample& sample, const long size)
+			static void ConvertToVoidBuffer(std::vector<TINY_ASIO_BUFFER_TYPE>&source, void* buffer, const pack::Sample& sample, const long size)
 			{
-				const long sourceCount = source.size();
-				const long totalSize = sizeof(TINY_ASIO_BUFFER_TYPE) * sourceCount;
-
-				// エンディアンの変更は，バッファに書き込んでから行う
-
-				long convertCount = sourceCount;
-
-				if (typeid(TINY_ASIO_BUFFER_TYPE) == typeid(int))
-				{
-					if (typeid(TO) == typeid(int))
-					{
-						
-					}
-					else
-					{
-
-					}
-				}
-				else if (TINY_ASIO_BUFFER_TYPE) == typeid(float))
-				{
-					if (typeid(TO) == typeid(float))
-					{
-
-					}
-					else
-					{
-
-					}
-				}
+				// 各種，型から型への切替を行う
+				SwitchingCompositTypeAtEachProcedure(source, buffer, sample, size)
 
 				if (sample.isMSB)
 					FormatBigEndian<TO>(buffer, size);
