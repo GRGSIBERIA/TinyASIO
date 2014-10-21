@@ -174,31 +174,31 @@ namespace asio
 	{
 		void FetchBuffer(void* buffer, const long size)
 		{
-			memset(buffer, 0, size);	// 最初にゼロ消去
-
 			switch (sample.type)
 			{
 			case pack::Short:
+				conv::StreamConverter::ConvertToVoidBuffer<short>(stream, buffer, sample, size);
 				break;
 
 			case pack::Int:
+				conv::StreamConverter::ConvertToVoidBuffer<int>(stream, buffer, sample, size);
 				break;
 
 			case pack::Int24:
+				conv::StreamConverter::ConvertToVoidBuffer<int>(stream, buffer, sample, size);
 				break;
 
 			case pack::Float:
+				conv::StreamConverter::ConvertToVoidBuffer<float>(stream, buffer, sample, size);
 				break;
 
 			case pack::Double:
+				conv::StreamConverter::ConvertToVoidBuffer<double>(stream, buffer, sample, size);
 				break;
 
 			default:
 				throw UnrecognizedTypeException("利用不可能な量子化ビット数が指定されています");
 			}
-
-			if (sample.isMSB)			// 一番最後にエンディアンを逆転させる
-				ReversibleMSB(buffer, size);
 		}
 
 	public:
@@ -210,7 +210,12 @@ namespace asio
 		*/
 		void Fetch(void* buffer, const long size)
 		{
+			memset(buffer, 0, size);	// 最初にゼロ消去
 
+			FetchBuffer(buffer, size);
+
+			if (sample.isMSB)			// 一番最後にエンディアンを逆転させる
+				ReversibleMSB(buffer, size);
 		}
 	};
 }
