@@ -191,7 +191,7 @@ return prevSize;
 					break;
 				}
 #endif
-
+				const long sourceCount = source.size();
 				for (int i = 0; i < sourceCount; ++i)
 					toArray[i] = (TO)(source[i] * diff);
 
@@ -241,7 +241,7 @@ return prevSize;
 			static void ConvertToVoidBuffer(std::vector<TINY_ASIO_BUFFER_TYPE>&source, void* buffer, const pack::Sample& sample, const long size)
 			{
 				// ŠeíCŒ^‚©‚çŒ^‚Ö‚ÌØ‘Ö‚ğs‚¤
-				SwitchingCompositTypeAtEachProcedure(source, buffer, sample, size)
+				SwitchingCompositTypeAtEachProcedure<TO>(source, buffer, sample, size);
 
 				if (sample.isMSB)
 					FormatBigEndian<TO>(buffer, size);
