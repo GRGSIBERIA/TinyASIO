@@ -190,13 +190,13 @@ namespace asio
 		* 入力バッファのインスタンスを得る
 		* @return 入力バッファ
 		*/
-		inline const InputBuffer& InputBuffer(const size_t i) const { return inputBuffers[i]; }
+		inline InputBuffer& InputBuffer(const size_t i) { return inputBuffers[i]; }
 
 		/**
 		* 出力バッファのインスタンスを得る
 		* @return 出力バッファ
 		*/
-		inline const OutputBuffer& OutputBuffer(const size_t i) const { return outputBuffers[i]; }
+		inline OutputBuffer& OutputBuffer(const size_t i) { return outputBuffers[i]; }
 
 		/**
 		* 入力バッファの数を得る
