@@ -85,7 +85,7 @@ namespace asio
 		{
 			ErrorCheck(iasio->createBuffers(&bufferInfos[0], bufferInfos.size(), bufferSize, callbacks));
 			InitBuffers(bufferSize, sampleType, callbacks);
-			callbackManager.Init(&bufferController.buffers);
+			callbackManager.Init(&bufferController.inputBuffers, &bufferController.outputBuffers);
 			return bufferController;
 		}
 

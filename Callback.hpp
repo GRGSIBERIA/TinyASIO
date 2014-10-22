@@ -21,11 +21,11 @@ namespace asio
 			{
 				for (auto& input : *inputBuffer)
 				{
-					input.Store(doubleBufferIndex);
+					input.StoreC(doubleBufferIndex);
 				}
 				for (auto& output : *outputBuffer)
 				{
-					output.Fetch(doubleBufferIndex);
+					output.FetchC(doubleBufferIndex);
 				}
 			}
 

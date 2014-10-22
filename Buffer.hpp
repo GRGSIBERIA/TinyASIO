@@ -47,47 +47,72 @@ namespace asio
 		}
 	};
 
+
+	namespace callback 
+	{
+		class CallbackManager;
+	}
+
 	/**
 	* 入力バッファ管理クラス
 	*/
 	class InputBuffer : public Buffer
 	{
+		friend callback::CallbackManager;
+
 		DeviceToHostStream stream;
+
+		/**
+		* Streamに入力されたデータを蓄積する
+		* @note CallbackManager用の関数
+		*/
+		inline void StoreC(const long bufferIndex)
+		{
+			stream.Store(bufferData[bufferIndex], bufferSize);
+		}
 
 	public:
 		InputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
 			: Buffer(info, bufferSize), stream(pack::DetectSampleTypePackStruct(sampleType)) {}
 
-		void Read() {}
-
 		/**
-		* Streamに入力されたデータを蓄積する
+		* バッファに蓄積されたデータを取得する
+		* @return バッファに蓄積されたデータ
 		*/
-		inline void Store(const long bufferIndex) 
+		std::shared_ptr<std::vector<TINY_ASIO_BUFFER_TYPE>> Fetch()
 		{
-			stream.Store(bufferData[bufferIndex], bufferSize);
+			auto sharedPtr = std::make_shared < std::vector<TINY_ASIO_BUFFER_TYPE>>(stream.GetStream());
+			stream.Clear();
+			return sharedPtr;
 		}
 	};
+
 
 	/**
 	* 出力バッファ管理クラス
 	*/
 	class OutputBuffer : public Buffer
 	{
+		friend callback::CallbackManager;
+
 		HostToDeviceStream stream;
+
+		/**
+		* Streamに蓄積されたデータを転送する
+		* @note CallbackManager用の関数
+		*/
+		inline void FetchC(const long bufferIndex)
+		{
+			stream.Fetch(bufferData[bufferIndex], bufferSize);
+		}
 
 	public:
 		OutputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
 			: Buffer(info, bufferSize), stream(pack::DetectSampleTypePackStruct(sampleType)) {}
 
-		void Write() {}
-
-		/**
-		* Streamに蓄積されたデータを転送する
-		*/
-		inline void Fetch(const long bufferIndex)
+		void Store(const std::vector<TINY_ASIO_BUFFER_TYPE>& storeBuffer) 
 		{
-			stream.Fetch(bufferData[bufferIndex], bufferSize);
+			stream.InsertLast(storeBuffer);
 		}
 	};
 
@@ -162,15 +187,27 @@ namespace asio
 		}
 
 		/**
-		* 入力バッファの配列を取得する
-		* @return 入力バッファの配列
+		* 入力バッファのインスタンスを得る
+		* @return 入力バッファ
 		*/
-		inline const std::vector<InputBuffer> InputBuffers() const { return inputBuffers; }
+		inline const InputBuffer& InputBuffer(const size_t i) const { return inputBuffers[i]; }
 
 		/**
-		* 出力バッファの配列を取得する
-		* @return 出力バッファの配列
+		* 出力バッファのインスタンスを得る
+		* @return 出力バッファ
 		*/
-		inline const std::vector<OutputBuffer> OutputBuffers() const { return outputBuffers; }
+		inline const OutputBuffer& OutputBuffer(const size_t i) const { return outputBuffers[i]; }
+
+		/**
+		* 入力バッファの数を得る
+		* @return 入力バッファの数
+		*/
+		inline const size_t InputCount() const { return inputBuffers.size(); }
+
+		/**
+		* 出力バッファの数を得る
+		* @return 出力バッファの数
+		*/
+		inline const size_t OutputCount() const { return outputBuffers.size(); }
 	};
 }
