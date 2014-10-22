@@ -90,8 +90,10 @@ return prevSize;
 				const long sourceCount = source.size();
 
 #if TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_INT
+				// int ‚©‚ç int24
 				const float diff = 8388608.0f / 2147483647.0f;
 #elif TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_FLOAT
+				// float ‚©‚ç int24
 				const float diff = 8388607.0f;
 #endif
 
