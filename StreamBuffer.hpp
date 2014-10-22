@@ -100,7 +100,19 @@ namespace asio
 	public:
 		StreamBuffer(pack::Sample& samplePack)
 			: sample(samplePack) {}
+
+
+		inline void Clear()
+		{
+			stream.clear();
+		}
+
+		inline const std::vector<TINY_ASIO_BUFFER_TYPE>& GetStream() const
+		{
+			return stream;
+		}
 	};
+
 
 
 	/**
@@ -173,6 +185,7 @@ namespace asio
 	};
 
 
+
 	/**
 	* ホストからデバイスに送るためのストリームクラス
 	*/
@@ -221,6 +234,13 @@ namespace asio
 			FetchBuffer(buffer, size);
 			if (sample.isMSB)			// 一番最後にエンディアンを逆転させる
 				ReversibleMSB(buffer, size);
+
+			RemoveFrontFromSize(size);
+		}
+
+		void InsertLast(const std::vector<TINY_ASIO_BUFFER_TYPE>& storeBuffer)
+		{
+			stream.insert(stream.end(), storeBuffer.begin(), storeBuffer.end());
 		}
 	};
 }
