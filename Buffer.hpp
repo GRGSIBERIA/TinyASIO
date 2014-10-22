@@ -110,6 +110,10 @@ namespace asio
 		OutputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
 			: Buffer(info, bufferSize), stream(pack::DetectSampleTypePackStruct(sampleType)) {}
 
+		/**
+		* バッファにデータを蓄積する
+		* @param[in] storeBuffer 蓄積したいデータ
+		*/
 		void Store(const std::vector<TINY_ASIO_BUFFER_TYPE>& storeBuffer) 
 		{
 			stream.InsertLast(storeBuffer);
