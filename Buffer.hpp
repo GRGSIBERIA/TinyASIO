@@ -21,6 +21,7 @@ namespace asio
 	{
 		friend CallbackManager;
 
+	protected:
 		IOType ioType;
 		long channelNumber;
 		long bufferSize;
@@ -51,13 +52,21 @@ namespace asio
 	*/
 	class InputBuffer : public Buffer
 	{
-		DeviceToHostStream buffer;
+		DeviceToHostStream stream;
 
 	public:
 		InputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
-			: Buffer(info, bufferSize), buffer(pack::DetectSampleTypePackStruct(sampleType)) {}
+			: Buffer(info, bufferSize), stream(pack::DetectSampleTypePackStruct(sampleType)) {}
 
 		void Read() {}
+
+		/**
+		* Streamに入力されたデータを蓄積する
+		*/
+		inline void Store(const long bufferIndex) 
+		{
+			stream.Store(bufferData[bufferIndex], bufferSize);
+		}
 	};
 
 	/**
@@ -65,13 +74,21 @@ namespace asio
 	*/
 	class OutputBuffer : public Buffer
 	{
-		HostToDeviceStream buffer;
+		HostToDeviceStream stream;
 
 	public:
 		OutputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
-			: Buffer(info, bufferSize), buffer(pack::DetectSampleTypePackStruct(sampleType)) {}
+			: Buffer(info, bufferSize), stream(pack::DetectSampleTypePackStruct(sampleType)) {}
 
 		void Write() {}
+
+		/**
+		* Streamに蓄積されたデータを転送する
+		*/
+		inline void Fetch(const long bufferIndex)
+		{
+			stream.Fetch(bufferData[bufferIndex], bufferSize);
+		}
 	};
 
 
