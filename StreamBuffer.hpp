@@ -61,7 +61,7 @@ namespace asio
 		}
 
 
-		void RemoveFront(const long bufferSize)
+		void RemoveFrontFromSize(const long bufferSize)
 		{
 			// 先頭からbufferSizeだけ消去する
 			unsigned long count;
@@ -109,6 +109,23 @@ namespace asio
 	class DeviceToHostStream : public StreamBuffer
 	{
 		/**
+		* 量子化ビット数が24bitの場合の特殊な処理
+		*/
+		void ConvertTo24Bit(void* buffer, const long size)
+		{
+			// ここでInt24bitからInt32bitに変換する
+			const long count = size / 3;
+			const long resize = count * 4;	// 24bit -> 32bitのサイズ
+			std::vector<int> toInt32List(count);
+			for (int i = 0; i < count; ++i)
+			{
+				BYTE* bytePtr = reinterpret_cast<BYTE*>(buffer);	// バイト型のポインタで位置を調整する
+				toInt32List[i] = *reinterpret_cast<int*>(bytePtr[i * 3]) & 0xFFFFFF;	// 24ビットマスクをかける
+			}
+			conv::StreamConverter::ConvertToOptionType<int>(stream, reinterpret_cast<void*>(&toInt32List[0]), size);
+		}
+
+		/**
 		* バッファに追加する
 		*/
 		void StoreBuffer(void* buffer, const long size)
@@ -124,18 +141,7 @@ namespace asio
 				break;
 
 			case pack::Int24:
-			{
-				// ここでInt24bitからInt32bitに変換する
-				const long count = size / 3;
-				const long resize = count * 4;	// 24bit -> 32bitのサイズ
-				std::vector<int> toInt32List(count);
-				for (int i = 0; i < count; ++i)
-				{
-					BYTE* bytePtr = reinterpret_cast<BYTE*>(buffer)+i * 3;	// バイト型のポインタで位置を調整する
-					toInt32List[i] = *reinterpret_cast<int*>(bytePtr)& 0xFFFFFF;	// 24ビットマスクをかける
-				}
-				conv::StreamConverter::ConvertToOptionType<int>(stream, reinterpret_cast<void*>(&toInt32List[0]), size);
-			}
+				ConvertTo24Bit(buffer, size);
 				break;
 
 			case pack::Float:
@@ -213,7 +219,6 @@ namespace asio
 			memset(buffer, 0, size);	// 最初にゼロ消去
 
 			FetchBuffer(buffer, size);
-
 			if (sample.isMSB)			// 一番最後にエンディアンを逆転させる
 				ReversibleMSB(buffer, size);
 		}
