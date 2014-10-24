@@ -18,18 +18,21 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 	TEST_HR(hr);
 
 	auto list = asio::Registory::GetAsioDriverPathes();
-	asio::Driver::Init(list[0]);
 
-	auto driver = asio::Driver::Get();
+	auto driver = asio::Driver::Init(list[0]);
 
-	auto inputs = driver.InputChannels();
-	auto outputs = driver.OutputChannels();
+	const auto& inputs = driver.InputChannels();
+	const auto& outputs = driver.OutputChannels();
 
-	if (inputs.size() <= 0)
-		return 0;
+	if (inputs.size() > 0)
+	{
+		driver.AddChannel(inputs[0]);
+	}
 
-	if (outputs.size() <= 0)
-		return 0;
+	if (outputs.size() > 0)
+	{
+		driver.AddChannel(outputs[0]);
+	}
 
 	
 

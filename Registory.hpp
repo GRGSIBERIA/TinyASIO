@@ -45,13 +45,13 @@ namespace asio
 	
 
 	/**
-	* サブキーとドライバー名を格納するための構造体
+	* レジストリのパスとドライバー名を格納するための構造体
 	*/
 	struct SubKey
 	{
 	public:
-		const std::string registoryPath;
-		const std::string driverName;
+		const std::string registoryPath;	/*!< レジストリのパス */
+		const std::string driverName;		/*!< ドライバ名 */
 
 		SubKey(const std::string& regPath, const std::string& driverName)
 			: registoryPath(regPath), driverName(driverName) {}
@@ -137,6 +137,7 @@ namespace asio
 
 		/**
 		* 登録されているASIOドライバのレジストリのパスを返す
+		* @return レジストリのパスの配列
 		*/
 		static std::vector<SubKey> GetAsioDriverPathes()
 		{

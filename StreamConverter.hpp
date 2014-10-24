@@ -87,7 +87,11 @@ return prevSize;
 			static void CovertBit24(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const long size)
 			{
 				std::vector<BYTE> bit24Array(size, 0);
-				const long sourceCount = source.size();
+				long transferCount = source.size();
+				const long bufferCount = size / 3;
+
+				if (transferCount > bufferCount)
+					transferCount = bufferCount;
 
 #if TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_INT
 				// int から int24
@@ -97,7 +101,7 @@ return prevSize;
 				const float diff = 8388607.0f;
 #endif
 
-				for (int i = 0; i < sourceCount; ++i)
+				for (int i = 0; i < transferCount; ++i)
 				{
 					int num = (int)(source[i] * diff);
 					BYTE* top = reinterpret_cast<BYTE*>(&num);
@@ -110,16 +114,31 @@ return prevSize;
 			}
 
 
+			/**
+			* 実際に，void*へ転送する実メモリサイズを取得する
+			*/
+			template <typename TO>
+			static long TransferSize(const long sourceCount, const long size)
+			{
+				long transferSize = sourceCount * sizeof(TO);
+				if (transferSize > size)
+					transferSize = size;
+				return transferSize;
+			}
+
+
+			template <typename TO>
 			static bool DoneUniqueRoutineAsIsDone(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const pack::Sample& sample, const long size)
 			{
-				const long sourceCount = source.size();
-				const long sourceSize = sizeof(TINY_ASIO_BUFFER_TYPE) * sourceCount;
+				const long transferSize = TransferSize<TO>(source.size(), size);
+
+				memset(buffer, 0, size);	// transferSizeがsizeに満たない場合があるため，これで初期化しておく
 
 				// 型ごとに決まった処理へ分岐させる
 #if TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_INT
 				if (sample.type == pack::Int)
 				{
-					memcpy(buffer, &source[0], sourceSize);
+					memcpy(buffer, &source[0], transferSize);
 					return true;
 				}
 				if (sample.type == pack::Int24)
@@ -130,7 +149,7 @@ return prevSize;
 #elif TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_FLOAT
 				if (sample.type == pack::Float)
 				{
-					memcpy(buffer, &source[0], sourceSize);
+					memcpy(buffer, &source[0], transferSize);
 					return true;
 				}
 				if (sample.type == pack::Int24)
@@ -145,34 +164,21 @@ return prevSize;
 
 
 			/**
-			* @tparam TO 変換先の型
-			* @tparam COMP 比較する型
+			* 転送するときに値を丸めるのに使う差分値
 			*/
-			template <typename TO>
-			static void SwitchingCompositTypeAtEachProcedure(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const pack::Sample& sample, const long size)
+			static const float GetDiffFromSample(const pack::Sample& sample)
 			{
-				const long destCount = size / sizeof(TO);
-
-				// 固有の処理を行った後，退出するなら退出させる
-				if (DoneUniqueRoutineAsIsDone(source, buffer, sample, size))
-					return;
-
-				std::vector<TO> toArray(destCount, 0);
-				float diff;
-
 #if TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_INT
 
 				// int型から
 				switch (sample.type)
 				{
 				case pack::Short:
-					diff = 32767.0f / 2147483647.0f;
-					break;
+					return 32767.0f / 2147483647.0f;
 
 				case pack::Float:
 				case pack::Double:
-					diff = 1.0f / 2147483647.0f;
-					break;
+					return 1.0f / 2147483647.0f;
 				}
 
 #elif TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_FLOAT
@@ -181,20 +187,39 @@ return prevSize;
 				switch (sample.type)
 				{
 				case pack::Short:
-					diff = 32767.0f;
-					break;
+					return 32767.0f;
 
 				case pack::Int:
-					diff = 2147483647.0f;
-					break;
+					return 2147483647.0f;
 
 				case pack::Double:
-					diff = 1.0f;
-					break;
+					return 1.0f;
 				}
 #endif
-				const long sourceCount = source.size();
-				for (int i = 0; i < sourceCount; ++i)
+				return 0.0f;
+			}
+
+
+			/**
+			* @tparam TO 変換先の型
+			* @tparam COMP 比較する型
+			*/
+			template <typename TO>
+			static void SwitchingCompositTypeAtEachProcedure(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const pack::Sample& sample, const long size)
+			{
+				// 固有の処理を行った後，退出するなら退出させる
+				if (DoneUniqueRoutineAsIsDone<TO>(source, buffer, sample, size))
+					return;
+
+				const float diff = GetDiffFromSample(sample);
+				const long destCount = size / sizeof(TO);
+				std::vector<TO> toArray(destCount, 0);	// destCountだけメモリを確保し，0で初期化しておく
+
+				long transferCount = source.size();	// 実際に転送する領域が，bufferよりも大きくなるのを防止する
+				if (transferCount > destCount)
+					transferCount = destCount;
+
+				for (int i = 0; i < transferCount; ++i)
 					toArray[i] = (TO)(source[i] * diff);
 
 				memcpy(buffer, &toArray[0], size);

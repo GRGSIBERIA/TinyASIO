@@ -172,10 +172,11 @@ namespace asio
 		* @params[in] subkey ASIOドライバのSubkey
 		* @note 以前に生成されたドライバは破棄される
 		*/
-		static void Init(const SubKey& subkey)
+		static Driver& Init(const SubKey& subkey)
 		{
 			auto clsid = Registory::GetCLSID(subkey.registoryPath);
 			Driver::driver.reset(new Driver(clsid), [](Driver *p) { delete p; });
+			return *Driver::driver;
 		}
 
 		/**
