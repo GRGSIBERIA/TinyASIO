@@ -3,6 +3,7 @@
 #include <exception>
 #include <string>
 
+#include "Registory.hpp"
 #include "Interface.hpp"
 #include "Structure.hpp"
 #include "Channel.hpp"
@@ -168,11 +169,12 @@ namespace asio
 	public:
 		/**
 		* ドライバの初期化
-		* @params[in] clsid ASIOドライバのCLSID
+		* @params[in] subkey ASIOドライバのSubkey
 		* @note 以前に生成されたドライバは破棄される
 		*/
-		static void Init(const CLSID& clsid)
+		static void Init(const SubKey& subkey)
 		{
+			auto clsid = Registory::GetCLSID(subkey.registoryPath);
 			Driver::driver.reset(new Driver(clsid), [](Driver *p) { delete p; });
 		}
 

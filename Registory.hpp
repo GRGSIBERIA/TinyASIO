@@ -10,6 +10,9 @@
 
 namespace asio
 {
+	/**
+	* レジストリーキーが開けない
+	*/
 	class CantOpenRegistoryKey : public std::exception
 	{
 	public:
@@ -17,10 +20,24 @@ namespace asio
 	};
 
 
+	/**
+	* サブキーのインデックスが開けなくなっている
+	*/
 	class CantOpenSubKeyIndex : public std::exception
 	{
 	public:
 		CantOpenSubKeyIndex(const std::string& regPath) : std::exception(("サブキーのインデックスが開けません:" + regPath).c_str()) {}
+	};
+
+
+	/**
+	* ASIOのドライバーがひとつもない
+	*/
+	class DontFoundASIODrivers : public std::exception
+	{
+	public:
+		DontFoundASIODrivers(const std::string& message)
+			: exception(message.c_str()) {}
 	};
 
 
@@ -45,11 +62,14 @@ namespace asio
 	/**
 	* ASIO関連のレジストリを探す処理
 	*/
-	class ASIORegistory
+	class Registory
 	{
 	public:
 		typedef std::shared_ptr<std::vector<SubKey>> SubKeyList;
-		typedef std::shared_ptr<std::vector<CLSID>> CLSIDList;
+		typedef std::shared_ptr<std::vector<::CLSID>> CLSIDList;
+
+		static SubKeyList subkeys;
+		static CLSIDList clsids;
 		
 	private:
 		static LONG WrappedRegOpenKey(HKEY mainKey, const std::string& regPath, HKEY& hkey)
@@ -118,14 +138,14 @@ namespace asio
 		/**
 		* 登録されているASIOドライバのレジストリのパスを返す
 		*/
-		static SubKeyList GetAsioDriverPathes()
+		static std::vector<SubKey> GetAsioDriverPathes()
 		{
-			SubKeyList resultSubKeys(new std::vector<SubKey>());
+			subkeys = SubKeyList(new std::vector<SubKey>());
 
 			HKEY hkey;
 			LONG cr = WrappedRegOpenKey(HKEY_LOCAL_MACHINE, ASIO_REGISTORY_PATH, hkey);
 			if (cr != ERROR_SUCCESS)
-				return resultSubKeys;
+				return *subkeys;
 
 			DWORD index = 0;
 			while (true)
@@ -133,7 +153,7 @@ namespace asio
 				try
 				{
 					const auto subkey = GetSubKey(hkey, index);
-					resultSubKeys->emplace_back(ASIO_REGISTORY_PATH + "\\" + subkey, subkey);
+					subkeys->emplace_back(ASIO_REGISTORY_PATH + "\\" + subkey, subkey);
 				}
 				catch (CantOpenSubKeyIndex)
 				{
@@ -146,13 +166,16 @@ namespace asio
 
 			::RegCloseKey(hkey);
 
-			return resultSubKeys;
+			if (subkeys->size() <= 0)
+				throw DontFoundASIODrivers("ASIOのドライバーがひとつも存在しません");
+
+			return *subkeys;
 		}
 
 		/**
 		* ASIOドライバーのCLSIDを取得する
 		*/
-		static CLSID GetCLSID(const std::string& regPath)
+		static ::CLSID GetCLSID(const std::string& regPath)
 		{
 			HKEY hkey;
 			if (WrappedRegOpenKey(HKEY_LOCAL_MACHINE, regPath, hkey) != ERROR_SUCCESS)
@@ -164,7 +187,7 @@ namespace asio
 
 			// レジストリエントリの値が16進数の文字列
 			std::wstring clsidStr = ToWide(clsidStrBuffer);
-			CLSID resultCLSID;
+			::CLSID resultCLSID;
 
 			auto check = CLSIDFromString(clsidStr.c_str(), (LPCLSID)&resultCLSID);
 			if (check != S_OK)
@@ -174,21 +197,8 @@ namespace asio
 
 			return resultCLSID;
 		}
-
-		/**
-		* SubKeyListに存在する全てのパスからCLSIDを取得する
-		*/
-		static CLSIDList GetCLSIDs(const SubKeyList& subkeyList)
-		{
-			CLSIDList clsids(new std::vector<CLSID>());
-
-			for (const auto& subkey : *subkeyList)
-			{
-				CLSID clsid = GetCLSID(subkey.registoryPath);
-				clsids->push_back(clsid);
-			}
-
-			return clsids;
-		}
 	};
+
+	Registory::CLSIDList Registory::clsids;
+	Registory::SubKeyList Registory::subkeys;
 }
