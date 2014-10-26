@@ -43,5 +43,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 		
 	}
 
+	controller.Stop();
+
 	return 0;
 }
