@@ -36,7 +36,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 
 	const auto& controller = driver.CreateBuffer(asio::pack::Sample(asio::pack::Int, false));
 
-	
+	controller.Start();
+
+	while (1)
+	{
+		
+	}
 
 	return 0;
 }
