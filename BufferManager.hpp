@@ -20,7 +20,7 @@ namespace asio
 		std::vector<ASIOBufferInfo> bufferInfos;
 
 	private:
-		void InitBuffers(const long& bufferSize, const ASIOSampleType& sampleType, ASIOCallbacks* callbacks)
+		void InitBuffers(const long& bufferSize, const ASIOSampleType& sampleType)
 		{
 			bufferController.Clear();
 			for (unsigned i = 0; i < bufferInfos.size(); ++i)
@@ -87,7 +87,7 @@ namespace asio
 		const BufferController& CreateBuffer(const long& bufferSize, const ASIOSampleType sampleType, ASIOCallbacks* callbacks)
 		{
 			ErrorCheck(iasio->createBuffers(&bufferInfos[0], bufferInfos.size(), bufferSize, callbacks));
-			InitBuffers(bufferSize, sampleType, callbacks);
+			InitBuffers(bufferSize, sampleType);
 			callbackManager.Init(&bufferController.inputBuffers, &bufferController.outputBuffers);
 			return bufferController;
 		}

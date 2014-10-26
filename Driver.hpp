@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <exception>
 #include <string>
+#include <memory>
 
 #include "Registory.hpp"
 #include "Interface.hpp"
@@ -76,8 +77,8 @@ namespace asio
 			driverName = buffer;
 			driverVersion = iasio->getDriverVersion();
 
-			channelManager = shared_ptr<ChannelManager>(new ChannelManager(iasio));
-			bufferManager = shared_ptr<BufferManager>(new BufferManager(iasio));
+			channelManager = std::shared_ptr<ChannelManager>(new ChannelManager(iasio));
+			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(iasio));
 		}
 
 	public:
@@ -154,7 +155,7 @@ namespace asio
 
 			auto& bufferCtrl = bufferManager->CreateBuffer(bufferPref, sample.ToSampleType(), &callback);
 
-			bufferManager = shared_ptr<BufferManager>(new BufferManager(iasio));
+			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(iasio));
 			
 			return bufferCtrl;
 		}

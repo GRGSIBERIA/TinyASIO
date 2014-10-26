@@ -16,7 +16,7 @@ namespace asio
 	class CantOpenRegistoryKey : public std::exception
 	{
 	public:
-		CantOpenRegistoryKey(const std::string& regPath) : std::exception(("レジストリを開けません: " + regPath).c_str()) { }
+		CantOpenRegistoryKey(const std::wstring& regPath) : std::exception(("レジストリを開けません: " + std::string(regPath.begin(), regPath.end())).c_str()) { }
 	};
 
 
@@ -26,7 +26,7 @@ namespace asio
 	class CantOpenSubKeyIndex : public std::exception
 	{
 	public:
-		CantOpenSubKeyIndex(const std::string& regPath) : std::exception(("サブキーのインデックスが開けません:" + regPath).c_str()) {}
+		CantOpenSubKeyIndex(const std::wstring& regPath) : std::exception(("サブキーのインデックスが開けません:" + std::string(regPath.begin(), regPath.end())).c_str()) {}
 	};
 
 
@@ -36,12 +36,12 @@ namespace asio
 	class DontFoundASIODrivers : public std::exception
 	{
 	public:
-		DontFoundASIODrivers(const std::string& message)
-			: exception(message.c_str()) {}
+		DontFoundASIODrivers(const std::wstring& message)
+			: exception(std::string(message.begin(), message.end()).c_str()) {}
 	};
 
 
-	const std::string ASIO_REGISTORY_PATH = "SOFTWARE\\ASIO";
+	const std::wstring ASIO_REGISTORY_PATH = L"SOFTWARE\\ASIO";
 	
 
 	/**
@@ -50,10 +50,10 @@ namespace asio
 	struct SubKey
 	{
 	public:
-		const std::string registoryPath;	/*!< レジストリのパス */
-		const std::string driverName;		/*!< ドライバ名 */
+		const std::wstring registoryPath;	/*!< レジストリのパス */
+		const std::wstring driverName;		/*!< ドライバ名 */
 
-		SubKey(const std::string& regPath, const std::string& driverName)
+		SubKey(const std::wstring& regPath, const std::wstring& driverName)
 			: registoryPath(regPath), driverName(driverName) {}
 	};
 
@@ -72,13 +72,13 @@ namespace asio
 		static CLSIDList clsids;
 		
 	private:
-		static LONG WrappedRegOpenKey(HKEY mainKey, const std::string& regPath, HKEY& hkey)
+		static LONG WrappedRegOpenKey(HKEY mainKey, const std::wstring& regPath, HKEY& hkey)
 		{
 			return RegOpenKeyEx(mainKey, (LPCTSTR)regPath.c_str(), 0, KEY_ALL_ACCESS, &hkey);
 		}
 
 
-		static bool Exist(HKEY mainKey, const std::string& regPath)
+		static bool Exist(HKEY mainKey, const std::wstring& regPath)
 		{
 			HKEY hkey;
 
@@ -91,38 +91,18 @@ namespace asio
 			return true;
 		}
 
-		static const std::string GetSubKey(HKEY& hkey, const DWORD index)
+		static const std::wstring GetSubKey(HKEY& hkey, const DWORD index)
 		{
 			// RegEnumKeyExに失敗したら例外を発生させておく
 			DWORD max_path_size = 360;
-			char *subkeyBuffer = new char[max_path_size];
+			wchar_t *subkeyBuffer = new wchar_t[max_path_size];
 			LONG cr = RegEnumKeyEx(hkey, index, subkeyBuffer, &max_path_size, NULL, NULL, NULL, NULL);
 			if (cr != ERROR_SUCCESS)
 				throw CantOpenSubKeyIndex(ASIO_REGISTORY_PATH);	// この例外でbreakできる
 				
-			std::string result = subkeyBuffer;
+			std::wstring result = subkeyBuffer;
 			delete[] subkeyBuffer;		// 正直，こういうことやりたくない
 			return result;
-		}
-
-		static const std::wstring ToWide(std::string src)
-		{
-			std::wstring strWide;
-			size_t size = src.length() + 1;
-			wchar_t* converter = new wchar_t[size];
-
-#if defined(_MSC_VER) && _MSC_VER >= 1400 
-#pragma warning(push) 
-#pragma warning(disable:4996) 
-#endif 
-			// デバッグモードでのエラーを潰す
-			std::mbstowcs(converter, src.c_str(), size);
-#if defined(_MSC_VER) && _MSC_VER >= 1400 
-#pragma warning(pop) 
-#endif 
-			strWide = converter;
-			delete[] converter;
-			return strWide;
 		}
 
 
@@ -154,7 +134,7 @@ namespace asio
 				try
 				{
 					const auto subkey = GetSubKey(hkey, index);
-					subkeys->emplace_back(ASIO_REGISTORY_PATH + "\\" + subkey, subkey);
+					subkeys->emplace_back(ASIO_REGISTORY_PATH + L"\\" + subkey, subkey);
 				}
 				catch (CantOpenSubKeyIndex)
 				{
@@ -168,7 +148,7 @@ namespace asio
 			::RegCloseKey(hkey);
 
 			if (subkeys->size() <= 0)
-				throw DontFoundASIODrivers("ASIOのドライバーがひとつも存在しません");
+				throw DontFoundASIODrivers(L"ASIOのドライバーがひとつも存在しません");
 
 			return *subkeys;
 		}
@@ -176,23 +156,23 @@ namespace asio
 		/**
 		* ASIOドライバーのCLSIDを取得する
 		*/
-		static ::CLSID GetCLSID(const std::string& regPath)
+		static ::CLSID GetCLSID(const std::wstring& regPath)
 		{
 			HKEY hkey;
 			if (WrappedRegOpenKey(HKEY_LOCAL_MACHINE, regPath, hkey) != ERROR_SUCCESS)
 				throw CantOpenRegistoryKey(regPath);
 
 			DWORD dataSize = 360 * sizeof(TCHAR);
-			TCHAR clsidStrBuffer[360];
+			wchar_t clsidStrBuffer[360];
 			RegQueryValueEx(hkey, TEXT("CLSID"), NULL, NULL, (LPBYTE)clsidStrBuffer, &dataSize);
 
 			// レジストリエントリの値が16進数の文字列
-			std::wstring clsidStr = ToWide(clsidStrBuffer);
+			std::wstring clsidStr = clsidStrBuffer;
 			::CLSID resultCLSID;
 
 			auto check = CLSIDFromString(clsidStr.c_str(), (LPCLSID)&resultCLSID);
 			if (check != S_OK)
-				throw CantOpenRegistoryKey("GUID文字列が変換できないよ～");
+				throw CantOpenRegistoryKey(L"GUID文字列が変換できないよ～");
 
 			::RegCloseKey(hkey);
 

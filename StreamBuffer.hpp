@@ -134,7 +134,7 @@ namespace asio
 				BYTE* bytePtr = reinterpret_cast<BYTE*>(buffer);	// バイト型のポインタで位置を調整する
 				toInt32List[i] = *reinterpret_cast<int*>(bytePtr[i * 3]) & 0xFFFFFF;	// 24ビットマスクをかける
 			}
-			conv::StreamConverter::ConvertToOptionType<int>(stream, reinterpret_cast<void*>(&toInt32List[0]), size);
+			conv::StreamConverter::ConvertToOptionType<int>(stream, reinterpret_cast<void*>(&toInt32List[0]), resize);
 		}
 
 		/**
@@ -170,7 +170,7 @@ namespace asio
 		}
 
 	public:
-		DeviceToHostStream(pack::Sample& sample)
+		DeviceToHostStream(pack::Sample sample)
 			: StreamBuffer(sample) { }
 
 		/**

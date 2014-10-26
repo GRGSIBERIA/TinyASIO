@@ -145,8 +145,6 @@ namespace asio
 		BufferController(IASIO* iasio)
 			: iasio(iasio) {}
 
-		BufferController(const BufferController& c) {}
-
 	private:
 		void Add(const ASIOBufferInfo& info, const long& bufferSize, const ASIOSampleType& sampleType)
 		{
