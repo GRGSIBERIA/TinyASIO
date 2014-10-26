@@ -15,7 +15,7 @@ namespace asio
 	/**
 	* ドライバのインスタンスに生成失敗すると呼ばれる
 	*/
-	class CantCreateInstance : std::exception
+	class CantCreateInstance : public std::exception
 	{
 	public:
 		CantCreateInstance(const std::string& message)
@@ -25,10 +25,20 @@ namespace asio
 	/**
 	* 二回以上初期化されたりなどで呼び出される
 	*/
-	class OverTwiceCallException : std::exception
+	class OverTwiceCallException : public std::exception
 	{
 	public:
 		OverTwiceCallException(const std::string& message)
+			: exception(message.c_str()) {}
+	};
+
+	/**
+	* ドライバのハンドルを取得できなかった
+	*/
+	class CantHandlingASIODriver : public std::exception
+	{
+	public:
+		CantHandlingASIODriver(const std::string& message)
 			: exception(message.c_str()) {}
 	};
 
@@ -69,7 +79,14 @@ namespace asio
 			if (FAILED(hr))
 				throw CantCreateInstance("ドライバのインスタンス生成に失敗しました");
 
-			iasio->init(systemHandle);
+			try
+			{
+				iasio->init(systemHandle);
+			}
+			catch (...)
+			{
+				throw CantHandlingASIODriver("ドライバのハンドルの初期化に失敗しました");
+			}
 
 			// 名前とドライバのバージョンだけ取得
 			char buffer[360];
