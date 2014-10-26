@@ -51,6 +51,8 @@ namespace asio
 			ASIOBufferInfo info;
 			info.channelNum = channelNumber;
 			info.isInput = ioType;
+			info.buffers[0] = 0;
+			info.buffers[1] = 0;
 			bufferInfos.push_back(info);
 		}
 
@@ -74,6 +76,7 @@ namespace asio
 		* バッファリングするチャンネルを返す
 		*/
 		const std::vector<ASIOBufferInfo>& BufferingChannels() const { return bufferInfos; }
+
 
 		/**
 		* バッファの生成

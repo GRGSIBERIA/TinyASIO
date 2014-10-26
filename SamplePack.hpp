@@ -17,6 +17,10 @@ namespace asio
 				: std::exception(("サンプルの種類に未対応: " + message).c_str()) {}
 		};
 
+
+		/**
+		* 型の種類を表す
+		*/
 		enum Type
 		{
 			Short = 0,
@@ -26,12 +30,79 @@ namespace asio
 			Double = 4
 		};
 
+
+		/**
+		* 1サンプルの情報を表す
+		*/
 		struct Sample
 		{
-			Type type;
-			bool isMSB;
+			Type type;		//!< 型
+			bool isMSB;		//!< ビッグエンディアンかどうか
+			bool isAligned;
+
 			Sample() {}
-			Sample(const Type type, const bool isMSB) : type(type), isMSB(isMSB) {}
+
+			/**
+			* 1サンプルの情報を格納する構造体
+			* @param[in] type 型の種類
+			* @param[in] isMSB trueはビッグエンディアン，falseはリトルエンディアン
+			* @param[in] isAligned 32ビットにアラインメントするかどうか
+			* @note 20ビットと18ビットは無視する
+			*/
+			Sample(const Type type, const bool isMSB, const bool isAligned = true) : type(type), isMSB(isMSB), isAligned(isAligned) {}
+			
+			/**
+			* ASIOSampleTypeを取得する
+			* @return ASIOSampleTypeに変換されたもの
+			*/
+			const ASIOSampleType ToSampleType() const
+			{
+				switch (type)
+				{
+				case Short:
+					if (isMSB)
+					{
+						if (isAligned)
+							return ASIOSTInt32MSB16;
+						return ASIOSTInt16MSB;
+					}
+					else
+					{
+						if (isAligned)
+							return ASIOSTInt32LSB16;
+						return ASIOSTInt16LSB;
+					}
+				case Int:
+					if (isMSB)
+						return ASIOSTInt32MSB;
+					else
+						return ASIOSTInt32LSB;
+				case Int24:
+					if (isMSB)
+					{
+						if (isAligned)
+							return ASIOSTInt32MSB24;
+						return ASIOSTInt24MSB;
+					}
+					else
+					{
+						if (isAligned)
+							return ASIOSTInt32LSB24;
+						return ASIOSTInt24LSB;
+					}
+				case Float:
+					if (isMSB)
+						return ASIOSTFloat32MSB;
+					else
+						return ASIOSTFloat32LSB;
+				case Double:
+					if (isMSB)
+						return ASIOSTFloat64MSB;
+					else
+						return ASIOSTFloat64LSB;
+				}
+				throw NotImplementSampleType("利用不可なサンプルの種類");
+			}
 		};
 
 		Sample DetectSampleTypePackStruct(const long sampleType)

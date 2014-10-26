@@ -45,8 +45,8 @@ namespace asio
 		std::string driverName;
 		long driverVersion;
 
-		ChannelManager* channelManager;
-		BufferManager* bufferManager;
+		std::shared_ptr<ChannelManager> channelManager;
+		std::shared_ptr<BufferManager> bufferManager;
 
 	private:
 		ASIOCallbacks InitNullCallbacks()
@@ -76,8 +76,8 @@ namespace asio
 			driverName = buffer;
 			driverVersion = iasio->getDriverVersion();
 
-			channelManager = new ChannelManager(iasio);
-			bufferManager = nullptr;
+			channelManager = shared_ptr<ChannelManager>(new ChannelManager(iasio));
+			bufferManager = shared_ptr<BufferManager>(new BufferManager(iasio));
 		}
 
 	public:
@@ -140,30 +140,34 @@ namespace asio
 
 		/**
 		* バッファの生成
-		* @params[in] channel バッファを生成したいチャンネル
+		* @params[in] sample サンプリング方法
 		* @params[in] bufferPref バッファの設定
+		* @return バッファのコントローラ
 		*/
-		const BufferController& CreateBuffer(const Channel& channel, const BufferPreference& bufferPref)
+		const BufferController& CreateBuffer(const pack::Sample& sample, const BufferPreference& bufferPref)
 		{
 			ASIOCallbacks callback = callback::CallbackManager::CreateCallbacks();
 
-			if (bufferManager != nullptr)	// バッファを重複して利用させない作戦
-				delete bufferManager;
-			bufferManager = new BufferManager(iasio);
+			//if (bufferManager != nullptr)		// バッファを重複して利用させない作戦
+			//	delete bufferManager;
+			//bufferManager = new BufferManager(iasio);
 
-			auto& bufferCtrl = bufferManager->CreateBuffer(bufferPref, channel.sampleType, &callback);
+			auto& bufferCtrl = bufferManager->CreateBuffer(bufferPref, sample.ToSampleType(), &callback);
+
+			bufferManager = shared_ptr<BufferManager>(new BufferManager(iasio));
 			
 			return bufferCtrl;
 		}
 
 		/**
-		* バッファの生成
-		* @params[in] channel バッファを生成したいチャンネル
+		* バッファを生成する
+		* @params[in] sample サンプリング方法
+		* @return バッファのコントローラ
 		* @note この関数を使うとドライバ側で設定されているバッファサイズを利用します
 		*/
-		const BufferController& CreateBuffer(const Channel& channel)
+		const BufferController& CreateBuffer(const pack::Sample& sample)
 		{
-			return CreateBuffer(channel, GetBufferPreference());
+			return CreateBuffer(sample, GetBufferPreference());
 		}
 
 	public:
@@ -193,9 +197,6 @@ namespace asio
 		*/
 		virtual ~Driver()
 		{
-			delete channelManager;
-			delete bufferManager;
-
 			iasio->Release();
 		}
 	};
