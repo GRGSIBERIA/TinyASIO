@@ -176,7 +176,7 @@ namespace asio
 			HKEY hkey;
 			LONG cr = WrappedRegOpenKey(HKEY_LOCAL_MACHINE, ASIO_REGISTORY_PATH, hkey);
 			if (cr != ERROR_SUCCESS)
-				return *subkeys;
+				return DriverList(subkeys);
 
 			DWORD index = 0;
 			while (true)
