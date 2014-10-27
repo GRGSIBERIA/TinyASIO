@@ -236,6 +236,7 @@ namespace asio
 		/**
 		* ドライバの初期化
 		* @params[in] subkey ASIOドライバのSubkey
+		* @return subkeyで初期化されたドライバのインスタンス
 		* @note 以前に生成されたドライバは破棄される
 		*/
 		static Driver& Init(const SubKey& subkey)
@@ -244,7 +245,35 @@ namespace asio
 			Driver::driver.reset(new Driver(clsid), [](Driver *p) { delete p; });
 			return *Driver::driver;
 		}
+
+
+		/**
+		* ドライバの初期化
+		* @params[in] asioDriverName ASIOドライバの名前を検索して，それで初期化を行う
+		* @return asioDriverNameで初期化されたドライバのインスタンス
+		* @note 見つからない場合はたぶん落ちる
+		*/
+		static Driver& Init(const std::string& asioDriverName)
+		{
+			auto asioList = asio::Registory::GetAsioDriverPathes();
+			auto asioRegistory = asioList.Find(asioDriverName);
+			return Init(asioRegistory);
+		}
 		
+
+		/**
+		* ドライバの初期化
+		* @params[in] asioDriverName ASIOドライバの名前を検索して，それで初期化を行う
+		* @return asioDriverNameで初期化されたドライバのインスタンス
+		* @note 見つからない場合はたぶん落ちる
+		*/
+		static Driver& Init(const std::wstring& asioDriverName)
+		{
+			auto asioList = asio::Registory::GetAsioDriverPathes();
+			auto asioRegistory = asioList.Find(asioDriverName);
+			return Init(asioRegistory);
+		}
+
 
 		/**
 		* ドライバの解放など
