@@ -135,6 +135,32 @@ namespace asio
 		*/
 		inline const void AddChannel(const Channel& channel) { bufferManager->AddChannel(channel); }
 
+
+		/**
+		* チャンネルの配列を追加する
+		* @params[in] channels チャンネルの配列
+		* @params[in] isActiveChannelOnly このフラグが立っていると，有効なチャンネルのみ登録する
+		* @tparam CHANNEL InputChannelもしくはOutputChannel
+		*/
+		template <typename CHANNEL>
+		void AddChannels(const std::vector<CHANNEL>& channels, const bool isActiveChannelOnly = true)
+		{
+			for (const auto& channel : channels)
+			{
+				if (isActiveChannelOnly)	// isActiveOnlyフラグが立っていれば，isActiveのチェックを行う
+				{
+					if (channel.isActive)
+						bufferManager->AddChannel(channel);
+				}
+				else
+				{
+					// 特にフラグが立ってなければ，普通に通す
+					bufferManager->AddChannel(channel);
+				}
+			}
+		}
+
+
 		/**
 		* 登録したチャンネルを削除
 		*/
@@ -188,6 +214,24 @@ namespace asio
 			return CreateBuffer(sample, GetBufferPreference());
 		}
 
+
+		/**
+		* 存在している全てのチャンネルからバッファを生成する
+		* @params[in] sample サンプリング方法
+		* @params[in] activeChannelOnly 有効なチャンネルのみ生成する
+		* @return バッファのコントローラ
+		*/
+		const BufferController& CreateBufferAll(const pack::Sample& sample, const bool activeChannelOnly = true)
+		{
+			bufferManager->ClearChannel();	// 事前にクリアしておく
+
+			AddChannels(channelManager->Inputs(), activeChannelOnly);
+			AddChannels(channelManager->Outputs(), activeChannelOnly);
+
+			return CreateBuffer(sample);
+		}
+
+
 	public:
 		/**
 		* ドライバの初期化
@@ -200,15 +244,7 @@ namespace asio
 			Driver::driver.reset(new Driver(clsid), [](Driver *p) { delete p; });
 			return *Driver::driver;
 		}
-
-		/**
-		* ドライバインスタンスの取得
-		* @return ドライバインスタンス
-		*/
-		static Driver& Get()
-		{
-			return *Driver::driver;
-		}
+		
 
 		/**
 		* ドライバの解放など
@@ -220,18 +256,4 @@ namespace asio
 	};
 
 	std::shared_ptr<Driver> Driver::driver;
-
-	// メモ
-	//virtual ASIOError getSamplePosition(ASIOSamples *sPos, ASIOTimeStamp *tStamp) = 0;
-	//virtual ASIOError createBuffers(ASIOBufferInfo *bufferInfos, long numChannels,
-	//	long bufferSize, ASIOCallbacks *callbacks) = 0;
-	//virtual ASIOError disposeBuffers() = 0;
-	//virtual ASIOError controlPanel() = 0;
-	//virtual ASIOError future(long selector, void *opt) = 0;
-	//virtual ASIOError outputReady() = 0;
-
-	// 必要なのかどうかわからないので保留
-	//virtual ASIOError getClockSources(ASIOClockSource *clocks, long *numSources) = 0;
-	//virtual ASIOError setClockSource(long reference) = 0;
-	//virtual void getErrorMessage(char *string) = 0;
 }
