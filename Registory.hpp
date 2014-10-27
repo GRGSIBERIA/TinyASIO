@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <exception>
+#include <algorithm>
 
 #include <cstdlib>
 #include <stdlib.h>
@@ -57,6 +58,58 @@ namespace asio
 			: registoryPath(regPath), driverName(driverName) {}
 	};
 
+	class Registory;
+
+	typedef std::shared_ptr<std::vector<SubKey>> SubKeyList;
+	typedef std::shared_ptr<std::vector<::CLSID>> CLSIDList;
+
+
+	/**
+	* ASIOドライバのレジストリの配列を扱うためのラッパークラス
+	*/
+	class DriverList
+	{
+		friend Registory;
+
+		SubKeyList subkeys;
+
+		DriverList(SubKeyList& subkeys)
+			: subkeys(subkeys) { }
+
+	public:
+		/**
+		* ASIOドライバのレジストリキーの配列を取得する
+		* @return ASIOドライバのレジストリキーの配列
+		*/
+		const std::vector<SubKey>& Items() const { return *subkeys; }
+
+
+		/**
+		* 配列からASIOドライバのレジストリを探す
+		* @params[in] findName 探したいASIOドライバの名前
+		* @return ASIOドライバのレジストリ
+		*/
+		const SubKey& Find(const std::wstring findName)
+		{
+			return *std::find_if(subkeys->begin(), subkeys->end(),
+				[findName](asio::SubKey& subkey)
+			{
+				return subkey.driverName.find(findName) != std::wstring::npos;
+			});
+		}
+
+
+		/**
+		* 配列からASIOドライバのレジストリを探す
+		* @params[in] findName 探したいASIOドライバの名前
+		* @return ASIOドライバのレジストリ
+		*/
+		const SubKey& Find(const std::string findName)
+		{
+			std::wstring str(findName.begin(), findName.end());
+			return Find(str);
+		}
+	};
 
 
 	/**
@@ -65,9 +118,6 @@ namespace asio
 	class Registory
 	{
 	public:
-		typedef std::shared_ptr<std::vector<SubKey>> SubKeyList;
-		typedef std::shared_ptr<std::vector<::CLSID>> CLSIDList;
-
 		static SubKeyList subkeys;
 		static CLSIDList clsids;
 		
