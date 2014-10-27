@@ -169,7 +169,7 @@ namespace asio
 		* 登録されているASIOドライバのレジストリのパスを返す
 		* @return レジストリのパスの配列
 		*/
-		static std::vector<SubKey> GetAsioDriverPathes()
+		static DriverList GetAsioDriverPathes()
 		{
 			subkeys = SubKeyList(new std::vector<SubKey>());
 
@@ -200,7 +200,7 @@ namespace asio
 			if (subkeys->size() <= 0)
 				throw DontFoundASIODrivers(L"ASIOのドライバーがひとつも存在しません");
 
-			return *subkeys;
+			return DriverList(subkeys);
 		}
 
 		/**
@@ -230,6 +230,6 @@ namespace asio
 		}
 	};
 
-	Registory::CLSIDList Registory::clsids;
-	Registory::SubKeyList Registory::subkeys;
+	CLSIDList Registory::clsids;
+	SubKeyList Registory::subkeys;
 }
