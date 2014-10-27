@@ -190,15 +190,32 @@ namespace asio
 
 		/**
 		* 入力バッファのインスタンスを得る
+		* @params[in] index 添字
 		* @return 入力バッファ
 		*/
 		inline InputBuffer& InputBuffer(const unsigned int index) { return inputBuffers[index]; }
 
 		/**
 		* 出力バッファのインスタンスを得る
+		* @params[in] index 添字
 		* @return 出力バッファ
 		*/
 		inline OutputBuffer& OutputBuffer(const unsigned int index) { return outputBuffers[index]; }
+
+
+		/**
+		* 出力バッファの配列を得る
+		* @return 出力バッファの配列
+		*/
+		const std::vector<asio::OutputBuffer>& OutputBuffers() { return outputBuffers; }
+
+
+		/**
+		* 入力バッファの配列を得る
+		* @return 入力バッファの配列
+		*/
+		const std::vector<asio::InputBuffer>& InputBuffers() { return inputBuffers; }
+
 
 		/**
 		* 入力バッファの数を得る
