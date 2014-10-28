@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 /** ïœçXã÷é~ */
 #define TINY_ASIO_BUFFER_INT	0
@@ -22,3 +23,13 @@
 #define TINY_ASIO_BUFFER_TYPE float
 #endif
 /** Ç±Ç±Ç‹Ç≈ */
+
+
+/**
+* UNICODEëŒçÙ
+*/
+#ifdef UNICODE
+typedef std::wstring asio_string;
+#else
+typedef std::string asio_string;
+#endif
