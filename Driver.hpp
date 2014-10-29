@@ -55,6 +55,7 @@ namespace asio
 
 		std::string driverName;
 		long driverVersion;
+		SubKey subkey;
 
 		std::shared_ptr<ChannelManager> channelManager;
 		std::shared_ptr<BufferManager> bufferManager;
@@ -70,14 +71,29 @@ namespace asio
 			return callback;
 		}
 
-		/**
-		* @params[in] clsid ロードしたいCLSID
-		*/
-		Driver(const CLSID& clsid)
+
+		void RetryCreateInstance(const CLSID& clsid, const SubKey& subkey)
 		{
+			// デフォルトだとThreadingModelがSTAなので，STA/MTA（Both）に変更して再試行する
+			if (Registory::ChangeTheadingModel(subkey) != ERROR_SUCCESS)
+				throw CantCreateInstance("ドライバのインスタンス生成に失敗しました");
+
 			HRESULT hr = CoCreateInstance(clsid, 0, CLSCTX_INPROC_SERVER, clsid, (LPVOID*)&iasio);
 			if (FAILED(hr))
 				throw CantCreateInstance("ドライバのインスタンス生成に失敗しました");
+		}
+
+
+		/**
+		* @params[in] clsid ロードしたいCLSID
+		* @params[in] subkey レジストリの位置など
+		*/
+		Driver(const CLSID& clsid, const SubKey& subkey)
+			: subkey(subkey)
+		{
+			HRESULT hr = CoCreateInstance(clsid, 0, CLSCTX_INPROC_SERVER, clsid, (LPVOID*)&iasio);
+			if (FAILED(hr))
+				RetryCreateInstance(clsid, subkey);
 
 			try
 			{
@@ -228,6 +244,9 @@ namespace asio
 			AddChannels(channelManager->Inputs(), activeChannelOnly);
 			AddChannels(channelManager->Outputs(), activeChannelOnly);
 
+			if (bufferManager->BufferingChannels().size() <= 0)
+				throw DontEntryAnyChannels("一つもチャンネルが登録されていません");
+
 			return CreateBuffer(sample);
 		}
 
@@ -242,7 +261,7 @@ namespace asio
 		static Driver& Init(const SubKey& subkey)
 		{
 			auto clsid = Registory::GetCLSID(subkey.registoryPath);
-			Driver::driver.reset(new Driver(clsid), [](Driver *p) { delete p; });
+			Driver::driver.reset(new Driver(clsid, subkey), [](Driver *p) { delete p; });
 			return *Driver::driver;
 		}
 

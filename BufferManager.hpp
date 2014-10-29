@@ -7,6 +7,14 @@
 
 namespace asio
 {
+	/**
+	* チャンネルが登録されていない場合に送出される例外
+	*/
+	class DontEntryAnyChannels : std::exception
+	{
+	public:
+		DontEntryAnyChannels(const std::string& message) : exception(message.c_str()) {}
+	};
 
 	/**
 	* バッファを管理するクラス

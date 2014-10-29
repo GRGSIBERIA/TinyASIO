@@ -42,8 +42,9 @@ namespace asio
 	};
 
 
-	const std::wstring ASIO_REGISTORY_PATH = L"SOFTWARE\\ASIO";
-	
+	const std::wstring ASIO_REGISTORY_PATH = L"SOFTWARE\\ASIO";					//!< ASIOドライバのレジストリを格納しているところ
+	const std::wstring ASIO_CLSID_PATH = L"SOFTWARE\\Classes\\CLSID";			//!< CLSIDを格納しているところ
+	const std::wstring ASIO_CLSID_PATH_WOW6432NODE = L"SOFTWARE\\Classes\\CLSID\\Wow6432Node";
 
 	/**
 	* レジストリのパスとドライバー名を格納するための構造体
@@ -112,6 +113,14 @@ namespace asio
 	};
 
 
+	enum ThreadingModel
+	{
+		Apartment,	//!< STA
+		Both,		//!< 両方，E_NOINTERFACEでCoCreateInstanceでコケる場合に
+		Free		//!< MTA
+	};
+
+
 	/**
 	* ASIO関連のレジストリを探す処理
 	*/
@@ -156,6 +165,56 @@ namespace asio
 		}
 
 
+		static std::wstring GetCLSIDString(const std::wstring& regPath, HKEY& hkey)
+		{
+			if (WrappedRegOpenKey(HKEY_LOCAL_MACHINE, regPath, hkey) != ERROR_SUCCESS)
+				throw CantOpenRegistoryKey(regPath);
+
+			DWORD dataSize = 360 * sizeof(TCHAR);
+			wchar_t clsidStrBuffer[360];
+			RegQueryValueEx(hkey, TEXT("CLSID"), NULL, NULL, (LPBYTE)clsidStrBuffer, &dataSize);
+
+			// レジストリエントリの値が16進数の文字列
+			return clsidStrBuffer;
+		}
+
+
+		static const std::wstring GetCLSIDString(const SubKey& subkey)
+		{
+			HKEY hkey;
+			LONG cr = WrappedRegOpenKey(HKEY_LOCAL_MACHINE, ASIO_REGISTORY_PATH, hkey);
+			if (cr != ERROR_SUCCESS)
+				throw CantOpenRegistoryKey(subkey.registoryPath);
+
+			std::wstring clsidStr = GetCLSIDString(subkey.registoryPath, hkey);
+
+			::RegCloseKey(hkey);
+
+			return clsidStr;
+		}
+
+
+		static std::wstring ToStr(const ThreadingModel& model)
+		{
+			std::wstring modelStr(L"");
+			switch (model)
+			{
+			case ThreadingModel::Apartment:
+				modelStr = L"Apartment";
+				break;
+			case ThreadingModel::Both:
+				modelStr = L"Both";
+				break;
+			case ThreadingModel::Free:
+				modelStr = L"Free";
+				break;
+			default:
+				throw std::exception("おかしなものが投げられてるnyo");
+			}
+			return modelStr;
+		}
+
+
 	public:
 		/**
 		* SOFTWARE\ASIOが存在するか調べる
@@ -163,6 +222,38 @@ namespace asio
 		static bool ExistDrivers()
 		{
 			return Exist(HKEY_LOCAL_MACHINE, ASIO_REGISTORY_PATH);
+		}
+
+
+		/**
+		* ThreadingModelを変更する
+		* @params[in] subkey 対象のドライバのサブキー
+		* @params[in] mode ThreadingModeの種類，デフォルト推奨
+		* @return ERROR_SUCCES以外はエラー
+		* @warning CLSIDのレジストリ値を書き換えるので，利用には注意
+		*/
+		static LONG ChangeTheadingModel(const SubKey& subkey, const ThreadingModel model = ThreadingModel::Both)
+		{
+			const auto clsidStr = GetCLSIDString(subkey);
+
+			HKEY hkey;
+			std::wstring regPath = ASIO_CLSID_PATH + L"\\" + clsidStr + L"\\InprocServer32";	// ここにThreadingModeがありますよー
+			LONG cr = WrappedRegOpenKey(HKEY_LOCAL_MACHINE, regPath, hkey);
+			if (cr != ERROR_SUCCESS)
+			{
+				// さっきのパスには入っていなかったので，互換性のあるパスを調査してみる
+				regPath = ASIO_CLSID_PATH_WOW6432NODE + L"\\" + clsidStr + L"\\InprocServer32";
+				cr = WrappedRegOpenKey(HKEY_LOCAL_MACHINE, regPath, hkey);
+				if (cr != ERROR_SUCCESS)
+					throw CantOpenRegistoryKey(regPath);
+			}
+
+			const std::wstring modelStr = ToStr(model);
+			cr = RegSetValueEx(hkey, TEXT("ThreadingModel"), 0, REG_SZ, (LPBYTE)modelStr.c_str(), sizeof(wchar_t) * modelStr.size());
+
+			::RegCloseKey(hkey);
+
+			return cr;
 		}
 
 		/**
@@ -203,21 +294,15 @@ namespace asio
 			return DriverList(subkeys);
 		}
 
+
 		/**
 		* ASIOドライバーのCLSIDを取得する
 		*/
 		static ::CLSID GetCLSID(const std::wstring& regPath)
 		{
 			HKEY hkey;
-			if (WrappedRegOpenKey(HKEY_LOCAL_MACHINE, regPath, hkey) != ERROR_SUCCESS)
-				throw CantOpenRegistoryKey(regPath);
+			std::wstring clsidStr = GetCLSIDString(regPath, hkey);
 
-			DWORD dataSize = 360 * sizeof(TCHAR);
-			wchar_t clsidStrBuffer[360];
-			RegQueryValueEx(hkey, TEXT("CLSID"), NULL, NULL, (LPBYTE)clsidStrBuffer, &dataSize);
-
-			// レジストリエントリの値が16進数の文字列
-			std::wstring clsidStr = clsidStrBuffer;
 			::CLSID resultCLSID;
 
 			auto check = CLSIDFromString(clsidStr.c_str(), (LPCLSID)&resultCLSID);
