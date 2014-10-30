@@ -237,7 +237,7 @@ namespace asio
 		* @params[in] activeChannelOnly 有効なチャンネルのみ生成する
 		* @return バッファのコントローラ
 		*/
-		const BufferController& CreateBufferAll(const pack::Sample& sample, const bool activeChannelOnly = true)
+		const BufferController& CreateBufferAll(const pack::Sample& sample, const bool activeChannelOnly = false)
 		{
 			bufferManager->ClearChannel();	// 事前にクリアしておく
 
