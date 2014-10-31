@@ -111,5 +111,20 @@ namespace asio
 			CreateBuffer(bufferPreference.preferredSize, sampleType, callbacks);
 			return bufferController;
 		}
+
+
+		void EraseDisuseBuffer(const bool activeChannelOnly)
+		{
+			if (activeChannelOnly)
+			{
+				auto& buffers = bufferInfos;
+				for (auto itr = buffers.begin(); itr != buffers.end(); ++itr)
+				{
+					// 不要なチャンネルを削除する
+					if ((*itr).buffers[0] == nullptr || (*itr).buffers[0] == nullptr)
+						itr = buffers.erase(itr);
+				}
+			}
+		}
 	};
 }

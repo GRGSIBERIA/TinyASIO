@@ -114,19 +114,7 @@ namespace asio
 			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(iasio));
 		}
 
-		void EraseDisuseBuffer(const bool activeChannelOnly)
-		{
-			if (activeChannelOnly)
-			{
-				auto& buffers = bufferManager->BufferingChannels();
-				for (auto itr = buffers.begin(); itr != buffers.end(); ++itr)
-				{
-					// 不要なチャンネルを削除する
-					if ((*itr).buffers[0] == nullptr || (*itr).buffers[0] == nullptr)
-						itr = buffers.erase(itr);
-				}
-			}
-		}
+		
 
 	public:
 
@@ -215,7 +203,7 @@ namespace asio
 			//	delete bufferManager;
 			//bufferManager = new BufferManager(iasio);
 
-			EraseDisuseBuffer(activeChannelOnly);
+			bufferManager->EraseDisuseBuffer(activeChannelOnly);
 
 			auto& bufferCtrl = bufferManager->CreateBuffer(bufferPref, sample.ToSampleType(), &callback);
 
