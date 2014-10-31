@@ -128,7 +128,7 @@ return prevSize;
 
 
 			template <typename TO>
-			static bool DoneUniqueRoutineAsIsDone(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const pack::Sample& sample, const long size)
+			static bool DoneUniqueRoutineAsIsDone(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const Sample& sample, const long size)
 			{
 				const long transferSize = TransferSize<TO>(source.size(), size);
 
@@ -136,23 +136,23 @@ return prevSize;
 
 				// 型ごとに決まった処理へ分岐させる
 #if TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_INT
-				if (sample.type == pack::Int)
+				if (sample.type == Int)
 				{
 					memcpy(buffer, &source[0], transferSize);
 					return true;
 				}
-				if (sample.type == pack::Int24)
+				if (sample.type == Int24)
 				{
 					CovertBit24(source, buffer, size);
 					return true;
 				}
 #elif TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_FLOAT
-				if (sample.type == pack::Float)
+				if (sample.type == Float)
 				{
 					memcpy(buffer, &source[0], transferSize);
 					return true;
 				}
-				if (sample.type == pack::Int24)
+				if (sample.type == Int24)
 				{
 					// int24だけ特別な処理を行う
 					CovertBit24(source, buffer, size);
@@ -166,18 +166,18 @@ return prevSize;
 			/**
 			* 転送するときに値を丸めるのに使う差分値
 			*/
-			static const float GetDiffFromSample(const pack::Sample& sample)
+			static const float GetDiffFromSample(const Sample& sample)
 			{
 #if TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_INT
 
 				// int型から
 				switch (sample.type)
 				{
-				case pack::Short:
+				case Short:
 					return 32767.0f / 2147483647.0f;
 
-				case pack::Float:
-				case pack::Double:
+				case Float:
+				case Double:
 					return 1.0f / 2147483647.0f;
 				}
 
@@ -186,13 +186,13 @@ return prevSize;
 				// float型から
 				switch (sample.type)
 				{
-				case pack::Short:
+				case Short:
 					return 32767.0f;
 
-				case pack::Int:
+				case Int:
 					return 2147483647.0f;
 
-				case pack::Double:
+				case Double:
 					return 1.0f;
 				}
 #endif
@@ -205,7 +205,7 @@ return prevSize;
 			* @tparam COMP 比較する型
 			*/
 			template <typename TO>
-			static void SwitchingCompositTypeAtEachProcedure(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const pack::Sample& sample, const long size)
+			static void SwitchingCompositTypeAtEachProcedure(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const Sample& sample, const long size)
 			{
 				// 固有の処理を行った後，退出するなら退出させる
 				if (DoneUniqueRoutineAsIsDone<TO>(source, buffer, sample, size))
@@ -265,7 +265,7 @@ return prevSize;
 			* @tparam TO 変換先の型
 			*/
 			template <typename TO>
-			static void ConvertToVoidBuffer(std::vector<TINY_ASIO_BUFFER_TYPE>&source, void* buffer, const pack::Sample& sample, const long size)
+			static void ConvertToVoidBuffer(std::vector<TINY_ASIO_BUFFER_TYPE>&source, void* buffer, const Sample& sample, const long size)
 			{
 				// 各種，型から型への切替を行う
 				SwitchingCompositTypeAtEachProcedure<TO>(source, buffer, sample, size);

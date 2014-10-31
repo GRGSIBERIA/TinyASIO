@@ -197,7 +197,7 @@ namespace asio
 		* @return バッファのコントローラ
 		* @warning activeChannelOnlyがtrueの場合，自動的にメモリ領域の確保ができなかったバッファを削除するので，true推奨
 		*/
-		const BufferController& CreateBuffer(const pack::Sample& sample, const BufferPreference& bufferPref, const bool activeChannelOnly = true)
+		const BufferController& CreateBuffer(const Sample& sample, const BufferPreference& bufferPref, const bool activeChannelOnly = true)
 		{
 			ASIOCallbacks callback = callback::CallbackManager::CreateCallbacks();
 
@@ -222,7 +222,7 @@ namespace asio
 		* @note この関数を使うとドライバ側で設定されているバッファサイズを利用します
 		* @warning activeChannelOnlyがtrueの場合，自動的にメモリ領域の確保ができなかったバッファを削除するので，true推奨
 		*/
-		const BufferController& CreateBuffer(const pack::Sample& sample, const bool activeChannelOnly = true)
+		const BufferController& CreateBuffer(const Sample& sample, const bool activeChannelOnly = true)
 		{
 			return CreateBuffer(sample, GetBufferPreference(), activeChannelOnly);
 		}
@@ -235,7 +235,7 @@ namespace asio
 		* @warning activeChannelOnlyがtrueの場合，自動的にメモリ領域の確保ができなかったバッファを削除するので，true推奨
 		* @return バッファのコントローラ
 		*/
-		const BufferController& CreateBufferAll(const pack::Sample& sample, const bool activeChannelOnly = true)
+		const BufferController& CreateBufferAll(const Sample& sample, const bool activeChannelOnly = true)
 		{
 			bufferManager->ClearChannel();	// 事前にクリアしておく
 

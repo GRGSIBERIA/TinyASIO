@@ -73,7 +73,7 @@ namespace asio
 
 	public:
 		InputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
-			: Buffer(info, bufferSize), stream(pack::DetectSampleTypePackStruct(sampleType)) {}
+			: Buffer(info, bufferSize), stream(DetectSampleTypePackStruct(sampleType)) {}
 
 		/**
 		* バッファに蓄積されたデータを取得する
@@ -108,7 +108,7 @@ namespace asio
 
 	public:
 		OutputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
-			: Buffer(info, bufferSize), stream(pack::DetectSampleTypePackStruct(sampleType)) {}
+			: Buffer(info, bufferSize), stream(DetectSampleTypePackStruct(sampleType)) {}
 
 		/**
 		* バッファにデータを蓄積する

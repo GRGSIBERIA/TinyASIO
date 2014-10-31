@@ -25,7 +25,7 @@ namespace asio
 	protected:
 		std::vector<TINY_ASIO_BUFFER_TYPE> stream;
 
-		pack::Sample sample;
+		Sample sample;
 
 	protected:
 		/**
@@ -35,23 +35,23 @@ namespace asio
 		{
 			switch (sample.type)
 			{
-			case pack::Int:
+			case Int:
 				conv::StreamConverter::FormatBigEndian<int>(buffer, size);
 				break;
 
-			case pack::Int24:
+			case Int24:
 				conv::StreamConverter::FormatBigEndian<int>(buffer, size, 3);
 				break;
 
-			case pack::Short:
+			case Short:
 				conv::StreamConverter::FormatBigEndian<short>(buffer, size);
 				break;
 
-			case pack::Float:
+			case Float:
 				conv::StreamConverter::FormatBigEndian<float>(buffer, size);
 				break;
 
-			case pack::Double:
+			case Double:
 				conv::StreamConverter::FormatBigEndian<double>(buffer, size);
 				break;
 
@@ -67,23 +67,23 @@ namespace asio
 			unsigned long count;
 			switch (sample.type)
 			{
-			case pack::Short:
+			case Short:
 				count = bufferSize / sizeof(short);
 				break;
 
-			case pack::Int:
+			case Int:
 				count = bufferSize / sizeof(int);
 				break;
 
-			case pack::Int24:
+			case Int24:
 				count = bufferSize / 3;
 				break;
 
-			case pack::Float:
+			case Float:
 				count = bufferSize / sizeof(float);
 				break;
 
-			case pack::Double:
+			case Double:
 				count = bufferSize / sizeof(double);
 				break;
 
@@ -98,7 +98,7 @@ namespace asio
 		}
 
 	public:
-		StreamBuffer(pack::Sample& samplePack)
+		StreamBuffer(Sample& samplePack)
 			: sample(samplePack) {}
 
 
@@ -144,23 +144,23 @@ namespace asio
 		{
 			switch (sample.type)
 			{
-			case pack::Int:
+			case Int:
 				conv::StreamConverter::ConvertToOptionType<int>(stream, buffer, size);
 				break;
 
-			case pack::Short:
+			case Short:
 				conv::StreamConverter::ConvertToOptionType<short>(stream, buffer, size);
 				break;
 
-			case pack::Int24:
+			case Int24:
 				ConvertTo24Bit(buffer, size);
 				break;
 
-			case pack::Float:
+			case Float:
 				conv::StreamConverter::ConvertToOptionType<float>(stream, buffer, size);
 				break;
 
-			case pack::Double:
+			case Double:
 				conv::StreamConverter::ConvertToOptionType<double>(stream, buffer, size);
 				break;
 
@@ -170,7 +170,7 @@ namespace asio
 		}
 
 	public:
-		DeviceToHostStream(pack::Sample sample)
+		DeviceToHostStream(Sample sample)
 			: StreamBuffer(sample) { }
 
 		/**
@@ -195,23 +195,23 @@ namespace asio
 		{
 			switch (sample.type)
 			{
-			case pack::Short:
+			case Short:
 				conv::StreamConverter::ConvertToVoidBuffer<short>(stream, buffer, sample, size);
 				break;
 
-			case pack::Int:
+			case Int:
 				conv::StreamConverter::ConvertToVoidBuffer<int>(stream, buffer, sample, size);
 				break;
 
-			case pack::Int24:
+			case Int24:
 				conv::StreamConverter::ConvertToVoidBuffer<int>(stream, buffer, sample, size);
 				break;
 
-			case pack::Float:
+			case Float:
 				conv::StreamConverter::ConvertToVoidBuffer<float>(stream, buffer, sample, size);
 				break;
 
-			case pack::Double:
+			case Double:
 				conv::StreamConverter::ConvertToVoidBuffer<double>(stream, buffer, sample, size);
 				break;
 
@@ -221,7 +221,7 @@ namespace asio
 		}
 
 	public:
-		HostToDeviceStream(pack::Sample& sample)
+		HostToDeviceStream(Sample& sample)
 			: StreamBuffer(sample) { }
 
 		/**
