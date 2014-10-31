@@ -193,7 +193,9 @@ namespace asio
 		* バッファの生成
 		* @params[in] sample サンプリング方法
 		* @params[in] bufferPref バッファの設定
+		* @params[in] activeChannelOnly 有効なチャンネルのバッファのみ生成する
 		* @return バッファのコントローラ
+		* @warning activeChannelOnlyがtrueの場合，自動的にメモリ領域の確保ができなかったバッファを削除するので，true推奨
 		*/
 		const BufferController& CreateBuffer(const pack::Sample& sample, const BufferPreference& bufferPref, const bool activeChannelOnly = true)
 		{
@@ -215,8 +217,10 @@ namespace asio
 		/**
 		* バッファを生成する
 		* @params[in] sample サンプリング方法
+		* @params[in] activeChannelOnly 有効なチャンネルのバッファのみ生成する
 		* @return バッファのコントローラ
 		* @note この関数を使うとドライバ側で設定されているバッファサイズを利用します
+		* @warning activeChannelOnlyがtrueの場合，自動的にメモリ領域の確保ができなかったバッファを削除するので，true推奨
 		*/
 		const BufferController& CreateBuffer(const pack::Sample& sample, const bool activeChannelOnly = true)
 		{
@@ -227,7 +231,8 @@ namespace asio
 		/**
 		* 存在している全てのチャンネルからバッファを生成する
 		* @params[in] sample サンプリング方法
-		* @params[in] activeChannelOnly 有効なチャンネルのみ生成する
+		* @params[in] activeChannelOnly 有効なチャンネルのバッファのみ生成する
+		* @warning activeChannelOnlyがtrueの場合，自動的にメモリ領域の確保ができなかったバッファを削除するので，true推奨
 		* @return バッファのコントローラ
 		*/
 		const BufferController& CreateBufferAll(const pack::Sample& sample, const bool activeChannelOnly = true)
