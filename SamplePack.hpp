@@ -49,7 +49,7 @@ namespace asio
 			* @param[in] isAligned 32ビットにアラインメントするかどうか
 			* @note 20ビットと18ビットは無視する
 			*/
-			Sample(const Type type, const bool isMSB, const bool isAligned = true) : type(type), isMSB(isMSB), isAligned(isAligned) {}
+			Sample(const Type type, const bool isMSB = false, const bool isAligned = true) : type(type), isMSB(isMSB), isAligned(isAligned) {}
 			
 			/**
 			* ASIOSampleTypeを取得する
