@@ -114,6 +114,20 @@ namespace asio
 			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(iasio));
 		}
 
+		void EraseDisuseBuffer(const bool activeChannelOnly)
+		{
+			if (activeChannelOnly)
+			{
+				auto& buffers = bufferManager->BufferingChannels();
+				for (auto itr = buffers.begin(); itr != buffers.end(); ++itr)
+				{
+					// 不要なチャンネルを削除する
+					if ((*itr).buffers[0] == nullptr || (*itr).buffers[0] == nullptr)
+						itr = buffers.erase(itr);
+				}
+			}
+		}
+
 	public:
 
 		/**
@@ -159,21 +173,10 @@ namespace asio
 		* @tparam CHANNEL InputChannelもしくはOutputChannel
 		*/
 		template <typename CHANNEL>
-		void AddChannels(const std::vector<CHANNEL>& channels, const bool isActiveChannelOnly = true)
+		void AddChannels(const std::vector<CHANNEL>& channels)
 		{
 			for (const auto& channel : channels)
-			{
-				if (isActiveChannelOnly)	// isActiveOnlyフラグが立っていれば，isActiveのチェックを行う
-				{
-					if (channel.isActive)
-						bufferManager->AddChannel(channel);
-				}
-				else
-				{
-					// 特にフラグが立ってなければ，普通に通す
-					bufferManager->AddChannel(channel);
-				}
-			}
+				bufferManager->AddChannel(channel);
 		}
 
 
@@ -204,13 +207,15 @@ namespace asio
 		* @params[in] bufferPref バッファの設定
 		* @return バッファのコントローラ
 		*/
-		const BufferController& CreateBuffer(const pack::Sample& sample, const BufferPreference& bufferPref)
+		const BufferController& CreateBuffer(const pack::Sample& sample, const BufferPreference& bufferPref, const bool activeChannelOnly = true)
 		{
 			ASIOCallbacks callback = callback::CallbackManager::CreateCallbacks();
 
 			//if (bufferManager != nullptr)		// バッファを重複して利用させない作戦
 			//	delete bufferManager;
 			//bufferManager = new BufferManager(iasio);
+
+			EraseDisuseBuffer(activeChannelOnly);
 
 			auto& bufferCtrl = bufferManager->CreateBuffer(bufferPref, sample.ToSampleType(), &callback);
 
@@ -225,9 +230,9 @@ namespace asio
 		* @return バッファのコントローラ
 		* @note この関数を使うとドライバ側で設定されているバッファサイズを利用します
 		*/
-		const BufferController& CreateBuffer(const pack::Sample& sample)
+		const BufferController& CreateBuffer(const pack::Sample& sample, const bool activeChannelOnly = true)
 		{
-			return CreateBuffer(sample, GetBufferPreference());
+			return CreateBuffer(sample, GetBufferPreference(), activeChannelOnly);
 		}
 
 
@@ -237,17 +242,17 @@ namespace asio
 		* @params[in] activeChannelOnly 有効なチャンネルのみ生成する
 		* @return バッファのコントローラ
 		*/
-		const BufferController& CreateBufferAll(const pack::Sample& sample, const bool activeChannelOnly = false)
+		const BufferController& CreateBufferAll(const pack::Sample& sample, const bool activeChannelOnly = true)
 		{
 			bufferManager->ClearChannel();	// 事前にクリアしておく
 
-			AddChannels(channelManager->Inputs(), activeChannelOnly);
-			AddChannels(channelManager->Outputs(), activeChannelOnly);
+			AddChannels(channelManager->Inputs());
+			AddChannels(channelManager->Outputs());
 
 			if (bufferManager->BufferingChannels().size() <= 0)
 				throw DontEntryAnyChannels("一つもチャンネルが登録されていません");
 
-			return CreateBuffer(sample);
+			return CreateBuffer(sample, activeChannelOnly);
 		}
 
 

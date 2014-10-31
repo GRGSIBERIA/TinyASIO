@@ -83,7 +83,7 @@ namespace asio
 		/**
 		* バッファリングするチャンネルを返す
 		*/
-		const std::vector<ASIOBufferInfo>& BufferingChannels() const { return bufferInfos; }
+		std::vector<ASIOBufferInfo>& BufferingChannels() { return bufferInfos; }
 
 
 		/**
