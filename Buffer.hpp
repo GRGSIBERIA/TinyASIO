@@ -35,7 +35,7 @@ namespace asio
 		inline const IOType Type() const { return ioType; }
 
 	public:
-		Buffer(const ASIOBufferInfo& info, const long bufferSize)
+		Buffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
 			:
 			ioType((IOType)info.isInput),
 			channelNumber(info.channelNum),
@@ -73,7 +73,7 @@ namespace asio
 
 	public:
 		InputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
-			: Buffer(info, bufferSize), stream(DetectSampleTypePackStruct(sampleType)) {}
+			: Buffer(info, bufferSize, sampleType), stream(DetectSampleTypePackStruct(sampleType)) {}
 
 		/**
 		* バッファに蓄積されたデータを取得する
@@ -108,7 +108,7 @@ namespace asio
 
 	public:
 		OutputBuffer(const ASIOBufferInfo& info, const long bufferSize, const ASIOSampleType sampleType)
-			: Buffer(info, bufferSize), stream(DetectSampleTypePackStruct(sampleType)) {}
+			: Buffer(info, bufferSize, sampleType), stream(DetectSampleTypePackStruct(sampleType)) {}
 
 		/**
 		* バッファにデータを蓄積する
@@ -171,6 +171,15 @@ namespace asio
 		}
 
 	public:
+
+		/**
+		* インスタンスが破棄された時にバッファを解放する
+		*/
+		~BufferController()
+		{
+			if (buffers.size() > 0)
+				ErrorCheck(iasio->disposeBuffers());
+		}
 
 		/**
 		* バッファリング開始
