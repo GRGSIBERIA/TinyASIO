@@ -24,18 +24,18 @@ namespace asio
 	{
 		IASIO* iasio;
 
-		BufferController bufferController;
+		std::shared_ptr<BufferController> bufferController;
 		callback::CallbackManager callbackManager;
 		std::vector<ASIOBufferInfo> bufferInfos;
 
 	private:
 		void InitBuffers(const long& bufferSize, const ASIOSampleType& sampleType)
 		{
-			bufferController.Clear();
+			bufferController = std::shared_ptr<BufferController>(new BufferController(iasio, bufferSize));
 			for (unsigned i = 0; i < bufferInfos.size(); ++i)
 			{
 				const auto& info = bufferInfos[i];
-				bufferController.Add(info, bufferSize, sampleType);
+				bufferController->Add(info, bufferSize, sampleType);
 			}
 		}
 
@@ -102,8 +102,8 @@ namespace asio
 
 			ErrorCheck(iasio->createBuffers(&bufferInfos[0], bufferInfos.size(), bufferSize, callbacks));
 			InitBuffers(bufferSize, sampleType);
-			callbackManager.Init(&bufferController.inputBuffers, &bufferController.outputBuffers);
-			return bufferController;
+			callbackManager.Init(&bufferController->inputBuffers, &bufferController->outputBuffers);
+			return *bufferController;
 		}
 
 		/**
@@ -116,7 +116,7 @@ namespace asio
 		const BufferController& CreateBuffer(const BufferPreference& bufferPreference, const ASIOSampleType sampleType, ASIOCallbacks* callbacks)
 		{
 			CreateBuffer(bufferPreference.preferredSize, sampleType, callbacks);
-			return bufferController;
+			return *bufferController;
 		}
 
 

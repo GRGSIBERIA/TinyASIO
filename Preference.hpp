@@ -18,26 +18,30 @@ namespace asio
 		long inputLatency;
 		long outputLatency;
 		double sampleRate;
+		long bufferSize;
 
 	public:
 		/**
 		* 入力の遅延を得る
 		*/
-		const long& InputLatency() const { return inputLatency; }
+		inline const long& InputLatency() const { return inputLatency; }
 
 		/**
 		* 出力の遅延を得る
 		*/
-		const long& OutputLatency() const { return outputLatency; }
+		inline const long& OutputLatency() const { return outputLatency; }
 
 		/**
 		* サンプリング・レートを返す
 		* @return サンプリング・レート
 		*/
-		double SampleRate() const
-		{
-			return sampleRate;
-		}
+		inline const double SampleRate() const { return sampleRate; }
+
+		/**
+		* バッファの大きさを返す
+		* @return バッファの大きさ
+		*/
+		inline const long BufferSize() const { return bufferSize; }
 
 	private:
 		inline void InitLatency()
@@ -71,7 +75,7 @@ namespace asio
 		* @params[in] rate サンプリング・レート
 		* @note よくわからないので非推奨関数
 		*/
-		Preference& CanSampleRate(double rate)
+		inline Preference& CanSampleRate(double rate)
 		{
 			ErrorCheck(driver->canSampleRate(rate));
 		}
@@ -79,6 +83,13 @@ namespace asio
 	public:
 		Preference(IASIO* iasio)
 			: driver(iasio)
+		{
+			InitLatency();
+			InitSampleRate();
+		}
+
+		Preference(IASIO* iasio, const long bufferSize)
+			: driver(iasio), bufferSize(bufferSize)
 		{
 			InitLatency();
 			InitSampleRate();
