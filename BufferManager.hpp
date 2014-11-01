@@ -4,6 +4,7 @@
 #include "Channel.hpp"
 #include "Buffer.hpp"
 #include "Callback.hpp"
+#include "Preference.hpp"
 
 namespace asio
 {
@@ -90,10 +91,15 @@ namespace asio
 		* バッファの生成
 		* @params[in] bufferSize バッファの設定
 		* @params[in, out] callbacks バッファリング等の通知のために利用
-		* @note bufferSizeは自由に数値を決められないので注意, (bufferSize % granularity == 0)以外の数値は保障できない
+		* @note 
+		* bufferSizeは自由に数値を決められないので注意, (bufferSize % granularity == 0)以外の数値は保障できない．
+		* Sampling Rateなどの設定も，ドライバ側の設定に依存するようになっているので注意
 		*/
 		const BufferController& CreateBuffer(const long& bufferSize, const ASIOSampleType sampleType, ASIOCallbacks* callbacks)
 		{
+			Preference pref(iasio);
+			pref.SetSampleRate();	// デフォルトのサンプリングレートを設定する
+
 			ErrorCheck(iasio->createBuffers(&bufferInfos[0], bufferInfos.size(), bufferSize, callbacks));
 			InitBuffers(bufferSize, sampleType);
 			callbackManager.Init(&bufferController.inputBuffers, &bufferController.outputBuffers);
@@ -105,6 +111,7 @@ namespace asio
 		* @params[in] bufferPreference バッファの設定
 		* @params[in, out] callbacks バッファリング等の通知のために利用
 		* @note bufferSizeは自由に数値を決められないので注意, (bufferSize % granularity == 0)以外の数値は保障できない
+		* Sampling Rateなどの設定も，ドライバ側の設定に依存するようになっているので注意
 		*/
 		const BufferController& CreateBuffer(const BufferPreference& bufferPreference, const ASIOSampleType sampleType, ASIOCallbacks* callbacks)
 		{

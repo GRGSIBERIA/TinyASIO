@@ -9,6 +9,7 @@
 #include "Channel.hpp"
 #include "SamplePack.hpp"
 #include "StreamBuffer.hpp"
+#include "Preference.hpp"
 
 namespace asio
 {
@@ -137,13 +138,14 @@ namespace asio
 		std::vector<OutputBuffer> outputBuffers;
 
 		IASIO* iasio;
+		const Preference preference;
 
 	private:
 		/**
 		* 無闇矢鱈とコピーされていい存在じゃない
 		*/
 		BufferController(IASIO* iasio)
-			: iasio(iasio) {}
+			: iasio(iasio), preference(iasio) {}
 
 	private:
 		void Add(const ASIOBufferInfo& info, const long& bufferSize, const ASIOSampleType& sampleType)
@@ -180,6 +182,11 @@ namespace asio
 			if (buffers.size() > 0)
 				ErrorCheck(iasio->disposeBuffers());
 		}
+
+		/**
+		* ドライバの設定を返す
+		*/
+		inline const Preference& DriverPreference() const { return preference; }
 
 		/**
 		* バッファリング開始

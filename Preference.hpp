@@ -4,11 +4,15 @@
 
 namespace asio
 {
+	class BufferManager;
+
 	/**
 	* 設定関係のクラス
 	*/
 	class Preference
 	{
+		friend BufferManager;	// 設計ミスったらしい
+
 		IASIO* driver;
 
 		long inputLatency;
@@ -35,13 +39,31 @@ namespace asio
 			return sampleRate;
 		}
 
+	private:
+		inline void InitLatency()
+		{
+			ErrorCheck(driver->getLatencies(&inputLatency, &outputLatency));
+		}
+
+		inline void InitSampleRate()
+		{
+			ErrorCheck(driver->getSampleRate(&sampleRate));
+		}
+
 		/**
 		* サンプリング・レートを設定する
 		* @params[in] rate サンプリング・レート
 		*/
-		Preference& SampleRate(double rate)
+		inline Preference& SetSampleRate(double rate)
 		{
 			ErrorCheck(driver->setSampleRate(rate));
+			return *this;
+		}
+
+		inline Preference& SetSampleRate()
+		{
+			ErrorCheck(driver->setSampleRate(sampleRate));
+			return *this;
 		}
 
 		/**
@@ -52,17 +74,6 @@ namespace asio
 		Preference& CanSampleRate(double rate)
 		{
 			ErrorCheck(driver->canSampleRate(rate));
-		}
-
-	private:
-		void InitLatency()
-		{
-			ErrorCheck(driver->getLatencies(&inputLatency, &outputLatency));
-		}
-
-		void InitSampleRate()
-		{
-			ErrorCheck(driver->getSampleRate(&sampleRate));
 		}
 
 	public:
