@@ -41,7 +41,7 @@ namespace asio
 
 	public:
 		BufferManager(IASIO* iasio)
-			: iasio(iasio), bufferController(iasio), callbackManager()
+			: iasio(iasio), callbackManager()
 		{
 
 		}
