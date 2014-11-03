@@ -56,6 +56,7 @@ namespace asio
 		std::string driverName;
 		long driverVersion;
 		SubKey subkey;
+		ASIOCallbacks callback;
 
 		std::shared_ptr<ChannelManager> channelManager;
 		std::shared_ptr<BufferManager> bufferManager;
@@ -112,6 +113,7 @@ namespace asio
 
 			channelManager = std::shared_ptr<ChannelManager>(new ChannelManager(iasio));
 			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(iasio));
+			callback = callback::CallbackManager::CreateCallbacks();
 		}
 
 		
@@ -200,19 +202,13 @@ namespace asio
 		*/
 		const BufferController& CreateBuffer(const Sample& sample, const BufferPreference& bufferPref, const bool activeChannelOnly = true)
 		{
-			ASIOCallbacks callback = callback::CallbackManager::CreateCallbacks();
-
 			//if (bufferManager != nullptr)		// バッファを重複して利用させない作戦
 			//	delete bufferManager;
 			//bufferManager = new BufferManager(iasio);
 
 			bufferManager->EraseDisuseBuffer(activeChannelOnly);
 
-			auto& bufferCtrl = bufferManager->CreateBuffer(bufferPref, sample.ToSampleType(), &callback);
-
-			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(iasio));
-			
-			return bufferCtrl;
+			return bufferManager->CreateBuffer(bufferPref, sample.ToSampleType(), &callback);
 		}
 
 		/**
@@ -246,6 +242,7 @@ namespace asio
 			AddChannels(channelManager->Inputs());
 			AddChannels(channelManager->Outputs());
 
+			size_t cnt = bufferManager->BufferingChannels().size();
 			if (bufferManager->BufferingChannels().size() <= 0)
 				throw DontEntryAnyChannels("一つもチャンネルが登録されていません");
 
