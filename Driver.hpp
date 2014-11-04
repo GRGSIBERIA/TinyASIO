@@ -200,7 +200,7 @@ namespace asio
 		* @note サンプリングレートやバッファの大きさは，ドライバ側の設定に依存します
 		* @warning activeChannelOnlyがtrueの場合，自動的にメモリ領域の確保ができなかったバッファを削除するので，true推奨
 		*/
-		const BufferController& CreateBuffer(const Sample& sample, const BufferPreference& bufferPref, const bool activeChannelOnly = true)
+		BufferController& CreateBuffer(const Sample& sample, const BufferPreference& bufferPref, const bool activeChannelOnly = true)
 		{
 			//if (bufferManager != nullptr)		// バッファを重複して利用させない作戦
 			//	delete bufferManager;
@@ -221,7 +221,7 @@ namespace asio
 		*	サンプリングレートやバッファの大きさは，ドライバ側の設定に依存します．
 		* @warning activeChannelOnlyがtrueの場合，自動的にメモリ領域の確保ができなかったバッファを削除するので，true推奨
 		*/
-		const BufferController& CreateBuffer(const Sample& sample, const bool activeChannelOnly = true)
+		BufferController& CreateBuffer(const Sample& sample, const bool activeChannelOnly = true)
 		{
 			return CreateBuffer(sample, GetBufferPreference(), activeChannelOnly);
 		}
@@ -235,7 +235,7 @@ namespace asio
 		* @note サンプリングレートやバッファの大きさは，ドライバ側の設定に依存します
 		* @return バッファのコントローラ
 		*/
-		const BufferController& CreateBufferAll(const Sample& sample, const bool activeChannelOnly = true)
+		BufferController& CreateBufferAll(const Sample& sample, const bool activeChannelOnly = true)
 		{
 			bufferManager->ClearChannel();	// 事前にクリアしておく
 
@@ -298,7 +298,9 @@ namespace asio
 		*/
 		virtual ~Driver()
 		{
-			iasio->Release();
+			// ドライバが解放された状態らしく，あまり意味を成さない
+			//ErrorCheck(iasio->disposeBuffers());
+			//ErrorCheck(iasio->Release());
 		}
 	};
 

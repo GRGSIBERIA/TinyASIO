@@ -48,8 +48,8 @@ namespace asio
 
 		~BufferManager()
 		{
-			if (bufferInfos.size() > 0)
-				ErrorCheck(iasio->disposeBuffers());
+			//if (bufferInfos.size() > 0)
+				//ErrorCheck(iasio->disposeBuffers());
 		}
 
 		/**
@@ -95,7 +95,7 @@ namespace asio
 		* bufferSizeは自由に数値を決められないので注意, (bufferSize % granularity == 0)以外の数値は保障できない．
 		* Sampling Rateなどの設定も，ドライバ側の設定に依存するようになっているので注意
 		*/
-		const BufferController& CreateBuffer(const long& bufferSize, const ASIOSampleType sampleType, ASIOCallbacks* callbacks)
+		BufferController& CreateBuffer(const long& bufferSize, const ASIOSampleType sampleType, ASIOCallbacks* callbacks)
 		{
 			Preference pref(iasio);
 			pref.SetSampleRate();	// デフォルトのサンプリングレートを設定する
@@ -113,7 +113,7 @@ namespace asio
 		* @note bufferSizeは自由に数値を決められないので注意, (bufferSize % granularity == 0)以外の数値は保障できない
 		* Sampling Rateなどの設定も，ドライバ側の設定に依存するようになっているので注意
 		*/
-		const BufferController& CreateBuffer(const BufferPreference& bufferPreference, const ASIOSampleType sampleType, ASIOCallbacks* callbacks)
+		BufferController& CreateBuffer(const BufferPreference& bufferPreference, const ASIOSampleType sampleType, ASIOCallbacks* callbacks)
 		{
 			CreateBuffer(bufferPreference.preferredSize, sampleType, callbacks);
 			return *bufferController;

@@ -179,8 +179,8 @@ namespace asio
 		*/
 		~BufferController()
 		{
-			if (buffers.size() > 0)
-				ErrorCheck(iasio->disposeBuffers());
+			//if (buffers.size() > 0)
+				//ErrorCheck(iasio->disposeBuffers());
 		}
 
 		/**
