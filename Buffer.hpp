@@ -115,9 +115,18 @@ namespace asio
 		* バッファにデータを蓄積する
 		* @param[in] storeBuffer 蓄積したいデータ
 		*/
-		void Store(const std::vector<TINY_ASIO_BUFFER_TYPE>& storeBuffer) 
+		inline void Store(const std::vector<TINY_ASIO_BUFFER_TYPE>& storeBuffer) 
 		{
 			stream.InsertLast(storeBuffer);
+		}
+
+		/**
+		* バッファにデータを蓄積する
+		* @param[in] storeBuffer 蓄積したいデータ
+		*/
+		inline void Store(const std::shared_ptr<std::vector<TINY_ASIO_BUFFER_TYPE>>& storeBuffer)
+		{
+			Store(*storeBuffer);
 		}
 	};
 
