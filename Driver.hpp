@@ -249,6 +249,36 @@ namespace asio
 			return CreateBuffer(sample, activeChannelOnly);
 		}
 
+		/**
+		* 存在している全てのチャンネルからバッファを生成する
+		* @tparam T サンプリング方法, intかfloatのみ有効
+		* @params[in] activeChannelOnly 有効なチャンネルのバッファのみ生成する
+		* @warning activeChannelOnlyがtrueの場合，自動的にメモリ領域の確保ができなかったバッファを削除するので，true推奨
+		* @note サンプリングレートやバッファの大きさは，ドライバ側の設定に依存します
+		* @return バッファのコントローラ
+		*/
+		template <typename T = TINY_ASIO_BUFFER_TYPE>
+		BufferController& CreateBufferAll(const bool activeChannelOnly = true)
+		{
+			Sample* sample;
+			if (typeid(T) == typeid(int))
+			{
+				sample = new Sample(Int);
+			}
+			else if (typeid(T) == typeid(float))
+			{
+				sample = new Sample(Float);
+			}
+			else
+			{
+				throw NotImplementSampleType("実装されていない型が指定されました");
+			}
+
+			auto& retVal = CreateBufferAll(*sample, activeChannelOnly);
+			delete sample;
+			return retVal;
+		}
+
 
 	public:
 		/**
