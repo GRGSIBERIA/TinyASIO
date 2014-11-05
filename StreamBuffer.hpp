@@ -28,38 +28,6 @@ namespace asio
 		Sample sample;
 
 	protected:
-		/**
-		* ビッグエンディアンの処理
-		*/
-		void ReversibleMSB(void* buffer, const long size)
-		{
-			switch (sample.type)
-			{
-			case Int:
-				conv::StreamConverter::FormatBigEndian<int>(buffer, size);
-				break;
-
-			case Int24:
-				conv::StreamConverter::FormatBigEndian<int>(buffer, size, 3);
-				break;
-
-			case Short:
-				conv::StreamConverter::FormatBigEndian<short>(buffer, size);
-				break;
-
-			case Float:
-				conv::StreamConverter::FormatBigEndian<float>(buffer, size);
-				break;
-
-			case Double:
-				conv::StreamConverter::FormatBigEndian<double>(buffer, size);
-				break;
-
-			default:
-				throw UnrecognizedTypeException("利用不可能な量子化ビット数が指定されています");
-			}
-		}
-
 
 		void RemoveFrontFromSize(const long bufferSize)
 		{
@@ -67,24 +35,12 @@ namespace asio
 			unsigned long count;
 			switch (sample.type)
 			{
-			case Short:
-				count = bufferSize / sizeof(short);
-				break;
-
 			case Int:
 				count = bufferSize / sizeof(int);
 				break;
 
-			case Int24:
-				count = bufferSize / 3;
-				break;
-
 			case Float:
 				count = bufferSize / sizeof(float);
-				break;
-
-			case Double:
-				count = bufferSize / sizeof(double);
 				break;
 
 			default:
@@ -121,23 +77,6 @@ namespace asio
 	class DeviceToHostStream : public StreamBuffer
 	{
 		/**
-		* 量子化ビット数が24bitの場合の特殊な処理
-		*/
-		void ConvertTo24Bit(void* buffer, const long size)
-		{
-			// ここでInt24bitからInt32bitに変換する
-			const long count = size / 3;
-			const long resize = count * 4;	// 24bit -> 32bitのサイズ
-			std::vector<int> toInt32List(count);
-			for (int i = 0; i < count; ++i)
-			{
-				BYTE* bytePtr = reinterpret_cast<BYTE*>(buffer);	// バイト型のポインタで位置を調整する
-				toInt32List[i] = *reinterpret_cast<int*>(bytePtr[i * 3]) & 0xFFFFFF;	// 24ビットマスクをかける
-			}
-			conv::StreamConverter::ConvertToOptionType<int>(stream, reinterpret_cast<void*>(&toInt32List[0]), resize);
-		}
-
-		/**
 		* バッファに追加する
 		*/
 		void StoreBuffer(void* buffer, const long size)
@@ -148,24 +87,12 @@ namespace asio
 				conv::StreamConverter::ConvertToOptionType<int>(stream, buffer, size);
 				break;
 
-			case Short:
-				conv::StreamConverter::ConvertToOptionType<short>(stream, buffer, size);
-				break;
-
-			case Int24:
-				ConvertTo24Bit(buffer, size);
-				break;
-
 			case Float:
 				conv::StreamConverter::ConvertToOptionType<float>(stream, buffer, size);
 				break;
 
-			case Double:
-				conv::StreamConverter::ConvertToOptionType<double>(stream, buffer, size);
-				break;
-
 			default:
-				throw UnrecognizedTypeException("利用不可能な量子化ビット数が指定されています");
+				throw NotImplementSampleType("サポートしていない量子化ビット数です");
 			}
 		}
 
@@ -179,7 +106,7 @@ namespace asio
 		void Store(void* buffer, const long size)
 		{
 			if (sample.isMSB)
-				ReversibleMSB(buffer, size);
+				throw NotImplementSampleType("サポートしていない量子化ビット数です");
 			StoreBuffer(buffer, size);
 		}
 	};
@@ -195,15 +122,7 @@ namespace asio
 		{
 			switch (sample.type)
 			{
-			case Short:
-				conv::StreamConverter::ConvertToVoidBuffer<short>(stream, buffer, sample, size);
-				break;
-
 			case Int:
-				conv::StreamConverter::ConvertToVoidBuffer<int>(stream, buffer, sample, size);
-				break;
-
-			case Int24:
 				conv::StreamConverter::ConvertToVoidBuffer<int>(stream, buffer, sample, size);
 				break;
 
@@ -211,12 +130,8 @@ namespace asio
 				conv::StreamConverter::ConvertToVoidBuffer<float>(stream, buffer, sample, size);
 				break;
 
-			case Double:
-				conv::StreamConverter::ConvertToVoidBuffer<double>(stream, buffer, sample, size);
-				break;
-
 			default:
-				throw UnrecognizedTypeException("利用不可能な量子化ビット数が指定されています");
+				throw NotImplementSampleType("サポートしていない量子化ビット数です");
 			}
 		}
 
@@ -233,7 +148,7 @@ namespace asio
 
 			FetchBuffer(buffer, size);
 			if (sample.isMSB)			// 一番最後にエンディアンを逆転させる
-				ReversibleMSB(buffer, size);
+				throw NotImplementSampleType("サポートしていない量子化ビット数です");
 
 			RemoveFrontFromSize(size);
 		}
