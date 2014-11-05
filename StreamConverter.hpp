@@ -131,8 +131,16 @@ return prevSize;
 			static bool DoneUniqueRoutineAsIsDone(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const Sample& sample, const long size)
 			{
 				const long transferSize = TransferSize<TO>(source.size(), size);
+				//if (transferSize < size)
+				//{
+				//	// ‚±‚±‚ÅtransferSize‚ª¬‚³‚¢‚Æ—Ž‚¿‚é‚Ì‚ÅC‚Æ‚è‚ ‚¦‚¸‘å‚«‚­‚µ‚Ä‚¨‚­
+				//	source.insert(source.begin(), size / sizeof(TO), 0);
+				//}
 
 				memset(buffer, 0, size);	// transferSize‚ªsize‚É–ž‚½‚È‚¢ê‡‚ª‚ ‚é‚½‚ßC‚±‚ê‚Å‰Šú‰»‚µ‚Ä‚¨‚­
+
+				if (transferSize == 0)
+					return false;
 
 				// Œ^‚²‚Æ‚ÉŒˆ‚Ü‚Á‚½ˆ—‚Ö•ªŠò‚³‚¹‚é
 #if TINY_ASIO_BUFFER_OPTION == TINY_ASIO_BUFFER_INT
@@ -237,7 +245,7 @@ return prevSize;
 
 				if (typeid(TINY_ASIO_BUFFER_TYPE) == typeid(int) || typeid(TINY_ASIO_BUFFER_TYPE) == typeid(float))
 				{
-					source.insert(source.end(), reinterpret_cast<T*>(buffer), reinterpret_cast<T*>(buffer)+count);
+					source.insert(source.end(), reinterpret_cast<T*>(buffer), reinterpret_cast<T*>(buffer) + count);
 				}
 				else
 				{
