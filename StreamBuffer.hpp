@@ -80,7 +80,7 @@ namespace asio
 			switch (sample.type)
 			{
 			case Int:
-				conv::StreamConverter::ConvertToOptionType<int>(stream, buffer, size);
+				conv::StreamConverter::DeviceToHost(stream, buffer, size);
 				break;
 
 			default:
@@ -115,7 +115,7 @@ namespace asio
 			switch (sample.type)
 			{
 			case Int:
-				conv::StreamConverter::ConvertToVoidBuffer<int>(stream, buffer, sample, size);
+				conv::StreamConverter::HostToDevice(stream, buffer, sample, size);
 				break;
 
 			default:

@@ -30,8 +30,7 @@ namespace asio
 			/**
 			* buffer‚©‚çsource‚Ö—¬‚µ‚Şˆ—
 			*/
-			template <typename T>
-			static void ConvertToOptionType(std::vector<int>& source, void* buffer, const long size)
+			static void DeviceToHost(std::vector<int>& source, void* buffer, const long size)
 			{
 				
 			}
@@ -41,12 +40,9 @@ namespace asio
 			* std::vector‚©‚çvoid*‚Ö•ÏŠ·‚·‚é
 			* @tparam TO •ÏŠ·æ‚ÌŒ^
 			*/
-			template <typename TO>
-			static void ConvertToVoidBuffer(std::vector<int>&source, void* buffer, const Sample& sample, const long size)
+			static void HostToDevice(std::vector<int>&source, void* buffer, const Sample& sample, const long size)
 			{
-				// ŠeíCŒ^‚©‚çŒ^‚Ö‚ÌØ‘Ö‚ğs‚¤
-				SwitchingCompositTypeAtEachProcedure<TO>(source, buffer, sample, size);
-
+				
 			}
 		};
 	}
