@@ -23,7 +23,7 @@ namespace asio
 	class StreamBuffer
 	{
 	protected:
-		std::vector<TINY_ASIO_BUFFER_TYPE> stream;
+		std::vector<int> stream;
 
 		Sample sample;
 
@@ -63,7 +63,7 @@ namespace asio
 			stream.clear();
 		}
 
-		inline const std::vector<TINY_ASIO_BUFFER_TYPE>& GetStream() const
+		inline const std::vector<int>& GetStream() const
 		{
 			return stream;
 		}
@@ -153,7 +153,7 @@ namespace asio
 			RemoveFrontFromSize(size);
 		}
 
-		void InsertLast(const std::vector<TINY_ASIO_BUFFER_TYPE>& storeBuffer)
+		void InsertLast(const std::vector<int>& storeBuffer)
 		{
 			stream.insert(stream.end(), storeBuffer.begin(), storeBuffer.end());
 		}

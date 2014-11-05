@@ -257,7 +257,7 @@ namespace asio
 		* @note サンプリングレートやバッファの大きさは，ドライバ側の設定に依存します
 		* @return バッファのコントローラ
 		*/
-		template <typename T = TINY_ASIO_BUFFER_TYPE>
+		template <typename T = int>
 		BufferController& CreateBufferAll(const bool activeChannelOnly = true)
 		{
 			Sample* sample;

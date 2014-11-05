@@ -80,9 +80,9 @@ namespace asio
 		* バッファに蓄積されたデータを取得する
 		* @return バッファに蓄積されたデータ
 		*/
-		std::shared_ptr<std::vector<TINY_ASIO_BUFFER_TYPE>> Fetch()
+		std::shared_ptr<std::vector<int>> Fetch()
 		{
-			auto sharedPtr = std::make_shared < std::vector<TINY_ASIO_BUFFER_TYPE>>(stream.GetStream());
+			auto sharedPtr = std::make_shared < std::vector<int>>(stream.GetStream());
 			stream.Clear();
 			return sharedPtr;
 		}
@@ -115,7 +115,7 @@ namespace asio
 		* バッファにデータを蓄積する
 		* @param[in] storeBuffer 蓄積したいデータ
 		*/
-		inline void Store(const std::vector<TINY_ASIO_BUFFER_TYPE>& storeBuffer) 
+		inline void Store(const std::vector<int>& storeBuffer) 
 		{
 			stream.InsertLast(storeBuffer);
 		}
@@ -124,7 +124,7 @@ namespace asio
 		* バッファにデータを蓄積する
 		* @param[in] storeBuffer 蓄積したいデータ
 		*/
-		inline void Store(const std::shared_ptr<std::vector<TINY_ASIO_BUFFER_TYPE>>& storeBuffer)
+		inline void Store(const std::shared_ptr<std::vector<int>>& storeBuffer)
 		{
 			Store(*storeBuffer);
 		}

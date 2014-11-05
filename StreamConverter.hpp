@@ -24,7 +24,7 @@ namespace asio
 		*/
 		class StreamConverter
 		{
-			static const long ResizeSource(std::vector<TINY_ASIO_BUFFER_TYPE>& source, const long count)
+			static const long ResizeSource(std::vector<int>& source, const long count)
 			{
 				const long prevSize = source.size();
 source.resize(prevSize + count);
@@ -63,7 +63,7 @@ return prevSize;
 			}
 
 			template <typename T>
-			static void PourIntoSource(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const long count)
+			static void PourIntoSource(std::vector<int>& source, void* buffer, const long count)
 			{
 				const long prevSize = ResizeSource(source, count);
 				const float MAX_DIFF = DecideMaxDiffFromType(typeid(T));
@@ -84,7 +84,7 @@ return prevSize;
 			}
 
 
-			static void CovertBit24(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const long size)
+			static void CovertBit24(std::vector<int>& source, void* buffer, const long size)
 			{
 				std::vector<BYTE> bit24Array(size, 0);
 				long transferCount = source.size();
@@ -128,7 +128,7 @@ return prevSize;
 
 
 			template <typename TO>
-			static bool DoneUniqueRoutineAsIsDone(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const Sample& sample, const long size)
+			static bool DoneUniqueRoutineAsIsDone(std::vector<int>& source, void* buffer, const Sample& sample, const long size)
 			{
 				const long transferSize = TransferSize<TO>(source.size(), size);
 				//if (transferSize < size)
@@ -213,7 +213,7 @@ return prevSize;
 			* @tparam COMP î‰ärÇ∑ÇÈå^
 			*/
 			template <typename TO>
-			static void SwitchingCompositTypeAtEachProcedure(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const Sample& sample, const long size)
+			static void SwitchingCompositTypeAtEachProcedure(std::vector<int>& source, void* buffer, const Sample& sample, const long size)
 			{
 				// å≈óLÇÃèàóùÇçsÇ¡ÇΩå„ÅCëﬁèoÇ∑ÇÈÇ»ÇÁëﬁèoÇ≥ÇπÇÈ
 				if (DoneUniqueRoutineAsIsDone<TO>(source, buffer, sample, size))
@@ -239,11 +239,11 @@ return prevSize;
 			* bufferÇ©ÇÁsourceÇ÷ó¨ÇµçûÇﬁèàóù
 			*/
 			template <typename T>
-			static void ConvertToOptionType(std::vector<TINY_ASIO_BUFFER_TYPE>& source, void* buffer, const long size)
+			static void ConvertToOptionType(std::vector<int>& source, void* buffer, const long size)
 			{
 				const long count = size / sizeof(T);
 
-				if (typeid(TINY_ASIO_BUFFER_TYPE) == typeid(int) || typeid(TINY_ASIO_BUFFER_TYPE) == typeid(float))
+				if (typeid(int) == typeid(int) || typeid(int) == typeid(float))
 				{
 					source.insert(source.end(), reinterpret_cast<T*>(buffer), reinterpret_cast<T*>(buffer) + count);
 				}
@@ -273,7 +273,7 @@ return prevSize;
 			* @tparam TO ïœä∑êÊÇÃå^
 			*/
 			template <typename TO>
-			static void ConvertToVoidBuffer(std::vector<TINY_ASIO_BUFFER_TYPE>&source, void* buffer, const Sample& sample, const long size)
+			static void ConvertToVoidBuffer(std::vector<int>&source, void* buffer, const Sample& sample, const long size)
 			{
 				// äeéÌÅCå^Ç©ÇÁå^Ç÷ÇÃêÿë÷ÇçsÇ§
 				SwitchingCompositTypeAtEachProcedure<TO>(source, buffer, sample, size);
