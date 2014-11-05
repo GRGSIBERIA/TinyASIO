@@ -39,10 +39,6 @@ namespace asio
 				count = bufferSize / sizeof(int);
 				break;
 
-			case Float:
-				count = bufferSize / sizeof(float);
-				break;
-
 			default:
 				throw UnrecognizedTypeException("利用不可能な量子化ビット数が指定されています");
 			}
@@ -87,10 +83,6 @@ namespace asio
 				conv::StreamConverter::ConvertToOptionType<int>(stream, buffer, size);
 				break;
 
-			case Float:
-				conv::StreamConverter::ConvertToOptionType<float>(stream, buffer, size);
-				break;
-
 			default:
 				throw NotImplementSampleType("サポートしていない量子化ビット数です");
 			}
@@ -124,10 +116,6 @@ namespace asio
 			{
 			case Int:
 				conv::StreamConverter::ConvertToVoidBuffer<int>(stream, buffer, sample, size);
-				break;
-
-			case Float:
-				conv::StreamConverter::ConvertToVoidBuffer<float>(stream, buffer, sample, size);
 				break;
 
 			default:
