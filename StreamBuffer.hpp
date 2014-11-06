@@ -39,6 +39,8 @@ namespace asio
 	protected:
 		std::vector<int> stream;
 
+		HANDLE hMutex;
+		const std::wstring mutexName;
 		Sample sample;
 
 	protected:
@@ -46,7 +48,7 @@ namespace asio
 		template <typename FUNC>
 		void Mutex(FUNC func)
 		{
-			auto mutex = OpenMutex(MUTEX_ALL_ACCESS, FALSE, MUTEX);
+			auto mutex = OpenMutex(MUTEX_ALL_ACCESS, FALSE, mutexName.c_str());
 			WaitForSingleObject(mutex, INFINITE);
 			func();
 			ReleaseMutex(mutex);
@@ -54,8 +56,16 @@ namespace asio
 		}
 
 	public:
-		StreamBuffer(Sample& samplePack)
-			: sample(samplePack) {}
+		StreamBuffer(const Sample& samplePack, const std::wstring& mutexName)
+			: sample(samplePack), mutexName(mutexName) 
+		{
+			hMutex = CreateMutexW(NULL, FALSE, mutexName.c_str());
+		}
+
+		virtual ~StreamBuffer()
+		{
+			CloseHandle(hMutex);
+		}
 	};
 
 
@@ -65,6 +75,7 @@ namespace asio
 	*/
 	class DeviceToHostStream : public StreamBuffer
 	{
+	private:
 		/**
 		* バッファに追加する
 		*/
@@ -86,8 +97,11 @@ namespace asio
 		}
 
 	public:
-		DeviceToHostStream(Sample sample)
-			: StreamBuffer(sample) { }
+		DeviceToHostStream(const Sample sample, const long channelNumber)
+			: StreamBuffer(sample, std::wstring(L"TINY_ASIO_INPUT_") + std::to_wstring(channelNumber))
+		{
+			
+		}
 
 		/**
 		* バッファの中身をストリームへ蓄積する
@@ -154,8 +168,8 @@ namespace asio
 		}
 
 	public:
-		HostToDeviceStream(Sample& sample)
-			: StreamBuffer(sample) { }
+		HostToDeviceStream(Sample& sample, const long channelNumber)
+			: StreamBuffer(sample, std::wstring(L"TINY_ASIO_INPUT_") + std::to_wstring(channelNumber)) { }
 
 		/**
 		* ストリームの中身をバッファへ書き込む
