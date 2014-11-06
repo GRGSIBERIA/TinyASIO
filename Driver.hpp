@@ -242,7 +242,6 @@ namespace asio
 			AddChannels(channelManager->Inputs());
 			AddChannels(channelManager->Outputs());
 
-			size_t cnt = bufferManager->BufferingChannels().size();
 			if (bufferManager->BufferingChannels().size() <= 0)
 				throw DontEntryAnyChannels("ˆê‚Â‚àƒ`ƒƒƒ“ƒlƒ‹‚ª“o˜^‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ");
 

@@ -15,6 +15,16 @@ namespace asio
 			: std::exception(message.c_str()) {}
 	};
 
+	/**
+	* Option.hppで指定された型が変だったときに呼び出される
+	*/
+	class UnknownOptionType : public std::exception
+	{
+	public:
+		UnknownOptionType(const std::string& message)
+			: exception(message.c_str()) { }
+	};
+
 
 	/**
 	* バッファリングするためのストリームクラス
@@ -80,8 +90,12 @@ namespace asio
 			switch (sample.type)
 			{
 			case Int:
-				conv::StreamConverter::DeviceToHost(stream, buffer, size);
+			{
+				const size_t count = size / sizeof(int);
+				const int* ptr = reinterpret_cast<int*>(buffer);
+				stream.insert(stream.end(), ptr, &ptr[count]);
 				break;
+			}
 
 			default:
 				throw NotImplementSampleType("サポートしていない量子化ビット数です");
@@ -98,7 +112,7 @@ namespace asio
 		void Store(void* buffer, const long size)
 		{
 			if (sample.isMSB)
-				throw NotImplementSampleType("サポートしていない量子化ビット数です");
+				throw NotImplementSampleType("ビッグエンディアンはサポートしていません");
 			StoreBuffer(buffer, size);
 		}
 	};
@@ -115,8 +129,14 @@ namespace asio
 			switch (sample.type)
 			{
 			case Int:
-				conv::StreamConverter::HostToDevice(stream, buffer, sample, size);
+			{
+				const size_t count = size / sizeof(int);
+				if (stream.size() >= count)					// streamの長さが十分なとき
+					memcpy(buffer, stream.begin()._Ptr, count * sizeof(int));
+				else if (stream.size() > 0)					// count未満の場合
+					memcpy(buffer, stream.begin()._Ptr, stream.size() * sizeof(int));
 				break;
+			}
 
 			default:
 				throw NotImplementSampleType("サポートしていない量子化ビット数です");
@@ -136,7 +156,7 @@ namespace asio
 
 			FetchBuffer(buffer, size);
 			if (sample.isMSB)			// 一番最後にエンディアンを逆転させる
-				throw NotImplementSampleType("サポートしていない量子化ビット数です");
+				throw NotImplementSampleType("ビッグエンディアンはサポートしていません");
 
 			RemoveFrontFromSize(size);
 		}
