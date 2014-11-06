@@ -108,15 +108,28 @@ namespace asio
 		*/
 		void Store(void* buffer, const long size)
 		{
-			if (sample.isMSB)
-				throw NotImplementSampleType("ビッグエンディアンはサポートしていません");
 			StoreBuffer(buffer, size);
 		}
 
 		std::shared_ptr<std::vector<int>> CopyAsClear()
 		{
-			auto retVal = std::shared_ptr<std::vector<int>>(new std::vector<int>(stream));
-			Mutex([&]() { stream.clear(); });
+			const size_t halfSize = stream.size() >> 1;
+
+			auto retVal = std::shared_ptr<std::vector<int>>(new std::vector<int>());
+
+			Mutex([&]() { 
+				if (!sample.isMSB)
+				{
+					//retVal->insert(retVal->end(), stream.begin() + halfSize, stream.end());
+					//retVal->insert(retVal->end(), stream.begin(), stream.end() - halfSize);
+					retVal->insert(retVal->end(), stream.begin(), stream.end());
+				}
+				else
+				{
+					retVal->insert(retVal->end(), stream.begin(), stream.end());
+				}
+				stream.clear(); 
+			});
 			return retVal;
 		}
 	};
@@ -179,8 +192,6 @@ namespace asio
 			memset(buffer, 0, size);	// 最初にゼロ消去
 
 			FetchBuffer(buffer, size);
-			if (sample.isMSB)			// 一番最後にエンディアンを逆転させる
-				throw NotImplementSampleType("ビッグエンディアンはサポートしていません");
 
 			RemoveFrontFromSize(size);
 		}
