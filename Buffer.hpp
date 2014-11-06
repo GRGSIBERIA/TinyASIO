@@ -82,9 +82,7 @@ namespace asio
 		*/
 		std::shared_ptr<std::vector<int>> Fetch()
 		{
-			auto sharedPtr = std::make_shared < std::vector<int>>(stream.GetStream());
-			stream.Clear();
-			return sharedPtr;
+			return stream.CopyAsClear();
 		}
 	};
 

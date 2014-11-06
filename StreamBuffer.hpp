@@ -1,7 +1,8 @@
 #pragma once
 #include <vector>
+#include <Windows.h>
 #include "SamplePack.hpp"
-#include "StreamConverter.hpp"
+#include "Option.hpp"
 
 namespace asio
 {
@@ -26,6 +27,9 @@ namespace asio
 	};
 
 
+	
+
+
 	/**
 	* バッファリングするためのストリームクラス
 	* @note 子クラスは基本的にBufferControllerから見えなくなっているので，そんなに公開・非公開は気にしなくてもいいと思う
@@ -38,41 +42,20 @@ namespace asio
 		Sample sample;
 
 	protected:
-
-		void RemoveFrontFromSize(const long bufferSize)
+		// スレッドセーフな処理をしたい
+		template <typename FUNC>
+		void Mutex(FUNC func)
 		{
-			// 先頭からbufferSizeだけ消去する
-			unsigned long count;
-			switch (sample.type)
-			{
-			case Int:
-				count = bufferSize / sizeof(int);
-				break;
-
-			default:
-				throw UnrecognizedTypeException("利用不可能な量子化ビット数が指定されています");
-			}
-
-			if (count > stream.size())
-				count = stream.size();
-
-			stream.erase(stream.begin(), stream.begin() + count);
+			auto mutex = OpenMutex(MUTEX_ALL_ACCESS, FALSE, MUTEX);
+			WaitForSingleObject(mutex, INFINITE);
+			func();
+			ReleaseMutex(mutex);
+			CloseHandle(mutex);
 		}
 
 	public:
 		StreamBuffer(Sample& samplePack)
 			: sample(samplePack) {}
-
-
-		inline void Clear()
-		{
-			stream.clear();
-		}
-
-		inline const std::vector<int>& GetStream() const
-		{
-			return stream;
-		}
 	};
 
 
@@ -93,7 +76,7 @@ namespace asio
 			{
 				const size_t count = size / sizeof(int);
 				const int* ptr = reinterpret_cast<int*>(buffer);
-				stream.insert(stream.end(), ptr, &ptr[count]);
+				Mutex([&]() { stream.insert(stream.end(), ptr, &ptr[count]); });
 				break;
 			}
 
@@ -114,6 +97,13 @@ namespace asio
 			if (sample.isMSB)
 				throw NotImplementSampleType("ビッグエンディアンはサポートしていません");
 			StoreBuffer(buffer, size);
+		}
+
+		std::shared_ptr<std::vector<int>> CopyAsClear()
+		{
+			auto retVal = std::shared_ptr<std::vector<int>>(new std::vector<int>(stream));
+			Mutex([&]() { stream.clear(); });
+			return retVal;
 		}
 	};
 
@@ -143,6 +133,26 @@ namespace asio
 			}
 		}
 
+		void RemoveFrontFromSize(const long bufferSize)
+		{
+			// 先頭からbufferSizeだけ消去する
+			unsigned long count;
+			switch (sample.type)
+			{
+			case Int:
+				count = bufferSize / sizeof(int);
+				break;
+
+			default:
+				throw UnrecognizedTypeException("利用不可能な量子化ビット数が指定されています");
+			}
+
+			if (count > stream.size())
+				count = stream.size();
+
+			Mutex([&]() { stream.erase(stream.begin(), stream.begin() + count); });
+		}
+
 	public:
 		HostToDeviceStream(Sample& sample)
 			: StreamBuffer(sample) { }
@@ -161,9 +171,12 @@ namespace asio
 			RemoveFrontFromSize(size);
 		}
 
+		/**
+		* ストリームの最後に，指定した配列を追加する
+		*/
 		void InsertLast(const std::vector<int>& storeBuffer)
 		{
-			stream.insert(stream.end(), storeBuffer.begin(), storeBuffer.end());
+			Mutex([&]() {stream.insert(stream.end(), storeBuffer.begin(), storeBuffer.end()); });
 		}
 	};
 }

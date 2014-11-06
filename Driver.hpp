@@ -330,6 +330,7 @@ namespace asio
 			// ドライバが解放された状態らしく，あまり意味を成さない
 			//ErrorCheck(iasio->disposeBuffers());
 			//ErrorCheck(iasio->Release());
+			//CloseHandle(hMutex);	// ミューテックスのハンドルを開放する
 		}
 	};
 
