@@ -47,9 +47,9 @@ namespace asio
 			bufferData[1] = info.buffers[1];
 		}
 
-		static void DirectCopy(const long index, const Buffer& source, Buffer& dest, const size_t size)
+		static void DirectCopy(const long index, const Buffer& source, Buffer& dest, const size_t count)
 		{
-			memcpy(dest.bufferData[index], source.bufferData[index], size);
+			memcpy(dest.bufferData[index], source.bufferData[index], count * sizeof(int));
 		}
 	};
 

@@ -31,10 +31,10 @@ namespace asio
 				const size_t count = inputBuffer->size() > outputBuffer->size() ? inputBuffer->size() : outputBuffer->size();
 				for (size_t i = 0; i < count; ++i)
 				{
-					//Buffer::DirectCopy(doubleBufferIndex, inputBuffer->at(i), outputBuffer->at(i), count);
-					void *source = inputBuffer->at(i).bufferData[doubleBufferIndex];
-					void *dest = outputBuffer->at(i).bufferData[doubleBufferIndex];
-					memcpy(dest, source, inputBuffer->at(i).bufferSize * sizeof(int));
+					Buffer::DirectCopy(doubleBufferIndex, inputBuffer->at(i), outputBuffer->at(i), count);
+					//void *source = inputBuffer->at(i).bufferData[doubleBufferIndex];
+					//void *dest = outputBuffer->at(i).bufferData[doubleBufferIndex];
+					//memcpy(dest, source, inputBuffer->at(i).bufferSize * sizeof(int));
 				}
 			}
 
