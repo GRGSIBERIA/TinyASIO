@@ -85,9 +85,8 @@ namespace asio
 			{
 			case Int:
 			{
-				const size_t count = size / sizeof(int);
 				const int* ptr = reinterpret_cast<int*>(buffer);
-				Mutex([&]() { stream.insert(stream.end(), ptr, &ptr[count]); });
+				Mutex([&]() { stream.insert(stream.end(), ptr, &ptr[size]); });
 				break;
 			}
 
@@ -118,16 +117,7 @@ namespace asio
 			auto retVal = std::shared_ptr<std::vector<int>>(new std::vector<int>());
 
 			Mutex([&]() { 
-				if (!sample.isMSB)
-				{
-					//retVal->insert(retVal->end(), stream.begin() + halfSize, stream.end());
-					//retVal->insert(retVal->end(), stream.begin(), stream.end() - halfSize);
-					retVal->insert(retVal->end(), stream.begin(), stream.end());
-				}
-				else
-				{
-					retVal->insert(retVal->end(), stream.begin(), stream.end());
-				}
+				retVal->insert(retVal->end(), stream.begin(), stream.end());
 				stream.clear(); 
 			});
 			return retVal;
@@ -147,9 +137,8 @@ namespace asio
 			{
 			case Int:
 			{
-				const size_t count = size / sizeof(int);
-				if (stream.size() >= count)					// streamの長さが十分なとき
-					memcpy(buffer, stream.begin()._Ptr, count * sizeof(int));
+				if (stream.size() >= size)					// streamの長さが十分なとき
+					memcpy(buffer, stream.begin()._Ptr, size * sizeof(int));
 				else if (stream.size() > 0)					// count未満の場合
 					memcpy(buffer, stream.begin()._Ptr, stream.size() * sizeof(int));
 				break;
@@ -163,17 +152,7 @@ namespace asio
 		void RemoveFrontFromSize(const long bufferSize)
 		{
 			// 先頭からbufferSizeだけ消去する
-			unsigned long count;
-			switch (sample.type)
-			{
-			case Int:
-				count = bufferSize / sizeof(int);
-				break;
-
-			default:
-				throw UnrecognizedTypeException("利用不可能な量子化ビット数が指定されています");
-			}
-
+			unsigned long count = bufferSize;
 			if (count > stream.size())
 				count = stream.size();
 
@@ -189,7 +168,7 @@ namespace asio
 		*/
 		void Fetch(void* buffer, const long size)
 		{
-			memset(buffer, 0, size);	// 最初にゼロ消去
+			memset(buffer, 0, size * sizeof(int));	// 最初にゼロ消去
 
 			FetchBuffer(buffer, size);
 

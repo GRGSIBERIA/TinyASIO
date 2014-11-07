@@ -19,10 +19,10 @@ namespace asio
 			
 			static void BufferingLoop(const long doubleBufferIndex, const ASIOBool directProcess)
 			{
-				//for (auto& input : *inputBuffer)
-				//{
-				//	input.StoreC(doubleBufferIndex);
-				//}
+				for (auto& input : *inputBuffer)
+				{
+					input.StoreC(doubleBufferIndex);
+				}
 				//for (auto& output : *outputBuffer)
 				//{
 				//	output.FetchC(doubleBufferIndex);
