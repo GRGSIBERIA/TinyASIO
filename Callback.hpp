@@ -23,9 +23,14 @@ namespace asio
 				{
 					input.StoreC(doubleBufferIndex);
 				}
-				for (auto& output : *outputBuffer)
+				//for (auto& output : *outputBuffer)
+				//{
+				//	output.FetchC(doubleBufferIndex);
+				//}
+				const size_t count = inputBuffer->size() > outputBuffer->size() ? inputBuffer->size() : outputBuffer->size();
+				for (size_t i = 0; i < count; ++i)
 				{
-					output.FetchC(doubleBufferIndex);
+					Buffer::DirectCopy(doubleBufferIndex, inputBuffer->at(i), outputBuffer->at(i));
 				}
 			}
 
