@@ -129,7 +129,7 @@ namespace asio
 			// RegEnumKeyEx‚É¸”s‚µ‚½‚ç—áŠO‚ğ”­¶‚³‚¹‚Ä‚¨‚­
 			DWORD max_path_size = 360;
 			wchar_t *subkeyBuffer = new wchar_t[max_path_size];
-			LONG cr = RegEnumKeyEx(hkey, index, subkeyBuffer, &max_path_size, NULL, NULL, NULL, NULL);
+			LONG cr = RegEnumKeyExW(hkey, index, subkeyBuffer, &max_path_size, NULL, NULL, NULL, NULL);
 			if (cr != ERROR_SUCCESS)
 				throw CantOpenSubKeyIndex(ASIO_REGISTORY_PATH);	// ‚±‚Ì—áŠO‚Åbreak‚Å‚«‚é
 				
