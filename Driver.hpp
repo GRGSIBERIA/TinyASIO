@@ -4,44 +4,12 @@
 #include <string>
 #include <memory>
 
+#include "Exception.hpp"
 #include "Registory.hpp"
-#include "Interface.hpp"
-#include "Structure.hpp"
-#include "Channel.hpp"
-#include "BufferManager.hpp"
+#include "SDK.hpp"
 
 namespace asio
 {
-	/**
-	* ドライバのインスタンスに生成失敗すると呼ばれる
-	*/
-	class CantCreateInstance : public std::exception
-	{
-	public:
-		CantCreateInstance(const std::string& message)
-			: exception(message.c_str()) {}
-	};
-
-	/**
-	* 二回以上初期化されたりなどで呼び出される
-	*/
-	class OverTwiceCallException : public std::exception
-	{
-	public:
-		OverTwiceCallException(const std::string& message)
-			: exception(message.c_str()) {}
-	};
-
-	/**
-	* ドライバのハンドルを取得できなかった
-	*/
-	class CantHandlingASIODriver : public std::exception
-	{
-	public:
-		CantHandlingASIODriver(const std::string& message)
-			: exception(message.c_str()) {}
-	};
-
 	/**
 	* ASIOドライバのインターフェースのラッパクラス
 	*/
@@ -58,8 +26,6 @@ namespace asio
 		SubKey subkey;
 		ASIOCallbacks callback;
 
-		std::shared_ptr<ChannelManager> channelManager;
-		std::shared_ptr<BufferManager> bufferManager;
 
 	private:
 		ASIOCallbacks InitNullCallbacks()
@@ -110,10 +76,6 @@ namespace asio
 			iasio->getDriverName(buffer);
 			driverName = buffer;
 			driverVersion = iasio->getDriverVersion();
-
-			channelManager = std::shared_ptr<ChannelManager>(new ChannelManager(iasio));
-			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(iasio));
-			callback = callback::CallbackManager::CreateCallbacks();
 		}
 
 		
@@ -129,154 +91,6 @@ namespace asio
 		* ドライバのバージョンを返す
 		*/
 		const long& Version() const { return driverVersion; }
-
-		/**
-		* ドライバのインターフェースを返す
-		*/
-		const IASIO& Interface() const { return *iasio; }
-
-
-	public:		// チャンネル周り
-
-		/**
-		* 入力チャンネルの配列を返す
-		* @return 入力チャンネルの配列
-		*/
-		inline const std::vector<InputChannel>& InputChannels() const { return channelManager->Inputs(); }
-		
-		/**
-		* 出力チャンネルの配列を返す
-		* @return 出力チャンネルの配列
-		*/
-		inline const std::vector<OutputChannel>& OutputChannels() const { return channelManager->Outputs(); }
-
-		/**
-		* チャンネルを追加
-		*/
-		inline const void AddChannel(const Channel& channel) { bufferManager->AddChannel(channel); }
-
-
-		/**
-		* チャンネルの配列を追加する
-		* @params[in] channels チャンネルの配列
-		* @params[in] isActiveChannelOnly このフラグが立っていると，有効なチャンネルのみ登録する
-		* @tparam CHANNEL InputChannelもしくはOutputChannel
-		*/
-		template <typename CHANNEL>
-		void AddChannels(const std::vector<CHANNEL>& channels)
-		{
-			for (const auto& channel : channels)
-				bufferManager->AddChannel(channel);
-		}
-
-
-		/**
-		* 登録したチャンネルを削除
-		*/
-		inline const void ClearChannels() { bufferManager->ClearChannel(); }
-
-
-	public:		// バッファ周り
-
-		/**
-		* ASIOのバッファの設定を取得
-		* @return バッファの現在の設定
-		* @note BufferPreferenceの値を変更してCreateBufferへ渡す
-		* @note 必ずしも信用できる値を取得できるとは限らない
-		*/
-		BufferPreference GetBufferPreference() const
-		{
-			BufferPreference buf;
-			ErrorCheck(iasio->getBufferSize(&buf.minSize, &buf.maxSize, &buf.preferredSize, &buf.granularity));
-			return buf;
-		}
-
-		/**
-		* バッファの生成
-		* @params[in] sample サンプリング方法
-		* @params[in] bufferPref バッファの設定
-		* @params[in] activeChannelOnly 有効なチャンネルのバッファのみ生成する
-		* @return バッファのコントローラ
-		* @note サンプリングレートやバッファの大きさは，ドライバ側の設定に依存します
-		* @warning activeChannelOnlyがtrueの場合，自動的にメモリ領域の確保ができなかったバッファを削除するので，true推奨
-		*/
-		BufferController& CreateBuffer(const Sample& sample, const BufferPreference& bufferPref, const bool activeChannelOnly = true)
-		{
-			//if (bufferManager != nullptr)		// バッファを重複して利用させない作戦
-			//	delete bufferManager;
-			//bufferManager = new BufferManager(iasio);
-
-			bufferManager->EraseDisuseBuffer(activeChannelOnly);
-
-			return bufferManager->CreateBuffer(bufferPref, sample.ToSampleType(), &callback);
-		}
-
-		/**
-		* バッファを生成する
-		* @params[in] sample サンプリング方法
-		* @params[in] activeChannelOnly 有効なチャンネルのバッファのみ生成する
-		* @return バッファのコントローラ
-		* @note
-		*	この関数を使うとドライバ側で設定されているバッファサイズを利用します．
-		*	サンプリングレートやバッファの大きさは，ドライバ側の設定に依存します．
-		* @warning activeChannelOnlyがtrueの場合，自動的にメモリ領域の確保ができなかったバッファを削除するので，true推奨
-		*/
-		BufferController& CreateBuffer(const Sample& sample, const bool activeChannelOnly = true)
-		{
-			return CreateBuffer(sample, GetBufferPreference(), activeChannelOnly);
-		}
-
-
-		/**
-		* 存在している全てのチャンネルからバッファを生成する
-		* @params[in] sample サンプリング方法
-		* @params[in] activeChannelOnly 有効なチャンネルのバッファのみ生成する
-		* @warning activeChannelOnlyがtrueの場合，自動的にメモリ領域の確保ができなかったバッファを削除するので，true推奨
-		* @note サンプリングレートやバッファの大きさは，ドライバ側の設定に依存します
-		* @return バッファのコントローラ
-		*/
-		BufferController& CreateBufferAll(const Sample& sample, const bool activeChannelOnly = true)
-		{
-			bufferManager->ClearChannel();	// 事前にクリアしておく
-
-			AddChannels(channelManager->Inputs());
-			AddChannels(channelManager->Outputs());
-
-			if (bufferManager->BufferingChannels().size() <= 0)
-				throw DontEntryAnyChannels("一つもチャンネルが登録されていません");
-
-			return CreateBuffer(sample, activeChannelOnly);
-		}
-
-		/**
-		* 存在している全てのチャンネルからバッファを生成する
-		* @tparam T サンプリング方法, intかfloatのみ有効
-		* @params[in] activeChannelOnly 有効なチャンネルのバッファのみ生成する
-		* @warning activeChannelOnlyがtrueの場合，自動的にメモリ領域の確保ができなかったバッファを削除するので，true推奨
-		* @note サンプリングレートやバッファの大きさは，ドライバ側の設定に依存します
-		* @return バッファのコントローラ
-		*/
-		template <typename T = int>
-		BufferController& CreateBufferAll(const bool activeChannelOnly = true)
-		{
-			Sample* sample;
-			if (typeid(T) == typeid(int))
-			{
-				sample = new Sample(Int);
-			}
-			else if (typeid(T) == typeid(float))
-			{
-				sample = new Sample(Float);
-			}
-			else
-			{
-				throw NotImplementSampleType("実装されていない型が指定されました");
-			}
-
-			auto& retVal = CreateBufferAll(*sample, activeChannelOnly);
-			delete sample;
-			return retVal;
-		}
 
 
 	public:

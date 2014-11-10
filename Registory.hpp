@@ -9,37 +9,11 @@
 #include <cstdlib>
 #include <stdlib.h>
 
+#include "Exception.hpp"
+
 namespace asio
 {
-	/**
-	* レジストリーキーが開けない
-	*/
-	class CantOpenRegistoryKey : public std::exception
-	{
-	public:
-		CantOpenRegistoryKey(const std::wstring& regPath) : std::exception(("レジストリを開けません: " + std::string(regPath.begin(), regPath.end())).c_str()) { }
-	};
-
-
-	/**
-	* サブキーのインデックスが開けなくなっている
-	*/
-	class CantOpenSubKeyIndex : public std::exception
-	{
-	public:
-		CantOpenSubKeyIndex(const std::wstring& regPath) : std::exception(("サブキーのインデックスが開けません:" + std::string(regPath.begin(), regPath.end())).c_str()) {}
-	};
-
-
-	/**
-	* ASIOのドライバーがひとつもない
-	*/
-	class DontFoundASIODrivers : public std::exception
-	{
-	public:
-		DontFoundASIODrivers(const std::wstring& message)
-			: exception(std::string(message.begin(), message.end()).c_str()) {}
-	};
+	
 
 
 	const std::wstring ASIO_REGISTORY_PATH = L"SOFTWARE\\ASIO";					//!< ASIOドライバのレジストリを格納しているところ
