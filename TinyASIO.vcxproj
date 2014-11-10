@@ -65,22 +65,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Source.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Buffer.hpp" />
-    <ClInclude Include="StreamBuffer.hpp" />
-    <ClInclude Include="BufferManager.hpp" />
-    <ClInclude Include="Callback.hpp" />
-    <ClInclude Include="Channel.hpp" />
-    <ClInclude Include="Option.hpp" />
-    <ClInclude Include="Preference.hpp" />
-    <ClInclude Include="SamplePack.hpp" />
-    <ClInclude Include="StreamConverter.hpp" />
-    <ClInclude Include="Structure.hpp" />
     <ClInclude Include="Driver.hpp" />
+    <ClInclude Include="Exception.hpp" />
     <ClInclude Include="Interface.hpp" />
+    <ClInclude Include="Option.hpp" />
     <ClInclude Include="Registory.hpp" />
+    <ClInclude Include="SDK.hpp" />
     <ClInclude Include="TinyASIO.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
