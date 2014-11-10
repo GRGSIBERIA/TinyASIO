@@ -13,6 +13,8 @@
 
 namespace asio
 {
+	typedef std::shared_ptr<std::vector<int>> SharedStream;
+
 	class CallbackManager;
 
 	/**
@@ -85,7 +87,7 @@ namespace asio
 		* バッファに蓄積されたデータを取得する
 		* @return バッファに蓄積されたデータ
 		*/
-		std::shared_ptr<std::vector<int>> Fetch()
+		SharedStream Fetch()
 		{
 			return stream.CopyAsClear();
 		}
