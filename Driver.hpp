@@ -17,7 +17,7 @@ namespace asio
 	class Driver
 	{
 	private:
-		static std::shared_ptr<Driver> driver;	// シングルトン変数
+		static std::shared_ptr<Driver> driver;	// シングルトン
 
 		Interface iasio;
 
@@ -28,10 +28,7 @@ namespace asio
 		* @params[in] subkey レジストリの位置など
 		*/
 		Driver(const CLSID& clsid, const SubKey& subkey)
-			: iasio(clsid, subkey)
-		{
-			
-		}
+			: iasio(clsid, subkey) { }
 
 
 	public:
