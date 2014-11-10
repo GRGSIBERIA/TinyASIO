@@ -32,16 +32,8 @@ namespace asio
 
 
 	public:
-
-		/**
-		* ドライバ名を返す
-		*/
-		const std::string& Name() const { return iasio.Name(); }
-
-		/**
-		* ドライバのバージョンを返す
-		*/
-		const long& Version() const { return iasio.Version(); }
+		const std::string& Name() const { return iasio.Name(); }	//!< ドライバ名を返す
+		const long& Version() const { return iasio.Version(); }		//!< ドライバのバージョンを返す
 
 
 	public:
