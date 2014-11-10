@@ -1,11 +1,14 @@
 #pragma once
 
+#include "ControllerBase.hpp"
+
 namespace asio
 {
 	/* “ü—ÍM†‚ğ‚»‚Ì‚Ü‚Ü•Ô‚· */
-	class InputBackController
+	class InputBackController : public ControllerBase
 	{
-	private:
-		
+	public:
+		InputBackController()
+			: ControllerBase() {}
 	};
 }

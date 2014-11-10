@@ -34,7 +34,7 @@ namespace asio
 	public:
 		const std::string& Name() const { return iasio.Name(); }	//!< ドライバ名を返す
 		const long& Version() const { return iasio.Version(); }		//!< ドライバのバージョンを返す
-
+		IASIO* Interface() { return iasio.IASIO(); }					//!< ASIOのインターフェースを返す
 
 	public:
 		/**
@@ -69,10 +69,7 @@ namespace asio
 		* @return asioDriverNameで初期化されたドライバのインスタンス
 		* @note 見つからない場合はたぶん落ちる
 		*/
-		static Driver& Init(const std::string& asioDriverName)
-		{
-			return InitX(asioDriverName);
-		}
+		static Driver& Init(const std::string& asioDriverName) { return InitX(asioDriverName); }
 		
 
 		/**
@@ -81,10 +78,13 @@ namespace asio
 		* @return asioDriverNameで初期化されたドライバのインスタンス
 		* @note 見つからない場合はたぶん落ちる
 		*/
-		static Driver& Init(const std::wstring& asioDriverName)
-		{
-			return InitX(asioDriverName);
-		}
+		static Driver& Init(const std::wstring& asioDriverName)	{ return InitX(asioDriverName);	}
+
+
+		/**
+		* ドライバの取得
+		*/
+		static Driver& Get() { return *driver; }
 
 
 		/**

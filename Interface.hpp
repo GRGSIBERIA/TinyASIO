@@ -62,5 +62,10 @@ namespace asio
 		* ドライバのバージョンを返す
 		*/
 		const long& Version() const { return driverVersion; }
+
+		/**
+		* インターフェースを返す
+		*/
+		IASIO* IASIO() { return iasio; }
 	};
 }
