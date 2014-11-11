@@ -65,8 +65,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Channel.hpp" />
+    <ClInclude Include="ControllerBase.hpp" />
     <ClInclude Include="Driver.hpp" />
     <ClInclude Include="Exception.hpp" />
+    <ClInclude Include="InputBackController.hpp" />
     <ClInclude Include="Interface.hpp" />
     <ClInclude Include="Option.hpp" />
     <ClInclude Include="Registory.hpp" />
