@@ -66,7 +66,8 @@ namespace asio
 
 
 		/**
-		* @param[in,out] buffer コピーしたいバッファ
+		* 与えられたバッファに値を転送する
+		* @param[in,out] buffer 転送したいバッファ
 		* @param[in] bufferLength バッファの長さ
 		*/
 		void Fetch(void* buffer, const long bufferLength)
@@ -131,6 +132,11 @@ namespace asio
 	*/
 	class BufferManager
 	{
+		long numberOfInputChannels;
+		long numberOfOutputChannels;
+		long numberOfChannels;
+		long bufferLength;
+
 		std::vector<ASIOBufferInfo> bufferInfo;
 
 		std::vector<BufferBase> buffers;
@@ -140,14 +146,27 @@ namespace asio
 		static std::vector<InputBuffer>* inputBuffersPtr;
 		static std::vector<OutputBuffer>* outputBuffersPtr;
 
+	private:
+		void InitChannelInfo(IASIO* iasio)
+		{
+			ErrorCheck(iasio->getBufferSize(NULL, NULL, &bufferLength, NULL));
+
+			ErrorCheck(iasio->getChannels(&numberOfInputChannels, &numberOfOutputChannels));
+			numberOfChannels = numberOfInputChannels + numberOfOutputChannels;
+		}
+
 	public:
-		BufferManager(const long numChannels, const long bufferLength, ASIOCallbacks* callbacks)
+		BufferManager(ASIOCallbacks* callbacks)
 		{
 			auto* iasio = Driver::Get().Interface();
-			bufferInfo = std::vector<ASIOBufferInfo>(numChannels);
-			ErrorCheck(iasio->createBuffers(bufferInfo._Myfirst, numChannels, bufferLength, callbacks));
 
-			for (long i = 0; i < numChannels; ++i)
+			InitChannelInfo(iasio);
+
+			bufferInfo = std::vector<ASIOBufferInfo>(numberOfChannels);
+
+			ErrorCheck(iasio->createBuffers(bufferInfo._Myfirst, numberOfChannels, bufferLength, callbacks));
+
+			for (long i = 0; i < numberOfChannels; ++i)
 			{
 				if (bufferInfo[i].isInput)
 					inputBuffers.emplace_back(bufferInfo[i]);

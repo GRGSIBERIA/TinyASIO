@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ControllerBase.hpp"
+#include "Channel.hpp"
 
 namespace asio
 {
