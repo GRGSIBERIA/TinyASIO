@@ -8,6 +8,7 @@
 #include "Registory.hpp"
 #include "SDK.hpp"
 #include "Interface.hpp"
+#include "Channel.hpp"
 
 namespace asio
 {
@@ -20,6 +21,7 @@ namespace asio
 		static std::shared_ptr<Driver> driver;	// シングルトン
 
 		Interface iasio;
+		ChannelManager channelManager;
 
 	private:
 		
@@ -28,7 +30,7 @@ namespace asio
 		* @params[in] subkey レジストリの位置など
 		*/
 		Driver(const CLSID& clsid, const SubKey& subkey)
-			: iasio(clsid, subkey) { }
+			: iasio(clsid, subkey), channelManager() { }
 
 
 	public:
@@ -49,6 +51,8 @@ namespace asio
 			Driver::driver.reset(new Driver(clsid, subkey), [](Driver *p) { delete p; });
 			return *Driver::driver;
 		}
+
+		const ChannelManager& ChannelManager() const { return channelManager; }
 
 
 	private:

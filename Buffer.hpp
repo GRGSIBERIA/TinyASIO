@@ -22,6 +22,15 @@ namespace asio
 		CRITICAL_SECTION critical;	//!< クリティカルセクション
 
 
+		template <typename FUNC>
+		void Critical(FUNC func)
+		{
+			EnterCriticalSection(&critical);
+			func();
+			LeaveCriticalSection(&critical);
+		}
+
+
 	public:
 		BufferBase(const ASIOBufferInfo& info)
 			: channelNumber(info.channelNum)
@@ -51,10 +60,24 @@ namespace asio
 		StreamingBuffer Fetch()
 		{
 			StreamingBuffer retval = stream;
-			EnterCriticalSection(&critical);
-			stream = StreamingBuffer(new std::vector<int>());
-			LeaveCriticalSection(&critical);
+			Critical([&](){ stream = StreamingBuffer(new std::vector<int>()); });
 			return retval;
+		}
+
+
+		/**
+		* @param[in,out] buffer コピーしたいバッファ
+		* @param[in] bufferLength バッファの長さ
+		*/
+		void Fetch(void* buffer, const long bufferLength)
+		{
+			Critical([&](){
+				long length = bufferLength;
+				if (length > stream->size())
+					length = stream->size();
+				memcpy(buffer, &stream->at(0), length);
+				stream->erase(stream->begin(), stream->begin() + length);
+			});
 		}
 
 
@@ -64,9 +87,19 @@ namespace asio
 		*/
 		void Store(const std::vector<int>& store)
 		{
-			EnterCriticalSection(&critical);
-			stream->insert(stream->end(), store.begin(), store.end());
-			LeaveCriticalSection(&critical);
+			Critical([&](){stream->insert(stream->end(), store.begin(), store.end()); });
+		}
+
+
+		/**
+		* void*からバッファに蓄積する
+		* @param[in] buffer 移したいバッファ
+		* @param[in] bufferLength バッファの長さ
+		*/
+		void Store(void* buffer, const long bufferLength)
+		{
+			int* ptr = reinterpret_cast<int*>(buffer);
+			Critical([&](){ stream->insert(stream->end(), ptr, ptr + bufferLength); });
 		}
 	};
 
@@ -100,8 +133,12 @@ namespace asio
 	{
 		std::vector<ASIOBufferInfo> bufferInfo;
 
+		std::vector<BufferBase> buffers;
 		std::vector<InputBuffer> inputBuffers;
 		std::vector<OutputBuffer> outputBuffers;
+
+		static std::vector<InputBuffer>* inputBuffersPtr;
+		static std::vector<OutputBuffer>* outputBuffersPtr;
 
 	public:
 		BufferManager(const long numChannels, const long bufferLength, ASIOCallbacks* callbacks)
@@ -117,6 +154,15 @@ namespace asio
 				else
 					outputBuffers.emplace_back(bufferInfo[i]);
 			}
+
+			inputBuffersPtr = &inputBuffers;
+			outputBuffersPtr = &outputBuffers;
 		}
+
+		static std::vector<InputBuffer>* InputBuffer() { return inputBuffersPtr; }		//!< 公開されている入力バッファを得る
+		static std::vector<OutputBuffer>* OutputBuffer() { return outputBuffersPtr; }	//!< 公開されている出力バッファを得る
 	};
+
+	std::vector<InputBuffer>* BufferManager::inputBuffersPtr = nullptr;
+	std::vector<OutputBuffer>* BufferManager::outputBuffersPtr = nullptr;
 }

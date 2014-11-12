@@ -9,6 +9,7 @@ namespace asio
 {
 	/**
 	* コントローラの元になるクラス
+	* @warning 複数作成すると挙動がメチャクチャになるので注意
 	*/
 	class ControllerBase
 	{
@@ -16,13 +17,14 @@ namespace asio
 		Driver* driver;
 		IASIO* iasio;
 
-		long bufferLength;
 		long inputLatency;
 		long outputLatency;
 		long sampleRate;
 
-		ChannelManager* channelManager;
 		BufferManager* bufferManager;
+
+		static long bufferLength;
+		static BufferManager* bufferManagerPtr;
 
 	protected:
 		ControllerBase()
@@ -30,24 +32,28 @@ namespace asio
 			driver = &Driver::Get();
 			iasio = driver->Interface();
 
-			iasio->getBufferSize(NULL, NULL, &bufferLength, NULL);
-			iasio->getLatencies(&inputLatency, &outputLatency);
+			ErrorCheck(iasio->getBufferSize(NULL, NULL, &bufferLength, NULL));
+			ErrorCheck(iasio->getLatencies(&inputLatency, &outputLatency));
 
 			double sr;	// double型はなんか不自然なのでlongに変換する
-			iasio->getSampleRate(&sr);
+			ErrorCheck(iasio->getSampleRate(&sr));
+			ErrorCheck(iasio->setSampleRate(sr));
 			sampleRate = (long)sr;
-
-			channelManager = new ChannelManager();
 		}
 
+		/*
+		* バッファ生成関数の呼び出しは子クラスに移譲する
+		*/
 		void CreateBuffer(ASIOCallbacks* callbacks)
 		{
-			bufferManager = new BufferManager(channelManager->NumberOfChannels(), bufferLength, callbacks);
+			const auto& channelManager = Driver::Get().ChannelManager();
+			bufferManager = new BufferManager(channelManager.NumberOfChannels(), bufferLength, callbacks);
+			bufferManagerPtr = bufferManager;
 		}
 
 	public:
-		void Start() { driver->Interface()->start(); }	//!< 録音開始
-		void Stop() { driver->Interface()->stop(); }	//!< 録音終了
+		void Start() { driver->Interface()->start(); }	//!< バッファリング開始
+		void Stop() { driver->Interface()->stop(); }	//!< バッファリング終了
 		
 		inline const long BufferSize() const { return bufferLength * sizeof(int); }		//!< バッファの容量（バイト）を返す
 		inline const long BufferLength() const { return bufferLength; }		//!< バッファの長さを返す
@@ -58,8 +64,10 @@ namespace asio
 	public:
 		virtual ~ControllerBase()
 		{
-			delete channelManager;
 			delete bufferManager;
 		}
 	};
+
+	BufferManager* ControllerBase::bufferManagerPtr = nullptr;
+	long ControllerBase::bufferLength = 0;
 }
