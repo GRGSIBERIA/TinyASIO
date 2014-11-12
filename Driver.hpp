@@ -30,7 +30,7 @@ namespace asio
 		* @params[in] subkey レジストリの位置など
 		*/
 		Driver(const CLSID& clsid, const SubKey& subkey)
-			: iasio(clsid, subkey), channelManager() { }
+			: iasio(clsid, subkey), channelManager(iasio.IASIO()) { }
 
 
 	public:

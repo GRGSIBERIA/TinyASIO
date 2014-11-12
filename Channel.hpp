@@ -69,10 +69,8 @@ namespace asio
 		ASIOChannelInfo* infoPtr;	//!< チャンネル情報の先頭ポインタ
 
 	public:
-		ChannelManager()
+		ChannelManager(IASIO* iasio)
 		{
-			auto* iasio = Driver::Get().Interface();
-			
 			ErrorCheck(iasio->getChannels(&numberOfInput, &numberOfOutput));
 			ErrorCheck(iasio->getChannelInfo(infoPtr));
 			

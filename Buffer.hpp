@@ -1,9 +1,11 @@
 #pragma once
 #include <vector>
 #include <Windows.h>
+#include <algorithm>
 
 #include "SDK.hpp"
 #include "Driver.hpp"
+#include "Channel.hpp"
 
 namespace asio
 {
@@ -66,7 +68,7 @@ namespace asio
 
 
 		/**
-		* 与えられたバッファに値を転送する
+		* 元からあるバッファに転送する
 		* @param[in,out] buffer 転送したいバッファ
 		* @param[in] bufferLength バッファの長さ
 		*/
@@ -102,6 +104,22 @@ namespace asio
 			int* ptr = reinterpret_cast<int*>(buffer);
 			Critical([&](){ stream->insert(stream->end(), ptr, ptr + bufferLength); });
 		}
+
+		/**
+		* チャンネル番号で比較する
+		*/
+		inline const bool IsChannelNumber(const long channelNumber) const
+		{
+			return this->channelNumber == channelNumber;
+		}
+
+		/**
+		* チャンネル番号で比較する
+		*/
+		inline const bool IsChannelNumber(const Channel& channel) const
+		{
+			return channelNumber == channel.channelNumber;
+		}
 	};
 
 
@@ -132,41 +150,24 @@ namespace asio
 	*/
 	class BufferManager
 	{
-		long numberOfInputChannels;
-		long numberOfOutputChannels;
-		long numberOfChannels;
-		long bufferLength;
-
 		std::vector<ASIOBufferInfo> bufferInfo;
 
 		std::vector<BufferBase> buffers;
 		std::vector<InputBuffer> inputBuffers;
 		std::vector<OutputBuffer> outputBuffers;
 
+		static std::vector<BufferBase>* buffersPtr;
 		static std::vector<InputBuffer>* inputBuffersPtr;
 		static std::vector<OutputBuffer>* outputBuffersPtr;
 
-	private:
-		void InitChannelInfo(IASIO* iasio)
-		{
-			ErrorCheck(iasio->getBufferSize(NULL, NULL, &bufferLength, NULL));
-
-			ErrorCheck(iasio->getChannels(&numberOfInputChannels, &numberOfOutputChannels));
-			numberOfChannels = numberOfInputChannels + numberOfOutputChannels;
-		}
-
 	public:
-		BufferManager(ASIOCallbacks* callbacks)
+		BufferManager(const long numChannels, const long bufferLength, ASIOCallbacks* callbacks)
 		{
 			auto* iasio = Driver::Get().Interface();
+			bufferInfo = std::vector<ASIOBufferInfo>(numChannels);
+			ErrorCheck(iasio->createBuffers(bufferInfo._Myfirst, numChannels, bufferLength, callbacks));
 
-			InitChannelInfo(iasio);
-
-			bufferInfo = std::vector<ASIOBufferInfo>(numberOfChannels);
-
-			ErrorCheck(iasio->createBuffers(bufferInfo._Myfirst, numberOfChannels, bufferLength, callbacks));
-
-			for (long i = 0; i < numberOfChannels; ++i)
+			for (long i = 0; i < numChannels; ++i)
 			{
 				if (bufferInfo[i].isInput)
 					inputBuffers.emplace_back(bufferInfo[i]);
@@ -178,10 +179,17 @@ namespace asio
 			outputBuffersPtr = &outputBuffers;
 		}
 
+		BufferBase& Search(const Channel& channel)
+		{
+			
+			channel.channelNumber;
+		}
+
 		static std::vector<InputBuffer>* InputBuffer() { return inputBuffersPtr; }		//!< 公開されている入力バッファを得る
 		static std::vector<OutputBuffer>* OutputBuffer() { return outputBuffersPtr; }	//!< 公開されている出力バッファを得る
 	};
 
+	std::vector<BufferBase>* BufferManager::buffersPtr = nullptr;
 	std::vector<InputBuffer>* BufferManager::inputBuffersPtr = nullptr;
 	std::vector<OutputBuffer>* BufferManager::outputBuffersPtr = nullptr;
 }

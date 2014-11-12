@@ -15,7 +15,10 @@ namespace asio
 		}
 
 	public:
-		InputBackController()
-			: ControllerBase() {}
+		InputBackController(const InputChannel& input, const OutputChannel& output)
+			: ControllerBase() 
+		{
+
+		}
 	};
 }
