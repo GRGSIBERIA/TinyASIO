@@ -78,7 +78,7 @@ namespace asio
 				long length = bufferLength;
 				if (length > stream->size())
 					length = stream->size();
-				memcpy(buffer, &stream->at(0), length);
+				memcpy(buffer, &stream->at(0), length * sizeof(int));
 				stream->erase(stream->begin(), stream->begin() + length);
 			});
 		}
@@ -179,10 +179,32 @@ namespace asio
 			outputBuffersPtr = &outputBuffers;
 		}
 
+
+		/**
+		* バッファから対象のチャンネル番号を探してくる
+		*/
 		BufferBase& Search(const Channel& channel)
 		{
-			
-			channel.channelNumber;
+			return *std::find_if(buffers.begin(), buffers.end(), 
+				[&](const BufferBase& buffer) -> bool {
+				return buffer.ChannelNumber() == channel.channelNumber; 
+			});
+		}
+
+		InputBuffer& Search(const InputChannel& channel)
+		{
+			return *std::find_if(inputBuffers.begin(), inputBuffers.end(),
+				[&](const BufferBase& buffer) -> bool {
+				return buffer.ChannelNumber() == channel.channelNumber;
+			});
+		}
+
+		OutputBuffer& Search(const OutputChannel& channel)
+		{
+			return *std::find_if(outputBuffers.begin(), outputBuffers.end(),
+				[&](const BufferBase& buffer) -> bool {
+				return buffer.ChannelNumber() == channel.channelNumber;
+			});
 		}
 
 		static std::vector<InputBuffer>* InputBuffer() { return inputBuffersPtr; }		//!< 公開されている入力バッファを得る

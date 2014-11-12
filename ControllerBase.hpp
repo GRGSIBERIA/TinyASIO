@@ -51,6 +51,7 @@ namespace asio
 			bufferManagerPtr = bufferManager;
 		}
 
+
 	public:
 		void Start() { driver->Interface()->start(); }	//!< バッファリング開始
 		void Stop() { driver->Interface()->stop(); }	//!< バッファリング終了
