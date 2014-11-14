@@ -120,6 +120,14 @@ namespace asio
 		{
 			return channelNumber == channel.channelNumber;
 		}
+
+		/**
+		* バッファの領域がnullじゃなかったらtrue
+		*/
+		inline const bool IsEnabledBuffer() const
+		{
+			return buffers[0] != nullptr && buffers[1] != nullptr;
+		}
 	};
 
 
@@ -156,7 +164,7 @@ namespace asio
 		std::vector<InputBuffer> inputBuffers;
 		std::vector<OutputBuffer> outputBuffers;
 
-		static std::vector<BufferBase>* buffersPtr;
+		static std::vector<BufferBase>* buffersPtr;			//!< コールバック関数から使えるようにするためのポインタ
 		static std::vector<InputBuffer>* inputBuffersPtr;
 		static std::vector<OutputBuffer>* outputBuffersPtr;
 
@@ -187,7 +195,7 @@ namespace asio
 		{
 			return *std::find_if(buffers.begin(), buffers.end(), 
 				[&](const BufferBase& buffer) -> bool {
-				return buffer.ChannelNumber() == channel.channelNumber; 
+				return buffer.IsChannelNumber(channel);
 			});
 		}
 
@@ -195,7 +203,7 @@ namespace asio
 		{
 			return *std::find_if(inputBuffers.begin(), inputBuffers.end(),
 				[&](const BufferBase& buffer) -> bool {
-				return buffer.ChannelNumber() == channel.channelNumber;
+				return buffer.IsChannelNumber(channel);
 			});
 		}
 
@@ -203,7 +211,33 @@ namespace asio
 		{
 			return *std::find_if(outputBuffers.begin(), outputBuffers.end(),
 				[&](const BufferBase& buffer) -> bool {
-				return buffer.ChannelNumber() == channel.channelNumber;
+				return buffer.IsChannelNumber(channel);
+			});
+		}
+
+		/**
+		* バッファリングされている入力チャンネルを探す
+		* もっとも最初に見つかったものが返される
+		* @note バッファへのvoid*がnullptrじゃないものを取得する
+		*/
+		InputBuffer& SearchBufferableInput()
+		{
+			return *std::find_if(inputBuffers.begin(), inputBuffers.end(),
+				[](const BufferBase& buffer) -> bool {
+				return buffer.IsEnabledBuffer();
+			});
+		}
+
+		/**
+		* バッファリングされている出力チャンネルを探す
+		* もっとも最初に見つかったものが返される
+		* @note バッファへのvoid*がnullptrじゃないものを取得する
+		*/
+		OutputBuffer& SearchBufferableOutput()
+		{
+			return *std::find_if(outputBuffers.begin(), outputBuffers.end(),
+				[](const BufferBase& buffer) -> bool {
+				return buffer.IsEnabledBuffer();
 			});
 		}
 

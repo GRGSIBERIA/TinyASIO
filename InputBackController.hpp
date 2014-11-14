@@ -17,7 +17,7 @@ namespace asio
 			void* outBuf = output->GetBuffer(index);
 			void* inBuf = input->GetBuffer(index);
 
-			memcpy(outBuf, inBuf, bufferLength * sizeof(int));
+			memcpy(outBuf, inBuf, bufferLength * sizeof(int));	// 入力のバッファを出力へ移す
 
 			input->Store(inBuf, bufferLength);
 		}
@@ -35,6 +35,8 @@ namespace asio
 		{
 			
 		}
+
+		
 	};
 
 	InputBuffer* InputBackController::input = nullptr;
