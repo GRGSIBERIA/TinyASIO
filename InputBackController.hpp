@@ -1,11 +1,12 @@
 #pragma once
 
 #include "ControllerBase.hpp"
-#include "Channel.hpp"
 
 namespace asio
 {
-	/* 入力信号を出力にそのまま返す */
+	/*
+	 *入力信号を出力にそのまま返す 
+	 */
 	class InputBackController : public ControllerBase
 	{
 		static InputBuffer* input;
@@ -22,15 +23,29 @@ namespace asio
 			input->Store(inBuf, bufferLength);
 		}
 
+		ASIOCallbacks CreateCallbacks()
+		{
+			auto callbacks = ASIOCallbacks();
+			callbacks.asioMessage = NULL;
+			callbacks.bufferSwitch = &BufferSwitch;
+			callbacks.bufferSwitchTimeInfo = NULL;
+			callbacks.sampleRateDidChange = NULL;
+			return callbacks;
+		}
+
 	public:
 		/**
 		* 指定したチャンネルからコントローラを生成する
+		* @params[in] inputChannel 入力を受け付けるチャンネル
+		* @params[in] outputChannel 入力された内容を流し込みたい出力チャンネル
 		*/
 		InputBackController(const InputChannel& inputChannel, const OutputChannel& outputChannel)
 			: ControllerBase() 
 		{
 			input = &bufferManager->Search(inputChannel);
 			output = &bufferManager->Search(outputChannel);
+			auto callbacks = CreateCallbacks();
+			CreateBuffer(&callbacks);
 		}
 
 		/**
@@ -41,6 +56,8 @@ namespace asio
 		{
 			input = &bufferManager->SearchBufferableInput();
 			output = &bufferManager->SearchBufferableOutput();
+			auto callbacks = CreateCallbacks();
+			CreateBuffer(&callbacks);
 		}
 
 		
