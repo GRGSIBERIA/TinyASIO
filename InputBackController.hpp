@@ -5,7 +5,7 @@
 
 namespace asio
 {
-	/* 入力信号をそのまま返す */
+	/* 入力信号を出力にそのまま返す */
 	class InputBackController : public ControllerBase
 	{
 		static InputBuffer* input;
@@ -23,6 +23,9 @@ namespace asio
 		}
 
 	public:
+		/**
+		* 指定したチャンネルからコントローラを生成する
+		*/
 		InputBackController(const InputChannel& inputChannel, const OutputChannel& outputChannel)
 			: ControllerBase() 
 		{
@@ -30,10 +33,14 @@ namespace asio
 			output = &bufferManager->Search(outputChannel);
 		}
 
+		/**
+		* バッファリング可能なチャンネルからコントローラを生成する
+		*/
 		InputBackController()
 			: ControllerBase()
 		{
-			
+			input = &bufferManager->SearchBufferableInput();
+			output = &bufferManager->SearchBufferableOutput();
 		}
 
 		
