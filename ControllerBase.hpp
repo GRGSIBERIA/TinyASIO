@@ -22,6 +22,7 @@ namespace asio
 		long sampleRate;
 
 		BufferManager* bufferManager;
+		ASIOCallbacks callbacks;
 
 		static long bufferLength;
 		static BufferManager* bufferManagerPtr;
@@ -32,7 +33,8 @@ namespace asio
 			driver = &Driver::Get();
 			iasio = driver->Interface();
 
-			ErrorCheck(iasio->getBufferSize(NULL, NULL, &bufferLength, NULL));
+			long buf = 0;
+			ErrorCheck(iasio->getBufferSize(&buf, &buf, &bufferLength, &buf));
 			ErrorCheck(iasio->getLatencies(&inputLatency, &outputLatency));
 
 			double sr;	// doubleŒ^‚Í‚È‚ñ‚©•s©‘R‚È‚Ì‚Ålong‚É•ÏŠ·‚·‚é

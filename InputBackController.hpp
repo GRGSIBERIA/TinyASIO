@@ -32,10 +32,10 @@ namespace asio
 		InputBackController(const InputChannel& inputChannel, const OutputChannel& outputChannel)
 			: ControllerBase() 
 		{
+			callbacks = CreateCallbacks(&BufferSwitch, NULL, NULL, NULL);
+			CreateBuffer(&callbacks);
 			input = &bufferManager->Search(inputChannel);
 			output = &bufferManager->Search(outputChannel);
-			auto callbacks = CreateCallbacks(&BufferSwitch, NULL, NULL, NULL);
-			CreateBuffer(&callbacks);
 		}
 
 		/**
@@ -44,10 +44,10 @@ namespace asio
 		InputBackController()
 			: ControllerBase()
 		{
+			callbacks = CreateCallbacks(&BufferSwitch, NULL, NULL, NULL);
+			CreateBuffer(&callbacks);
 			input = &bufferManager->SearchBufferableInput();
 			output = &bufferManager->SearchBufferableOutput();
-			auto callbacks = CreateCallbacks(&BufferSwitch, NULL, NULL, NULL);
-			CreateBuffer(&callbacks);
 		}
 
 		/**

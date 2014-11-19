@@ -173,7 +173,7 @@ namespace asio
 		{
 			auto* iasio = Driver::Get().Interface();
 			bufferInfo = std::vector<ASIOBufferInfo>(numChannels);
-			ErrorCheck(iasio->createBuffers(bufferInfo._Myfirst, numChannels, bufferLength, callbacks));
+			ErrorCheck(iasio->createBuffers(&bufferInfo[0], numChannels, bufferLength, callbacks));
 
 			for (long i = 0; i < numChannels; ++i)
 			{
