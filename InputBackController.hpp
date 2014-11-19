@@ -20,17 +20,7 @@ namespace asio
 
 			memcpy(outBuf, inBuf, bufferLength * sizeof(int));	// 入力のバッファを出力へ移す
 
-			input->Store(inBuf, bufferLength);
-		}
-
-		ASIOCallbacks CreateCallbacks()
-		{
-			auto callbacks = ASIOCallbacks();
-			callbacks.asioMessage = NULL;
-			callbacks.bufferSwitch = &BufferSwitch;
-			callbacks.bufferSwitchTimeInfo = NULL;
-			callbacks.sampleRateDidChange = NULL;
-			return callbacks;
+			input->Store(inBuf, bufferLength);	// 入力ストリームに内容を蓄積する
 		}
 
 	public:
@@ -44,7 +34,7 @@ namespace asio
 		{
 			input = &bufferManager->Search(inputChannel);
 			output = &bufferManager->Search(outputChannel);
-			auto callbacks = CreateCallbacks();
+			auto callbacks = CreateCallbacks(&BufferSwitch, NULL, NULL, NULL);
 			CreateBuffer(&callbacks);
 		}
 
@@ -56,11 +46,19 @@ namespace asio
 		{
 			input = &bufferManager->SearchBufferableInput();
 			output = &bufferManager->SearchBufferableOutput();
-			auto callbacks = CreateCallbacks();
+			auto callbacks = CreateCallbacks(&BufferSwitch, NULL, NULL, NULL);
 			CreateBuffer(&callbacks);
 		}
 
-		
+		/**
+		* 入力ストリームに蓄積されたデータを取得する
+		* @return 入力ストリームに蓄積されたデータ
+		* @note 入力ストリームの内容は空になる
+		*/
+		std::shared_ptr<std::vector<int>> Fetch()
+		{
+			return input->Fetch();
+		}
 	};
 
 	InputBuffer* InputBackController::input = nullptr;
