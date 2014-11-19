@@ -21,11 +21,10 @@ namespace asio
 		long outputLatency;
 		long sampleRate;
 
-		BufferManager* bufferManager;
 		ASIOCallbacks callbacks;
 
 		static long bufferLength;
-		static BufferManager* bufferManagerPtr;
+		static std::shared_ptr<BufferManager> bufferManager;
 
 	protected:
 		ControllerBase()
@@ -43,30 +42,58 @@ namespace asio
 			sampleRate = (long)sr;
 		}
 
+
 		/*
 		* バッファ生成関数の呼び出しは子クラスに移譲する
 		*/
-		void CreateBuffer(ASIOCallbacks* callbacks)
+		void CreateBuffer(const std::vector<Channel>& channels, ASIOCallbacks* callbacks)
 		{
 			const auto& channelManager = Driver::Get().ChannelManager();
-			bufferManager = new BufferManager(channelManager.NumberOfChannels(), bufferLength, callbacks);
-			bufferManagerPtr = bufferManager;
+			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(channels, bufferLength, callbacks));
 		}
+
+
+		/*
+		* バッファ生成関数の呼び出しは子クラスに移譲する
+		*/
+		template <size_t NUM>
+		void CreateBuffer(const std::array<Channel, NUM>& channels, ASIOCallbacks* callbacks)
+		{
+			const auto& channelManager = Driver::Get().ChannelManager();
+			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(channels, bufferLength, callbacks));
+		}
+
+
+		static void SampleRateDidChange(ASIOSampleRate sRate)
+		{
+			
+		}
+			
+		static long AsioMessage(long selector, long value, void* message, double* opt)
+		{
+			return 0;
+		}
+		
+		static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
+		{
+			return params;
+		}
+
 
 		/**
 		* コールバック関数を生成する
 		*/
-		ASIOCallbacks CreateCallbacks(
-			ASIOBufferSwitch bufferSwitch, ASIOSampleRateDidChange sampleRateDidChange,
-			ASIOAsioMessage asioMessage, ASIOBufferSwitchTimeInfo bufferSwitchTimeInfo)
+		ASIOCallbacks CreateCallbacks(ASIOBufferSwitch bufferSwitch)
 		{
 			auto callbacks = ASIOCallbacks();
-			callbacks.asioMessage = asioMessage;
+			callbacks.asioMessage = &AsioMessage;
 			callbacks.bufferSwitch = bufferSwitch;
-			callbacks.bufferSwitchTimeInfo = bufferSwitchTimeInfo;
-			callbacks.sampleRateDidChange = sampleRateDidChange;
+			callbacks.bufferSwitchTimeInfo = &BufferSwitchTimeInfo;
+			callbacks.sampleRateDidChange = &SampleRateDidChange;
 			return callbacks;
 		}
+
+
 
 
 	public:
@@ -80,12 +107,9 @@ namespace asio
 		inline const long SampleRate() const { return sampleRate; }			//!< サンプリング周波数を返す
 
 	public:
-		virtual ~ControllerBase()
-		{
-			delete bufferManager;
-		}
+		virtual ~ControllerBase() { }
 	};
 
-	BufferManager* ControllerBase::bufferManagerPtr = nullptr;
+	std::shared_ptr<BufferManager> ControllerBase::bufferManager;
 	long ControllerBase::bufferLength = 0;
 }

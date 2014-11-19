@@ -9,10 +9,21 @@ namespace asio
 	/**
 	* ドライバが動かない時に呼ばれる
 	*/
-	class CantProcessException : std::exception
+	class CantProcessException : public std::exception
 	{
 	public:
 		CantProcessException(const std::string& message)
+			: exception(message.c_str()) {}
+	};
+
+
+	/**
+	* チャンネルが見つからない時に呼ばれる
+	*/
+	class DontFoundChannels : public std::exception
+	{
+	public:
+		DontFoundChannels(const std::string& message) 
 			: exception(message.c_str()) {}
 	};
 

@@ -18,17 +18,21 @@ namespace asio
 		const long channelNumber;			//!< チャンネル番号
 		const ASIOSampleType sampleType;	//!< サンプリングの種類
 		const long channelGroup;			//!< チャンネルのグループ
+		const bool isInput;
 
 	public:
-		Channel(const ASIOChannelInfo& i) 
-			: 
+		Channel(const ASIOChannelInfo& i)
+			:
 			isActive(i.isActive > 0),
 			name(i.name),
 			channelNumber(i.channel),
 			sampleType(i.type),
-			channelGroup(i.channelGroup)
-		{ 
-			
+			channelGroup(i.channelGroup),
+			isInput(i.isInput > 0) { }
+
+		Channel operator=(const Channel& channel)
+		{
+			return channel;
 		}
 	};
 
@@ -92,6 +96,11 @@ namespace asio
 		{
 			ErrorCheck(iasio->getChannels(&numberOfInput, &numberOfOutput));
 			
+			if (numberOfInput <= 0)
+				throw DontFoundChannels("入力チャンネルが見つかりません");
+			if (numberOfOutput <= 0)
+				throw DontFoundChannels("出力チャンネルが見つかりません");
+
 			numberOfChannels = numberOfInput + numberOfOutput;
 			inPtr = new ASIOChannelInfo[numberOfInput];
 			outPtr = new ASIOChannelInfo[numberOfOutput];
@@ -111,6 +120,8 @@ namespace asio
 
 		const std::vector<InputChannel>& Inputs() const { return inputs; }		//!< 入力チャンネルを返す
 		const std::vector<OutputChannel>& Outputs() const { return outputs; }	//!< 出力チャンネルを返す
+		const InputChannel& Inputs(const long i) const { return inputs[i]; }	//!< 添字iに対応した入力チャンネルを返す
+		const OutputChannel& Outputs(const long i) const { return outputs[i]; }	//!< 添字iに対応して出力チャンネルを返す
 		const long NumberOfInputs() const { return numberOfInput; }				//!< 入力チャンネル数
 		const long NumberOfOutputs() const { return numberOfOutput; }			//!< 出力チャンネル数
 		const long NumberOfChannels() const { return numberOfChannels; }		//!< チャンネル数

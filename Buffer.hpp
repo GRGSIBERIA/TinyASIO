@@ -2,6 +2,7 @@
 #include <vector>
 #include <Windows.h>
 #include <algorithm>
+#include <array>
 
 #include "SDK.hpp"
 #include "Driver.hpp"
@@ -168,14 +169,25 @@ namespace asio
 		static std::vector<InputBuffer>* inputBuffersPtr;
 		static std::vector<OutputBuffer>* outputBuffersPtr;
 
-	public:
-		BufferManager(const long numChannels, const long bufferLength, ASIOCallbacks* callbacks)
+	private:
+		template <typename VECTOR_ARRAY>
+		void InitBufferInfo(const VECTOR_ARRAY& channels)
+		{
+			bufferInfo = std::vector<ASIOBufferInfo>(channels.size());
+
+			for (int i = 0; i < channels.size(); ++i)
+			{
+				bufferInfo[i].channelNum = channels[i].channelNumber;
+				bufferInfo[i].isInput = channels[i].isInput;
+			}
+		}
+
+		void InitBuffers(const long bufferLength, ASIOCallbacks* callbacks)
 		{
 			auto* iasio = Driver::Get().Interface();
-			bufferInfo = std::vector<ASIOBufferInfo>(numChannels);
-			ErrorCheck(iasio->createBuffers(&bufferInfo[0], numChannels, bufferLength, callbacks));
+			ErrorCheck(iasio->createBuffers(&bufferInfo[0], bufferInfo.size(), bufferLength, callbacks));
 
-			for (long i = 0; i < numChannels; ++i)
+			for (long i = 0; i < bufferInfo.size(); ++i)
 			{
 				if (bufferInfo[i].isInput)
 					inputBuffers.emplace_back(bufferInfo[i]);
@@ -187,6 +199,19 @@ namespace asio
 			outputBuffersPtr = &outputBuffers;
 		}
 
+	public:
+		BufferManager(const std::vector<Channel> channels, const long bufferLength, ASIOCallbacks* callbacks)
+		{
+			InitBufferInfo(channels);
+			InitBuffers(bufferLength, callbacks);
+		}
+
+		template <size_t NUM>
+		BufferManager(const std::array<Channel, NUM> channels, const long bufferLength, ASIOCallbacks* callbacks)
+		{
+			InitBufferInfo(channels);
+			InitBuffers(bufferLength, callbacks);
+		}
 
 		/**
 		* バッファから対象のチャンネル番号を探してくる
