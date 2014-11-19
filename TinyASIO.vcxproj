@@ -78,6 +78,9 @@
     <ClInclude Include="SDK.hpp" />
     <ClInclude Include="TinyASIO.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

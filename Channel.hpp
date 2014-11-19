@@ -22,7 +22,7 @@ namespace asio
 	public:
 		Channel(const ASIOChannelInfo& i) 
 			: 
-			isActive(i.isActive),
+			isActive(i.isActive > 0),
 			name(i.name),
 			channelNumber(i.channel),
 			sampleType(i.type),
@@ -75,7 +75,7 @@ namespace asio
 			ErrorCheck(iasio->getChannelInfo(infoPtr));
 			
 			numberOfChannels = numberOfInput + numberOfOutput;
-			for (size_t i = 0; i < numberOfChannels; ++i)
+			for (long i = 0; i < numberOfChannels; ++i)
 			{
 				const auto& info = infoPtr[i];
 				if (info.isInput)

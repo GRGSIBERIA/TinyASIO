@@ -39,9 +39,6 @@
     <ClInclude Include="TinyASIO.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Channel.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Buffer.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -54,5 +51,13 @@
     <ClInclude Include="EffectableInputBackController.hpp">
       <Filter>ヘッダー ファイル\Controller</Filter>
     </ClInclude>
+    <ClInclude Include="Channel.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

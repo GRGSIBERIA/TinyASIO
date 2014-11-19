@@ -20,23 +20,63 @@ namespace asio
 	private:
 		static std::shared_ptr<Driver> driver;	// シングルトン
 
-		Interface iasio;
-		ChannelManager channelManager;
+		//Interface iasio;
+		IASIO *iasio;			//!< インターフェースへのポインタ
+		void *systemHandle;		//!< システムハンドル
+		SubKey subkey;			//!< レジストリの場所
+
+		std::string driverName;	//!< ドライバ名
+		long driverVersion;		//!< ドライバのバージョン
+
+		std::shared_ptr<ChannelManager> channelManager;
 
 	private:
+		void RetryCreateInstance(const CLSID& clsid, const SubKey& subkey)
+		{
+			// デフォルトだとThreadingModelがSTAなので，STA/MTA（Both）に変更して再試行する
+			if (Registory::ChangeTheadingModel(subkey) != ERROR_SUCCESS)
+				throw CantCreateInstance("ドライバのインスタンス生成に失敗しました");
+
+			HRESULT hr = CoCreateInstance(clsid, 0, CLSCTX_INPROC_SERVER, clsid, (LPVOID*)&iasio);
+			if (FAILED(hr))
+				throw CantCreateInstance("ドライバのインスタンス生成に失敗しました");
+		}
 		
 		/**
 		* @params[in] clsid ロードしたいCLSID
 		* @params[in] subkey レジストリの位置など
 		*/
 		Driver(const CLSID& clsid, const SubKey& subkey)
-			: iasio(clsid, subkey), channelManager(iasio.IASIO()) { }
+			: subkey(subkey)
+		{
+			HRESULT hr = CoCreateInstance(clsid, 0, CLSCTX_INPROC_SERVER, clsid, (LPVOID*)&iasio);
+			if (FAILED(hr))
+				RetryCreateInstance(clsid, subkey);
+
+			try
+			{
+				iasio->init(systemHandle);
+			}
+			catch (...)
+			{
+				throw CantHandlingASIODriver("ドライバのハンドルの初期化に失敗しました");
+			}
+
+			// 名前とドライバのバージョンだけ取得
+			char buffer[360];
+			iasio->getDriverName(buffer);
+			driverName = buffer;
+			driverVersion = iasio->getDriverVersion();
+
+			channelManager.reset(new asio::ChannelManager(iasio), [](asio::ChannelManager* p) { delete p; });
+		}
 
 
 	public:
-		const std::string& Name() const { return iasio.Name(); }	//!< ドライバ名を返す
-		const long& Version() const { return iasio.Version(); }		//!< ドライバのバージョンを返す
-		IASIO* Interface() { return iasio.IASIO(); }					//!< ASIOのインターフェースを返す
+		const std::string& Name() const { return driverName; }	//!< ドライバ名を返す
+		const long& Version() const { return driverVersion; }	//!< ドライバのバージョンを返す
+
+		IASIO* Interface() { return iasio; }					//!< ASIOのインターフェースを返す
 
 	public:
 		/**
@@ -52,7 +92,7 @@ namespace asio
 			return *Driver::driver;
 		}
 
-		const ChannelManager& ChannelManager() const { return channelManager; }
+		const ChannelManager& ChannelManager() const { return *channelManager; }
 
 
 	private:
