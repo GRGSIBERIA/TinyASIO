@@ -62,27 +62,51 @@ namespace asio
 	{
 		std::vector<InputChannel> inputs;
 		std::vector<OutputChannel> outputs;
+		IASIO* iasio;
 
 		long numberOfChannels;
 		long numberOfInput;			//!< 入力チャンネル数
 		long numberOfOutput;		//!< 出力チャンネル数
-		ASIOChannelInfo* infoPtr;	//!< チャンネル情報の先頭ポインタ
+		ASIOChannelInfo* inPtr;		//!< 入力チャンネル情報
+		ASIOChannelInfo* outPtr;	//!< 出力チャンネル情報
+
+
+	private:
+		//!< あるチャンネルの初期化
+		void InitOneChannel(ASIOChannelInfo& info, const long i, const ASIOBool isInput)
+		{
+			// infoに与えられた初期値で取得するチャンネルを判断してる
+			info.isInput = isInput;
+			info.channel = i;
+			ErrorCheck(iasio->getChannelInfo(&info));
+
+			if (isInput == 1)
+				inputs.emplace_back(info);
+			else
+				outputs.emplace_back(info);
+		}
 
 	public:
 		ChannelManager(IASIO* iasio)
+			: iasio(iasio)
 		{
 			ErrorCheck(iasio->getChannels(&numberOfInput, &numberOfOutput));
-			ErrorCheck(iasio->getChannelInfo(infoPtr));
 			
 			numberOfChannels = numberOfInput + numberOfOutput;
-			for (long i = 0; i < numberOfChannels; ++i)
-			{
-				const auto& info = infoPtr[i];
-				if (info.isInput)
-					inputs.emplace_back(info);
-				else
-					outputs.emplace_back(info);
-			}
+			inPtr = new ASIOChannelInfo[numberOfInput];
+			outPtr = new ASIOChannelInfo[numberOfOutput];
+
+			for (long i = 0; i < numberOfInput; ++i)
+				InitOneChannel(inPtr[i], i, 1);
+
+			for (long i = 0; i < numberOfInput; ++i)
+				InitOneChannel(outPtr[i], i, 1);
+		}
+
+		~ChannelManager()
+		{
+			delete[] inPtr;
+			delete[] outPtr;
 		}
 
 		const std::vector<InputChannel>& Inputs() const { return inputs; }		//!< 入力チャンネルを返す
