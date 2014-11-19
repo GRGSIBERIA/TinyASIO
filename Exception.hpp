@@ -2,6 +2,8 @@
 #include <string>
 #include <exception>
 
+#include "SDK.hpp"
+
 namespace asio
 {
 	/**
