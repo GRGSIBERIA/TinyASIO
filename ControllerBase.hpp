@@ -51,6 +51,21 @@ namespace asio
 			bufferManagerPtr = bufferManager;
 		}
 
+		/**
+		* コールバック関数を生成する
+		*/
+		ASIOCallbacks CreateCallbacks(
+			ASIOBufferSwitch bufferSwitch, ASIOSampleRateDidChange sampleRateDidChange,
+			ASIOAsioMessage asioMessage, ASIOBufferSwitchTimeInfo bufferSwitchTimeInfo)
+		{
+			auto callbacks = ASIOCallbacks();
+			callbacks.asioMessage = asioMessage;
+			callbacks.bufferSwitch = bufferSwitch;
+			callbacks.bufferSwitchTimeInfo = bufferSwitchTimeInfo;
+			callbacks.sampleRateDidChange = sampleRateDidChange;
+			return callbacks;
+		}
+
 
 	public:
 		void Start() { driver->Interface()->start(); }	//!< バッファリング開始
