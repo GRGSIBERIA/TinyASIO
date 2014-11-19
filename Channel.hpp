@@ -99,8 +99,8 @@ namespace asio
 			for (long i = 0; i < numberOfInput; ++i)
 				InitOneChannel(inPtr[i], i, 1);
 
-			for (long i = 0; i < numberOfInput; ++i)
-				InitOneChannel(outPtr[i], i, 1);
+			for (long i = 0; i < numberOfOutput; ++i)
+				InitOneChannel(outPtr[i], i, 0);
 		}
 
 		~ChannelManager()
