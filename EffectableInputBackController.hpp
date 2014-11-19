@@ -38,11 +38,11 @@ namespace asio
 		EffectableInputBackController(const InputChannel& inputChannel, const OutputChannel& outputChannel, EFFECT_FUNC effectorFunction)
 			: ControllerBase()
 		{
-			input = &bufferManager->Search(inputChannel);
-			output = &bufferManager->Search(outputChannel);
-			auto callbacks = CreateCallbacks(&BufferSwitch, NULL, NULL, NULL);
-			CreateBuffer(&callbacks);
-			effector = effectorFunction;
+			callbacks = CreateCallbacks(&BufferSwitch);
+			CreateBuffer({ inputChannel, outputChannel }, &callbacks);
+
+			input = &bufferManager->SearchBufferableInput();
+			output = &bufferManager->SearchBufferableOutput();
 		}
 
 		/**
@@ -51,11 +51,13 @@ namespace asio
 		EffectableInputBackController(EFFECT_FUNC effectorFunction)
 			: ControllerBase()
 		{
+			callbacks = CreateCallbacks(&BufferSwitch);
+			auto& channelMng = Driver::Get().ChannelManager();
+
+			CreateBuffer({ channelMng.Inputs(0), channelMng.Outputs(0) }, &callbacks);
+
 			input = &bufferManager->SearchBufferableInput();
 			output = &bufferManager->SearchBufferableOutput();
-			auto callbacks = CreateCallbacks(&BufferSwitch, NULL, NULL, NULL);
-			CreateBuffer(&callbacks);
-			effector = effectorFunction;
 		}
 
 		/**
