@@ -138,10 +138,14 @@ namespace asio
 		ASIOTimeCode     timeCode;       // optional, evaluated if (timeCode.flags & kTcValid)
 	};
 
+	typedef void(*ASIOBufferSwitch) (long doubleBufferIndex, ASIOBool directProcess);
+	typedef void(*ASIOSampleRateDidChange) (ASIOSampleRate sRate);
+	typedef long(*ASIOAsioMessage) (long selector, long value, void* message, double* opt);
+	typedef ASIOTime* (*ASIOBufferSwitchTimeInfo) (ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
 
 	struct ASIOCallbacks
 	{
-		void(*bufferSwitch) (long doubleBufferIndex, ASIOBool directProcess);
+		ASIOBufferSwitch bufferSwitch;
 		// bufferSwitch indicates that both input and output are to be processed.
 		// the current buffer half index (0 for A, 1 for B) determines
 		// - the output buffer that the host should start to fill. the other buffer
@@ -158,16 +162,16 @@ namespace asio
 		// directProcess should be set to ASIOFalse.
 		// Note: bufferSwitch may be called at interrupt time for highest efficiency.
 
-		void(*sampleRateDidChange) (ASIOSampleRate sRate);
+		ASIOSampleRateDidChange sampleRateDidChange;
 		// gets called when the AudioStreamIO detects a sample rate change
 		// If sample rate is unknown, 0 is passed (for instance, clock loss
 		// when externally synchronized).
 
-		long(*asioMessage) (long selector, long value, void* message, double* opt);
+		ASIOAsioMessage asioMessage;
 		// generic callback for various purposes, see selectors below.
 		// note this is only present if the asio version is 2 or higher
 
-		ASIOTime* (*bufferSwitchTimeInfo) (ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
+		ASIOBufferSwitchTimeInfo bufferSwitchTimeInfo;
 		// new callback with time info. makes ASIOGetSamplePosition() and various
 		// calls to ASIOGetSampleRate obsolete,
 		// and allows for timecode sync etc. to be preferred; will be used if
