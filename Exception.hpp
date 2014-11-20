@@ -18,6 +18,17 @@ namespace asio
 
 
 	/**
+	* 実行中にサンプリング周波数が変更された
+	*/
+	class SampleRateDidChangeException : public std::exception
+	{
+	public:
+		SampleRateDidChangeException(const std::string& message)
+			: exception(message.c_str()) {}
+	};
+
+
+	/**
 	* チャンネルが見つからない時に呼ばれる
 	*/
 	class DontFoundChannels : public std::exception
