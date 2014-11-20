@@ -32,8 +32,7 @@ namespace asio
 		InputBackController(const InputChannel& inputChannel, const OutputChannel& outputChannel)
 			: ControllerBase() 
 		{
-			InitCallbacks(&BufferSwitch);
-			CreateBuffer({inputChannel, outputChannel}, &callbacks);
+			CreateBuffer({inputChannel, outputChannel}, &BufferSwitch);
 
 			input = &bufferManager->InputBuffers(0);
 			output = &bufferManager->OutputBuffers(0);
@@ -46,9 +45,7 @@ namespace asio
 		InputBackController()
 			: ControllerBase()
 		{
-			InitCallbacks(&BufferSwitch);
-
-			CreateBuffer({channelManager->Inputs(0), channelManager->Outputs(0)}, &callbacks);
+			CreateBuffer({channelManager->Inputs(0), channelManager->Outputs(0)}, &BufferSwitch);
 
 			input = &bufferManager->InputBuffers(0);
 			output = &bufferManager->OutputBuffers(0);
