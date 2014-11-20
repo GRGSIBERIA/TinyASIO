@@ -39,13 +39,24 @@ namespace asio
 		}
 
 		/**
-		* バッファリング可能なチャンネルからコントローラを生成する
+		* 0番の入出力チャンネルからコントローラを生成する
 		* @note 0番の入出力同士をつなぐので，適当に音の出るチャンネルにジャックを挿してください
 		*/
 		InputBackController()
 			: ControllerBase()
 		{
 			CreateBuffer({channelManager->Inputs(0), channelManager->Outputs(0)}, &BufferSwitch);
+
+			input = &bufferManager->Inputs(0);
+			output = &bufferManager->Outputs(0);
+		}
+
+		/**
+		* チャンネル番号からコントローラを生成する
+		*/
+		InputBackController(const long inputNum, const long outputNum)
+		{
+			CreateBuffer({ channelManager->Inputs(inputNum), channelManager->Outputs(outputNum) }, &BufferSwitch);
 
 			input = &bufferManager->Inputs(0);
 			output = &bufferManager->Outputs(0);
