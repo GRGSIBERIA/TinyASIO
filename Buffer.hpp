@@ -214,33 +214,6 @@ namespace asio
 		}
 
 		/**
-		* バッファから対象のチャンネル番号を探してくる
-		*/
-		BufferBase& Search(const Channel& channel)
-		{
-			return *std::find_if(buffers.begin(), buffers.end(), 
-				[&](const BufferBase& buffer) -> bool {
-				return buffer.IsChannelNumber(channel);
-			});
-		}
-
-		InputBuffer& Search(const InputChannel& channel)
-		{
-			return *std::find_if(inputBuffers.begin(), inputBuffers.end(),
-				[&](const BufferBase& buffer) -> bool {
-				return buffer.IsChannelNumber(channel);
-			});
-		}
-
-		OutputBuffer& Search(const OutputChannel& channel)
-		{
-			return *std::find_if(outputBuffers.begin(), outputBuffers.end(),
-				[&](const BufferBase& buffer) -> bool {
-				return buffer.IsChannelNumber(channel);
-			});
-		}
-
-		/**
 		* バッファリングされている入力チャンネルを探す
 		* もっとも最初に見つかったものが返される
 		* @note バッファへのvoid*がnullptrじゃないものを取得する

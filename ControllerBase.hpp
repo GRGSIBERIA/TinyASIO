@@ -16,6 +16,7 @@ namespace asio
 	protected:
 		Driver* driver;
 		IASIO* iasio;
+		const ChannelManager* channelManager;
 
 		long inputLatency;
 		long outputLatency;
@@ -31,6 +32,7 @@ namespace asio
 		{
 			driver = &Driver::Get();
 			iasio = driver->Interface();
+			channelManager = &driver->ChannelManager();
 
 			long buf = 0;
 			ErrorCheck(iasio->getBufferSize(&buf, &buf, &bufferLength, &buf));
@@ -42,16 +44,48 @@ namespace asio
 			sampleRate = (long)sr;
 		}
 
+		static void SampleRateDidChange(ASIOSampleRate sRate)
+		{
+			throw SampleRateDidChangeException("サンプリング周波数が変更されました");
+		}
+
+		static long AsioMessage(long selector, long value, void* message, double* opt)
+		{
+			return 0;
+		}
+
+		static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
+		{
+			return params;
+		}
+
+		/**
+		* コールバック関数を生成する
+		*/
+		void InitCallbacks(ASIOBufferSwitch bufferSwitch)
+		{
+			callbacks.asioMessage = &AsioMessage;
+			callbacks.bufferSwitch = bufferSwitch;
+			callbacks.bufferSwitchTimeInfo = &BufferSwitchTimeInfo;
+			callbacks.sampleRateDidChange = &SampleRateDidChange;
+		}
 
 		/*
 		* バッファ生成関数の呼び出しは子クラスに移譲する
 		*/
 		void CreateBuffer(const std::vector<Channel>& channels, ASIOCallbacks* callbacks)
 		{
-			const auto& channelManager = Driver::Get().ChannelManager();
 			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(channels, bufferLength, callbacks));
 		}
 
+		/*
+		* バッファ生成関数の呼び出しは子クラスに移譲する
+		*/
+		void CreateBuffer(const std::vector<Channel>& channels, ASIOBufferSwitch bufferSwitch)
+		{
+			InitCallbacks(bufferSwitch);
+			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(channels, bufferLength, &callbacks));
+		}
 
 		/*
 		* バッファ生成関数の呼び出しは子クラスに移譲する
@@ -59,42 +93,18 @@ namespace asio
 		template <size_t NUM>
 		void CreateBuffer(const std::array<Channel, NUM>& channels, ASIOCallbacks* callbacks)
 		{
-			const auto& channelManager = Driver::Get().ChannelManager();
 			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(channels, bufferLength, callbacks));
 		}
 
-
-		static void SampleRateDidChange(ASIOSampleRate sRate)
-		{
-			throw SampleRateDidChangeException("サンプリング周波数が変更されました");
-		}
-			
-		static long AsioMessage(long selector, long value, void* message, double* opt)
-		{
-			return 0;
-		}
-		
-		static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
-		{
-			return params;
-		}
-
-
-		/**
-		* コールバック関数を生成する
+		/*
+		* バッファ生成関数の呼び出しは子クラスに移譲する
 		*/
-		ASIOCallbacks CreateCallbacks(ASIOBufferSwitch bufferSwitch)
+		template <size_t NUM>
+		void CreateBuffer(const std::array<Channel, NUM>& channels, ASIOBufferSwitch bufferSwitch)
 		{
-			auto callbacks = ASIOCallbacks();
-			callbacks.asioMessage = &AsioMessage;
-			callbacks.bufferSwitch = bufferSwitch;
-			callbacks.bufferSwitchTimeInfo = &BufferSwitchTimeInfo;
-			callbacks.sampleRateDidChange = &SampleRateDidChange;
-			return callbacks;
+			InitCallbacks(bufferSwitch);
+			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(channels, bufferLength, &callbacks));
 		}
-
-
-
 
 	public:
 		void Start() { driver->Interface()->start(); }	//!< バッファリング開始
