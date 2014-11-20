@@ -35,8 +35,8 @@ namespace asio
 			InitCallbacks(&BufferSwitch);
 			CreateBuffer({inputChannel, outputChannel}, &callbacks);
 
-			input = &bufferManager->InputBuffer(0);
-			output = &bufferManager->OutputBuffer(0);
+			input = &bufferManager->InputBuffers(0);
+			output = &bufferManager->OutputBuffers(0);
 		}
 
 		/**
@@ -50,8 +50,8 @@ namespace asio
 
 			CreateBuffer({channelManager->Inputs(0), channelManager->Outputs(0)}, &callbacks);
 
-			input = &bufferManager->SearchBufferableInput();
-			output = &bufferManager->SearchBufferableOutput();
+			input = &bufferManager->InputBuffers(0);
+			output = &bufferManager->OutputBuffers(0);
 		}
 
 		/**
@@ -59,7 +59,7 @@ namespace asio
 		* @return 入力ストリームに蓄積されたデータ
 		* @note 入力ストリームの内容は空になる
 		*/
-		std::shared_ptr<std::vector<int>> Fetch()
+		StreamingVector Fetch()
 		{
 			return input->Fetch();
 		}

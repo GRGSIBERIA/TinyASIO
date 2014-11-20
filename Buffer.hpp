@@ -4,13 +4,14 @@
 #include <algorithm>
 #include <array>
 
+#include "Option.hpp"
 #include "SDK.hpp"
 #include "Driver.hpp"
 #include "Channel.hpp"
 
 namespace asio
 {
-	typedef std::shared_ptr<std::vector<int>> StreamingBuffer;
+	
 
 	/**
 	* バッファ用のクラス
@@ -21,7 +22,7 @@ namespace asio
 		void *buffers[2];	//!< バッファ
 		long channelNumber;	//!< チャンネル番号
 
-		StreamingBuffer stream;		//!< ストリーミング用の変数
+		StreamingVector stream;		//!< ストリーミング用の変数
 		CRITICAL_SECTION critical;	//!< クリティカルセクション
 
 
@@ -41,7 +42,7 @@ namespace asio
 			buffers[0] = info.buffers[0];
 			buffers[1] = info.buffers[1];
 
-			stream = StreamingBuffer(new std::vector<int>());
+			stream = StreamingVector(new std::vector<int>());
 			InitializeCriticalSection(&critical);
 		}
 
@@ -60,10 +61,10 @@ namespace asio
 		* バッファの中身を取り出す
 		* @return バッファの中身
 		*/
-		StreamingBuffer Fetch()
+		StreamingVector Fetch()
 		{
-			StreamingBuffer retval = stream;
-			Critical([&](){ stream = StreamingBuffer(new std::vector<int>()); });
+			StreamingVector retval = stream;
+			Critical([&](){ stream = StreamingVector(new std::vector<int>()); });
 			return retval;
 		}
 
@@ -239,8 +240,10 @@ namespace asio
 			});
 		}
 
-		static std::vector<InputBuffer>* InputBuffer() { return inputBuffersPtr; }		//!< 公開されている入力バッファを得る
-		static std::vector<OutputBuffer>* OutputBuffer() { return outputBuffersPtr; }	//!< 公開されている出力バッファを得る
+		static std::vector<InputBuffer>* InputBuffers() { return inputBuffersPtr; }		//!< 公開されている入力バッファを得る
+		static std::vector<OutputBuffer>* OutputBuffers() { return outputBuffersPtr; }	//!< 公開されている出力バッファを得る
+		static InputBuffer& InputBuffers(const size_t i) { return inputBuffersPtr->at(i); }		//!< 添字から入力バッファを得る
+		static OutputBuffer& OutputBuffers(const size_t i) { return outputBuffersPtr->at(i); }	//!< 添字から出力バッファを得る
 	};
 
 	std::vector<BufferBase>* BufferManager::buffersPtr = nullptr;

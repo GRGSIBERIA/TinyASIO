@@ -13,9 +13,6 @@
 
 namespace asio
 {
-	
-
-
 	const std::wstring ASIO_REGISTORY_PATH = L"SOFTWARE\\ASIO";					//!< ASIOƒhƒ‰ƒCƒo‚ÌƒŒƒWƒXƒgƒŠ‚ðŠi”[‚µ‚Ä‚¢‚é‚Æ‚±‚ë
 	const std::wstring ASIO_CLSID_PATH = L"SOFTWARE\\Classes\\CLSID";			//!< CLSID‚ðŠi”[‚µ‚Ä‚¢‚é‚Æ‚±‚ë
 	const std::wstring ASIO_CLSID_PATH_WOW6432NODE = L"SOFTWARE\\Classes\\CLSID\\Wow6432Node";
