@@ -240,10 +240,10 @@ namespace asio
 			});
 		}
 
-		static std::vector<InputBuffer>* InputBuffers() { return inputBuffersPtr; }		//!< 公開されている入力バッファを得る
-		static std::vector<OutputBuffer>* OutputBuffers() { return outputBuffersPtr; }	//!< 公開されている出力バッファを得る
-		static InputBuffer& InputBuffers(const size_t i) { return inputBuffersPtr->at(i); }		//!< 添字から入力バッファを得る
-		static OutputBuffer& OutputBuffers(const size_t i) { return outputBuffersPtr->at(i); }	//!< 添字から出力バッファを得る
+		static std::vector<InputBuffer>* Inputs() { return inputBuffersPtr; }		//!< 公開されている入力バッファを得る
+		static std::vector<OutputBuffer>* Outputs() { return outputBuffersPtr; }	//!< 公開されている出力バッファを得る
+		static InputBuffer& Inputs(const size_t i) { return inputBuffersPtr->at(i); }		//!< 添字から入力バッファを得る
+		static OutputBuffer& Outputs(const size_t i) { return outputBuffersPtr->at(i); }	//!< 添字から出力バッファを得る
 	};
 
 	std::vector<BufferBase>* BufferManager::buffersPtr = nullptr;
