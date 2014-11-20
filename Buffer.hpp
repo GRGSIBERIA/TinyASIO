@@ -25,6 +25,8 @@ namespace asio
 		StreamingVector stream;		//!< ストリーミング用の変数
 		CRITICAL_SECTION critical;	//!< クリティカルセクション
 
+		const Channel& channelInfo;	//!< チャンネル情報
+
 
 		template <typename FUNC>
 		void Critical(FUNC func)
@@ -36,8 +38,8 @@ namespace asio
 
 
 	public:
-		BufferBase(const ASIOBufferInfo& info)
-			: channelNumber(info.channelNum)
+		BufferBase(const ASIOBufferInfo& info, const Channel& channel)
+			: channelNumber(info.channelNum), channelInfo(channel)
 		{
 			buffers[0] = info.buffers[0];
 			buffers[1] = info.buffers[1];
@@ -55,7 +57,7 @@ namespace asio
 
 		inline const long ChannelNumber() const { return channelNumber; }	//!< チャンネル番号
 		inline void* GetBuffer(const long index) { return buffers[index]; }	//!< indexからバッファを取得する
-
+		inline const Channel& ChannelInfo() const { return channelInfo; }		//!< チャンネル情報を取得する
 
 		/**
 		* バッファの中身を取り出す
@@ -139,8 +141,8 @@ namespace asio
 	class InputBuffer : public BufferBase
 	{
 	public:
-		InputBuffer(const ASIOBufferInfo& info)
-			: BufferBase(info) {}
+		InputBuffer(const ASIOBufferInfo& info, const Channel& channel)
+			: BufferBase(info, channel) {}
 	};
 
 
@@ -150,8 +152,8 @@ namespace asio
 	class OutputBuffer : public BufferBase
 	{
 	public:
-		OutputBuffer(const ASIOBufferInfo& info)
-			: BufferBase(info) {}
+		OutputBuffer(const ASIOBufferInfo& info, const Channel& channel)
+			: BufferBase(info, channel) {}
 	};
 
 
@@ -183,7 +185,7 @@ namespace asio
 			}
 		}
 
-		void InitBuffers(const long bufferLength, ASIOCallbacks* callbacks)
+		void InitBuffers(const std::vector<Channel>& channels, const long bufferLength, ASIOCallbacks* callbacks)
 		{
 			auto* iasio = Driver::Get().Interface();
 			ErrorCheck(iasio->createBuffers(&bufferInfo[0], bufferInfo.size(), bufferLength, callbacks));
@@ -191,9 +193,9 @@ namespace asio
 			for (long i = 0; i < bufferInfo.size(); ++i)
 			{
 				if (bufferInfo[i].isInput)
-					inputBuffers.emplace_back(bufferInfo[i]);
+					inputBuffers.emplace_back(bufferInfo[i], channels[i]);
 				else
-					outputBuffers.emplace_back(bufferInfo[i]);
+					outputBuffers.emplace_back(bufferInfo[i], channels[i]);
 			}
 
 			inputBuffersPtr = &inputBuffers;
@@ -201,17 +203,17 @@ namespace asio
 		}
 
 	public:
-		BufferManager(const std::vector<Channel> channels, const long bufferLength, ASIOCallbacks* callbacks)
+		BufferManager(const std::vector<Channel>& channels, const long bufferLength, ASIOCallbacks* callbacks)
 		{
 			InitBufferInfo(channels);
-			InitBuffers(bufferLength, callbacks);
+			InitBuffers(channels, bufferLength, callbacks);
 		}
 
 		template <size_t NUM>
-		BufferManager(const std::array<Channel, NUM> channels, const long bufferLength, ASIOCallbacks* callbacks)
+		BufferManager(const std::array<Channel, NUM>& channels, const long bufferLength, ASIOCallbacks* callbacks)
 		{
 			InitBufferInfo(channels);
-			InitBuffers(bufferLength, callbacks);
+			InitBuffers(channels, bufferLength, callbacks);
 		}
 
 		/**
