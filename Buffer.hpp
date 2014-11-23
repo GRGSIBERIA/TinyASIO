@@ -74,7 +74,8 @@ namespace asio
 
 		inline const long ChannelNumber() const { return channelNumber; }	//!< チャンネル番号
 		inline void* GetBuffer(const long index) { return buffers[index]; }	//!< indexからバッファを取得する
-		inline const Channel& ChannelInfo() const { return channelInfo; }		//!< チャンネル情報を取得する
+		inline const Channel& ChannelInfo() const { return channelInfo; }	//!< チャンネル情報を取得する
+		inline const long StreamLength() const { return stream->size(); }	//!< ストリームの現在の長さを得る
 
 		/**
 		* バッファの中身を取り出す

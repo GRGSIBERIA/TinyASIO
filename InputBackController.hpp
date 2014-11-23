@@ -88,6 +88,11 @@ namespace asio
 		{
 			return input->Fetch();
 		}
+
+		/**
+		* ƒXƒgƒŠ[ƒ€‚ÌŒ»Ý‚Ì’·‚³‚ð“¾‚é
+		*/
+		const long StreamLength() const { return input->StreamLength(); }
 	};
 
 	InputBuffer* InputBackController::input = nullptr;

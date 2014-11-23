@@ -124,8 +124,8 @@ namespace asio
 		}
 
 	public:
-		void Start() { driver->Interface()->start(); }	//!< バッファリング開始
-		void Stop() { driver->Interface()->stop(); }	//!< バッファリング終了
+		inline void Start() { driver->Interface()->start(); }	//!< バッファリング開始
+		inline void Stop() { driver->Interface()->stop(); }	//!< バッファリング終了
 		
 		inline const long BufferSize() const { return bufferLength * sizeof(int); }		//!< バッファの容量（バイト）を返す
 		inline const long BufferLength() const { return bufferLength; }		//!< バッファの長さを返す
