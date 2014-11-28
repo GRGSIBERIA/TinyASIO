@@ -88,8 +88,8 @@ namespace asio
 		long numberOfChannels;
 		long numberOfInput;			//!< 入力チャンネル数
 		long numberOfOutput;		//!< 出力チャンネル数
-		ASIOChannelInfo* inPtr;		//!< 入力チャンネル情報
-		ASIOChannelInfo* outPtr;	//!< 出力チャンネル情報
+		std::shared_ptr<ASIOChannelInfo> inPtr;		//!< 入力チャンネル情報
+		std::shared_ptr<ASIOChannelInfo> outPtr;	//!< 出力チャンネル情報
 
 
 	private:
@@ -119,21 +119,17 @@ namespace asio
 				throw DontFoundChannels("出力チャンネルが見つかりません");
 
 			numberOfChannels = numberOfInput + numberOfOutput;
-			inPtr = new ASIOChannelInfo[numberOfInput];
-			outPtr = new ASIOChannelInfo[numberOfOutput];
+			inPtr = std::shared_ptr<ASIOChannelInfo>(new ASIOChannelInfo[numberOfInput]);
+			outPtr = std::shared_ptr<ASIOChannelInfo>(new ASIOChannelInfo[numberOfOutput]);
 
 			for (long i = 0; i < numberOfInput; ++i)
-				InitOneChannel(inPtr[i], i, 1);
+				InitOneChannel(inPtr.get()[i], i, 1);
 
 			for (long i = 0; i < numberOfOutput; ++i)
-				InitOneChannel(outPtr[i], i, 0);
+				InitOneChannel(outPtr.get()[i], i, 0);
 		}
 
-		~ChannelManager()
-		{
-			delete[] inPtr;
-			delete[] outPtr;
-		}
+		~ChannelManager() { }
 
 		const std::vector<InputChannel>& Inputs() const { return inputs; }		//!< 入力チャンネルを返す
 		const std::vector<OutputChannel>& Outputs() const { return outputs; }	//!< 出力チャンネルを返す
