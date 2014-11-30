@@ -35,12 +35,19 @@
 <h3>概要</h3>
 
 <p>
-  TinyASIOはASIO SDKのラッパーライブラリです．
+  TinyASIOはASIO SDKの小型化を目指した非常に小さなライブラリです．
   ASIO SDKでの開発を省力化する目的で作りました．
   入力チャンネルの音声を出力チャンネルに流すだけのコードがたったの5行で書くことができます．
 </p>
 
 <script src="https://gist.github.com/GRGSIBERIA/aa038d41a448758b100c.js"></script>
+
+<p>
+  もし，ASIOのドライバ名がわからなければ，レジストリから使用可能なデバイスを取得することができます．
+  レジストリの取得は大変面倒くさい作業ですが，TinyASIOを使えばたったの1行で取得できます．
+</p>
+
+<script src="https://gist.github.com/GRGSIBERIA/f107bc4811e643ac41ad.js"></script>
 
 <p>
   TinyASIOはコントローラによって音声の入出力を管理しています．
