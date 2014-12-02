@@ -103,9 +103,9 @@ namespace asio
 
 	enum ThreadingModel
 	{
-		Apartment,	//!< STA
+		Apartment,	//!< STA，シングルスレッドで動作
 		Both,		//!< 両方，E_NOINTERFACEでCoCreateInstanceでコケる場合に
-		Free		//!< MTA
+		Free		//!< MTA，マルチスレッドで動作
 	};
 
 
