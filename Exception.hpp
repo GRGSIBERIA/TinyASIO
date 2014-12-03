@@ -120,6 +120,16 @@ namespace asio
 	};
 
 
+	/**
+	* Š—LŒ ‚ªd•¡‚µ‚Ä‚¢‚é
+	*/
+	class DuplicateOwnershipToken : public std::exception
+	{
+	public:
+		DuplicateOwnershipToken(const std::wstring& message)
+			: exception(std::string(message.begin(), message.end()).c_str()) {}
+	};
+
 	void ErrorCheck(const long& error)
 	{
 		switch (error)

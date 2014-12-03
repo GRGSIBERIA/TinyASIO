@@ -37,16 +37,23 @@ namespace asio
 
 		long inputLatency;
 		long outputLatency;
-		long sampleRate;
 
 		ASIOCallbacks callbacks;
-
-		static long bufferLength;
+	
+		static long sampleRate;
+		static long bufferLength;		//!< バッファの長さ
 		static std::shared_ptr<BufferManager> bufferManager;
+
+		static bool ownershipToken;		//!< 所有権
 
 	protected:
 		ControllerBase()
 		{
+			if (ownershipToken)
+				throw DuplicateOwnershipToken(L"複数のコントローラが生成されています．片方を削除してください．");
+
+			ownershipToken = true;
+
 			driver = &Driver::Get();
 			iasio = driver->Interface();
 			channelManager = &driver->ChannelManager();
@@ -134,9 +141,14 @@ namespace asio
 		inline const long SampleRate() const { return sampleRate; }			//!< サンプリング周波数を返す
 
 	public:
-		virtual ~ControllerBase() { }
+		virtual ~ControllerBase() 
+		{
+			ownershipToken = false;
+		}
 	};
 
 	std::shared_ptr<BufferManager> ControllerBase::bufferManager;
 	long ControllerBase::bufferLength = 0;
+	long ControllerBase::sampleRate = 0;
+	bool ControllerBase::ownershipToken = false;
 }
