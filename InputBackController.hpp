@@ -43,8 +43,8 @@ namespace asio
 	public:
 		/**
 		* 指定したチャンネルからコントローラを生成する
-		* @params[in] inputChannel 入力を受け付けるチャンネル
-		* @params[in] outputChannel 入力された内容を流し込みたい出力チャンネル
+		* @param[in] inputChannel 入力を受け付けるチャンネル
+		* @param[in] outputChannel 入力された内容を流し込みたい出力チャンネル
 		*/
 		InputBackController(const InputChannel& inputChannel, const OutputChannel& outputChannel)
 			: ControllerBase() 

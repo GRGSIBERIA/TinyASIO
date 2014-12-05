@@ -43,8 +43,8 @@ namespace asio
 	private:
 		
 		/**
-		* @params[in] clsid ロードしたいCLSID
-		* @params[in] subkey レジストリの位置など
+		* @param[in] clsid ロードしたいCLSID
+		* @param[in] subkey レジストリの位置など
 		*/
 		Driver(const CLSID& clsid, const SubKey& subkey)
 			: iasio(clsid, subkey)
@@ -62,7 +62,7 @@ namespace asio
 	public:
 		/**
 		* ドライバの初期化
-		* @params[in] subkey ASIOドライバのSubkey
+		* @param[in] subkey ASIOドライバのSubkey
 		* @return subkeyで初期化されたドライバのインスタンス
 		* @note 以前に生成されたドライバは破棄される
 		*/
@@ -90,7 +90,7 @@ namespace asio
 	public:
 		/**
 		* ドライバの初期化
-		* @params[in] asioDriverName ASIOドライバの名前を検索して，それで初期化を行う
+		* @param[in] asioDriverName ASIOドライバの名前を検索して，それで初期化を行う
 		* @return asioDriverNameで初期化されたドライバのインスタンス
 		* @note 見つからない場合はたぶん落ちる
 		*/
@@ -99,7 +99,7 @@ namespace asio
 
 		/**
 		* ドライバの初期化
-		* @params[in] asioDriverName ASIOドライバの名前を検索して，それで初期化を行う
+		* @param[in] asioDriverName ASIOドライバの名前を検索して，それで初期化を行う
 		* @return asioDriverNameで初期化されたドライバのインスタンス
 		* @note 見つからない場合はたぶん落ちる
 		*/

@@ -75,7 +75,7 @@ namespace asio
 
 		/**
 		* 配列からASIOドライバのレジストリを探す
-		* @params[in] findName 探したいASIOドライバの名前
+		* @param[in] findName 探したいASIOドライバの名前
 		* @return ASIOドライバのレジストリ
 		*/
 		const SubKey& Find(const std::wstring findName)
@@ -90,7 +90,7 @@ namespace asio
 
 		/**
 		* 配列からASIOドライバのレジストリを探す
-		* @params[in] findName 探したいASIOドライバの名前
+		* @param[in] findName 探したいASIOドライバの名前
 		* @return ASIOドライバのレジストリ
 		*/
 		const SubKey& Find(const std::string findName)
@@ -205,7 +205,7 @@ namespace asio
 
 	public:
 		/**
-		* SOFTWARE\ASIOが存在するか調べる
+		* SOFTWARE/ASIOが存在するか調べる
 		*/
 		static bool ExistDrivers()
 		{
@@ -215,8 +215,8 @@ namespace asio
 
 		/**
 		* ThreadingModelを変更する
-		* @params[in] subkey 対象のドライバのサブキー
-		* @params[in] mode ThreadingModeの種類，デフォルト推奨
+		* @param[in] subkey 対象のドライバのサブキー
+		* @param[in] model ThreadingModeの種類，デフォルト推奨
 		* @return ERROR_SUCCES以外はエラー
 		* @warning CLSIDのレジストリ値を書き換えるので，利用には注意
 		*/

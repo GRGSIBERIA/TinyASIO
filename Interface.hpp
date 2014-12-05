@@ -44,8 +44,8 @@ namespace asio
 
 	public:
 		/**
-		* @params[in] clsid ロードしたいCLSID
-		* @params[in] subkey レジストリの位置など
+		* @param clsid ロードしたいCLSID
+		* @param subkey レジストリの位置など
 		*/
 		Interface(const CLSID& clsid, const SubKey& subkey)
 			: subkey(subkey)
@@ -72,16 +72,19 @@ namespace asio
 
 		/**
 		* ドライバ名を返す
+		* @return ドライバ名
 		*/
 		const std::string& Name() const { return driverName; }
 
 		/**
 		* ドライバのバージョンを返す
+		* @return ドライバのバージョン
 		*/
 		const long& Version() const { return driverVersion; }
 
 		/**
 		* インターフェースを返す
+		* @return ドライバのCOMインターフェース
 		*/
 		IASIO* IASIO() { return iasio; }
 	};

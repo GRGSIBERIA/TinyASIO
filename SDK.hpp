@@ -18,6 +18,7 @@ along with TinyASIO.If not, see <http://www.gnu.org/licenses/>
 /**
 * このファイルで定義されている内容はASIO SDKから拝借
 */
+
 #pragma once
 
 #include <windows.h>
@@ -33,15 +34,15 @@ namespace asio
 
 	typedef long ASIOError;
 	enum {
-		ASE_OK = 0,             // This value will be returned whenever the call succeeded
-		ASE_SUCCESS = 0x3f4847a0,	// unique success return value for ASIOFuture calls
-		ASE_NotPresent = -1000, // hardware input or output is not present or available
-		ASE_HWMalfunction,      // hardware is malfunctioning (can be returned by any ASIO function)
-		ASE_InvalidParameter,   // input parameter invalid
-		ASE_InvalidMode,        // hardware is in a bad mode or used in a bad mode
-		ASE_SPNotAdvancing,     // hardware is not running when sample position is inquired
-		ASE_NoClock,            // sample clock or rate cannot be determined or is not present
-		ASE_NoMemory            // not enough memory for completing the request
+		ASE_OK = 0,					//!< This value will be returned whenever the call succeeded
+		ASE_SUCCESS = 0x3f4847a0,	//!< unique success return value for ASIOFuture calls
+		ASE_NotPresent = -1000,		//!< hardware input or output is not present or available
+		ASE_HWMalfunction,			//!< hardware is malfunctioning (can be returned by any ASIO function)
+		ASE_InvalidParameter,		//!< input parameter invalid
+		ASE_InvalidMode,			//!< hardware is in a bad mode or used in a bad mode
+		ASE_SPNotAdvancing,			//!< hardware is not running when sample position is inquired
+		ASE_NoClock,				//!< sample clock or rate cannot be determined or is not present
+		ASE_NoMemory				//!< not enough memory for completing the request
 	};
 
 
@@ -50,11 +51,11 @@ namespace asio
 
 	struct ASIOClockSource
 	{
-		long index;					// as used for ASIOSetClockSource()
-		long associatedChannel;		// for instance, S/PDIF or AES/EBU
-		long associatedGroup;		// see channel groups (ASIOGetChannelInfo())
-		ASIOBool isCurrentSource;	// ASIOTrue if this is the current clock source
-		char name[32];				// for user selection
+		long index;					//!< as used for ASIOSetClockSource()
+		long associatedChannel;		//!< for instance, S/PDIF or AES/EBU
+		long associatedGroup;		//!< see channel groups (ASIOGetChannelInfo())
+		ASIOBool isCurrentSource;	//!< ASIOTrue if this is the current clock source
+		char name[32];				//!< for user selection
 	};
 
 
@@ -73,75 +74,75 @@ namespace asio
 	typedef long ASIOSampleType;
 	enum {
 		ASIOSTInt16MSB = 0,
-		ASIOSTInt24MSB = 1,		// used for 20 bits as well
+		ASIOSTInt24MSB = 1,			//!< used for 20 bits as well
 		ASIOSTInt32MSB = 2,
-		ASIOSTFloat32MSB = 3,		// IEEE 754 32 bit float
-		ASIOSTFloat64MSB = 4,		// IEEE 754 64 bit double float
+		ASIOSTFloat32MSB = 3,		//!< IEEE 754 32 bit float
+		ASIOSTFloat64MSB = 4,		//!< IEEE 754 64 bit double float
 
 		// these are used for 32 bit data buffer, with different alignment of the data inside
 		// 32 bit PCI bus systems can be more easily used with these
-		ASIOSTInt32MSB16 = 8,		// 32 bit data with 16 bit alignment
-		ASIOSTInt32MSB18 = 9,		// 32 bit data with 18 bit alignment
-		ASIOSTInt32MSB20 = 10,		// 32 bit data with 20 bit alignment
-		ASIOSTInt32MSB24 = 11,		// 32 bit data with 24 bit alignment
+		ASIOSTInt32MSB16 = 8,		//!< 32 bit data with 16 bit alignment
+		ASIOSTInt32MSB18 = 9,		//!< 32 bit data with 18 bit alignment
+		ASIOSTInt32MSB20 = 10,		//!< 32 bit data with 20 bit alignment
+		ASIOSTInt32MSB24 = 11,		//!< 32 bit data with 24 bit alignment
 
 		ASIOSTInt16LSB = 16,
-		ASIOSTInt24LSB = 17,		// used for 20 bits as well
+		ASIOSTInt24LSB = 17,		//!< used for 20 bits as well
 		ASIOSTInt32LSB = 18,
-		ASIOSTFloat32LSB = 19,		// IEEE 754 32 bit float, as found on Intel x86 architecture
-		ASIOSTFloat64LSB = 20, 		// IEEE 754 64 bit double float, as found on Intel x86 architecture
+		ASIOSTFloat32LSB = 19,		//!< IEEE 754 32 bit float, as found on Intel x86 architecture
+		ASIOSTFloat64LSB = 20, 		//!< IEEE 754 64 bit double float, as found on Intel x86 architecture
 
 		// these are used for 32 bit data buffer, with different alignment of the data inside
 		// 32 bit PCI bus systems can more easily used with these
-		ASIOSTInt32LSB16 = 24,		// 32 bit data with 18 bit alignment
-		ASIOSTInt32LSB18 = 25,		// 32 bit data with 18 bit alignment
-		ASIOSTInt32LSB20 = 26,		// 32 bit data with 20 bit alignment
-		ASIOSTInt32LSB24 = 27,		// 32 bit data with 24 bit alignment
+		ASIOSTInt32LSB16 = 24,		//!< 32 bit data with 18 bit alignment
+		ASIOSTInt32LSB18 = 25,		//!< 32 bit data with 18 bit alignment
+		ASIOSTInt32LSB20 = 26,		//!< 32 bit data with 20 bit alignment
+		ASIOSTInt32LSB24 = 27,		//!< 32 bit data with 24 bit alignment
 
 		//	ASIO DSD format.
-		ASIOSTDSDInt8LSB1 = 32,		// DSD 1 bit data, 8 samples per byte. First sample in Least significant bit.
-		ASIOSTDSDInt8MSB1 = 33,		// DSD 1 bit data, 8 samples per byte. First sample in Most significant bit.
-		ASIOSTDSDInt8NER8 = 40,		// DSD 8 bit data, 1 sample per byte. No Endianness required.
+		ASIOSTDSDInt8LSB1 = 32,		//!< DSD 1 bit data, 8 samples per byte. First sample in Least significant bit.
+		ASIOSTDSDInt8MSB1 = 33,		//!< DSD 1 bit data, 8 samples per byte. First sample in Most significant bit.
+		ASIOSTDSDInt8NER8 = 40,		//!< DSD 8 bit data, 1 sample per byte. No Endianness required.
 
 		ASIOSTLastEntry
 	};
 
 	struct ASIOChannelInfo
 	{
-		long channel;			// on input, channel index
-		ASIOBool isInput;		// on input
-		ASIOBool isActive;		// on exit
-		long channelGroup;		// dto
-		ASIOSampleType type;	// dto
-		char name[32];			// dto
+		long channel;			//!< on input, channel index
+		ASIOBool isInput;		//!< on input
+		ASIOBool isActive;		//!< on exit
+		long channelGroup;		//!< dto
+		ASIOSampleType type;	//!< dto
+		char name[32];			//!< dto
 	};
 
 
 	struct ASIOBufferInfo
 	{
-		ASIOBool isInput;			// on input:  ASIOTrue: input, else output
-		long channelNum;			// on input:  channel index
-		void *buffers[2];			// on output: double buffer addresses
+		ASIOBool isInput;			//!< on input:  ASIOTrue: input, else output
+		long channelNum;			//!< on input:  channel index
+		void *buffers[2];			//!< on output: double buffer addresses
 	};
 
 
 	struct AsioTimeInfo
 	{
-		double          speed;                  // absolute speed (1. = nominal)
-		ASIOTimeStamp   systemTime;             // system time related to samplePosition, in nanoseconds
+		double          speed;                  //!< absolute speed (1. = nominal)
+		ASIOTimeStamp   systemTime;             //!< system time related to samplePosition, in nanoseconds
 		// on mac, must be derived from Microseconds() (not UpTime()!)
 		// on windows, must be derived from timeGetTime()
 		ASIOSamples     samplePosition;
-		ASIOSampleRate  sampleRate;             // current rate
-		unsigned long flags;                    // (see below)
+		ASIOSampleRate  sampleRate;             //!< current rate
+		unsigned long flags;                    //!< (see below)
 		char reserved[12];
 	};
 
 
 	struct ASIOTimeCode
 	{
-		double          speed;                  // speed relation (fraction of nominal speed)
-		// optional; set to 0. or 1. if not supported
+		double          speed;                  //!< speed relation (fraction of nominal speed)
+												//!< optional; set to 0. or 1. if not supported
 		ASIOSamples     timeCodeSamples;        // time in samples
 		unsigned long   flags;                  // some information flags (see below)
 		char future[64];
@@ -150,9 +151,9 @@ namespace asio
 
 	struct ASIOTime                     // both input/output
 	{
-		long reserved[4];                       // must be 0
-		AsioTimeInfo     timeInfo;       // required
-		ASIOTimeCode     timeCode;       // optional, evaluated if (timeCode.flags & kTcValid)
+		long reserved[4];                //!< must be 0
+		AsioTimeInfo     timeInfo;       //!< required
+		ASIOTimeCode     timeCode;       //!< optional, evaluated if (timeCode.flags & kTcValid)
 	};
 
 	typedef void(*ASIOBufferSwitch) (long doubleBufferIndex, ASIOBool directProcess);

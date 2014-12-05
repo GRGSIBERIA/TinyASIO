@@ -49,9 +49,9 @@ namespace asio
 	public:
 		/**
 		* 指定したチャンネルからコントローラを生成する
-		* @params[in] inputChannel 入力を受け付けるチャンネル
-		* @params[in] outputChannel 入力された内容を流し込みたい出力チャンネル
-		* @params[in] effectorFunction void (*)(void*, long)なラムダ式, void*は入力バッファ, longはバッファのサンプル数
+		* @param[in] inputChannel 入力を受け付けるチャンネル
+		* @param[in] outputChannel 入力された内容を流し込みたい出力チャンネル
+		* @param[in] effectorFunction void (*)(void*, long)なラムダ式, void*は入力バッファ, longはバッファのサンプル数
 		*/
 		EffectableInputBackController(const InputChannel& inputChannel, const OutputChannel& outputChannel, EFFECT_FUNC effectorFunction)
 			: ControllerBase()

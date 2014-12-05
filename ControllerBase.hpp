@@ -111,25 +111,6 @@ namespace asio
 			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(channels, bufferLength, &callbacks));
 		}
 
-		/*
-		* バッファ生成関数の呼び出しは子クラスに移譲する
-		*/
-		template <size_t NUM>
-		void CreateBuffer(const std::array<Channel, NUM>& channels, ASIOCallbacks* callbacks)
-		{
-			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(channels, bufferLength, callbacks));
-		}
-
-		/*
-		* バッファ生成関数の呼び出しは子クラスに移譲する
-		*/
-		template <size_t NUM>
-		void CreateBuffer(const std::array<Channel, NUM>& channels, ASIOBufferSwitch bufferSwitch)
-		{
-			InitCallbacks(bufferSwitch);
-			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(channels, bufferLength, &callbacks));
-		}
-
 	public:
 		inline void Start() { driver->Interface()->start(); }	//!< バッファリング開始
 		inline void Stop() { driver->Interface()->stop(); }	//!< バッファリング終了
