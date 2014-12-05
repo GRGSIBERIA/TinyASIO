@@ -115,7 +115,7 @@ namespace asio
 		/**
 		* ƒhƒ‰ƒCƒo‚Ì‰ð•ú‚È‚Ç
 		*/
-		~Driver() {	}
+		~Driver() { }
 	};
 
 	std::shared_ptr<Driver> Driver::driver;
