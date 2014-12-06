@@ -74,7 +74,7 @@
     <ClInclude Include="InputBackController.hpp" />
     <ClInclude Include="Interface.hpp" />
     <ClInclude Include="Option.hpp" />
-    <ClInclude Include="Registory.hpp" />
+    <ClInclude Include="Registry.hpp" />
     <ClInclude Include="SDK.hpp" />
     <ClInclude Include="TinyASIO.hpp" />
   </ItemGroup>

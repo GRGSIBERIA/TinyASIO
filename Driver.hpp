@@ -22,7 +22,7 @@ along with TinyASIO.If not, see <http://www.gnu.org/licenses/>
 #include <memory>
 
 #include "Exception.hpp"
-#include "Registory.hpp"
+#include "Registry.hpp"
 #include "SDK.hpp"
 #include "Interface.hpp"
 #include "Channel.hpp"
@@ -68,7 +68,7 @@ namespace asio
 		*/
 		static Driver& Init(const SubKey& subkey)
 		{
-			auto clsid = Registory::GetCLSID(subkey.registoryPath);
+			auto clsid = Registry::GetCLSID(subkey.registryPath);
 			Driver::driver.reset(new Driver(clsid, subkey), [](Driver *p) { delete p; });
 			return *Driver::driver;
 		}
@@ -81,9 +81,9 @@ namespace asio
 		template <typename T>
 		static Driver& InitX(const T& asioDriverName)
 		{
-			auto asioList = asio::Registory::GetAsioDriverPathes();
-			auto asioRegistory = asioList.Find(asioDriverName);
-			return Init(asioRegistory);
+			auto asioList = asio::Registry::GetAsioDriverPathes();
+			auto asioRegistry = asioList.Find(asioDriverName);
+			return Init(asioRegistry);
 		}
 
 

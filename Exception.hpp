@@ -92,10 +92,10 @@ namespace asio
 	/**
 	* レジストリーキーが開けない
 	*/
-	class CantOpenRegistoryKey : public std::exception
+	class CantOpenRegistryKey : public std::exception
 	{
 	public:
-		CantOpenRegistoryKey(const std::wstring& regPath) : std::exception(("レジストリを開けません: " + std::string(regPath.begin(), regPath.end())).c_str()) { }
+		CantOpenRegistryKey(const std::wstring& regPath) : std::exception(("レジストリを開けません: " + std::string(regPath.begin(), regPath.end())).c_str()) { }
 	};
 
 

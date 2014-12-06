@@ -40,14 +40,14 @@ namespace asio
 	struct SubKey
 	{
 	public:
-		const std::wstring registoryPath;	/*!< レジストリのパス */
+		const std::wstring registryPath;	/*!< レジストリのパス */
 		const std::wstring driverName;		/*!< ドライバ名 */
 
 		SubKey(const std::wstring& regPath, const std::wstring& driverName)
-			: registoryPath(regPath), driverName(driverName) {}
+			: registryPath(regPath), driverName(driverName) {}
 	};
 
-	class Registory;
+	class Registry;
 
 	typedef std::shared_ptr<std::vector<SubKey>> SubKeyList;
 	typedef std::shared_ptr<std::vector<::CLSID>> CLSIDList;
@@ -58,7 +58,7 @@ namespace asio
 	*/
 	class DriverList
 	{
-		friend Registory;
+		friend Registry;
 
 		SubKeyList subkeys;
 
@@ -112,7 +112,7 @@ namespace asio
 	/**
 	* ASIO関連のレジストリを探す処理
 	*/
-	class Registory
+	class Registry
 	{
 	public:
 		static SubKeyList subkeys;
@@ -156,7 +156,7 @@ namespace asio
 		static std::wstring GetCLSIDString(const std::wstring& regPath, HKEY& hkey)
 		{
 			if (WrappedRegOpenKey(HKEY_LOCAL_MACHINE, regPath, hkey) != ERROR_SUCCESS)
-				throw CantOpenRegistoryKey(regPath);
+				throw CantOpenRegistryKey(regPath);
 
 			DWORD dataSize = 360 * sizeof(TCHAR);
 			wchar_t clsidStrBuffer[360];
@@ -172,9 +172,9 @@ namespace asio
 			HKEY hkey;
 			LONG cr = WrappedRegOpenKey(HKEY_LOCAL_MACHINE, ASIO_REGISTORY_PATH, hkey);
 			if (cr != ERROR_SUCCESS)
-				throw CantOpenRegistoryKey(subkey.registoryPath);
+				throw CantOpenRegistryKey(subkey.registryPath);
 
-			std::wstring clsidStr = GetCLSIDString(subkey.registoryPath, hkey);
+			std::wstring clsidStr = GetCLSIDString(subkey.registryPath, hkey);
 
 			::RegCloseKey(hkey);
 
@@ -233,7 +233,7 @@ namespace asio
 				regPath = ASIO_CLSID_PATH_WOW6432NODE + L"\\" + clsidStr + L"\\InprocServer32";
 				cr = WrappedRegOpenKey(HKEY_LOCAL_MACHINE, regPath, hkey);
 				if (cr != ERROR_SUCCESS)
-					throw CantOpenRegistoryKey(regPath);
+					throw CantOpenRegistryKey(regPath);
 			}
 
 			const std::wstring modelStr = ToStr(model);
@@ -295,7 +295,7 @@ namespace asio
 
 			auto check = CLSIDFromString(clsidStr.c_str(), (LPCLSID)&resultCLSID);
 			if (check != S_OK)
-				throw CantOpenRegistoryKey(L"GUID文字列が変換できないよ～");
+				throw CantOpenRegistryKey(L"GUID文字列が変換できないよ～");
 
 			::RegCloseKey(hkey);
 
@@ -303,6 +303,6 @@ namespace asio
 		}
 	};
 
-	CLSIDList Registory::clsids;
-	SubKeyList Registory::subkeys;
+	CLSIDList Registry::clsids;
+	SubKeyList Registry::subkeys;
 }

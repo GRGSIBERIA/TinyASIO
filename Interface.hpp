@@ -17,7 +17,7 @@ along with TinyASIO.If not, see <http://www.gnu.org/licenses/>
 
 #pragma once
 #include "SDK.hpp"
-#include "Registory.hpp"
+#include "Registry.hpp"
 
 namespace asio
 {
@@ -34,7 +34,7 @@ namespace asio
 		void RetryCreateInstance(const CLSID& clsid, const SubKey& subkey)
 		{
 			// デフォルトだとThreadingModelがSTAなので，STA/MTA（Both）に変更して再試行する
-			if (Registory::ChangeTheadingModel(subkey) != ERROR_SUCCESS)
+			if (Registry::ChangeTheadingModel(subkey) != ERROR_SUCCESS)
 				throw CantCreateInstance("ドライバのインスタンス生成に失敗しました");
 
 			HRESULT hr = CoCreateInstance(clsid, 0, CLSCTX_INPROC_SERVER, clsid, (LPVOID*)&iasio);

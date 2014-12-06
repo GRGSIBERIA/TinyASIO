@@ -16,7 +16,7 @@ along with TinyASIO.If not, see <http://www.gnu.org/licenses/>
 ***********************************************************************/
 
 #pragma once
-#include "Registory.hpp"
+#include "Registry.hpp"
 #include "Driver.hpp"
 #include "Option.hpp"
 

@@ -30,9 +30,6 @@
     <ClInclude Include="Option.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Registory.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="SDK.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -52,6 +49,9 @@
       <Filter>ヘッダー ファイル\Controller</Filter>
     </ClInclude>
     <ClInclude Include="Channel.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
