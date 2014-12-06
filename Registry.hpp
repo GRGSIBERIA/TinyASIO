@@ -71,6 +71,8 @@ namespace asio
 		* @return ASIOドライバのレジストリキーの配列
 		*/
 		const std::vector<SubKey>& Items() const { return *subkeys; }
+		const SubKey& Items(const long i) const { return subkeys->at(i); }
+		const size_t Count() const { return subkeys->size(); }
 
 
 		/**
