@@ -20,6 +20,7 @@ along with TinyASIO.If not, see <http://www.gnu.org/licenses/>
 #include <Windows.h>
 #include <algorithm>
 #include <array>
+#include <mutex>
 
 #include "Option.hpp"
 #include "SDK.hpp"
@@ -40,7 +41,7 @@ namespace asio
 		long channelNumber;	//!< チャンネル番号
 
 		StreamingVector stream;		//!< ストリーミング用の変数
-		CRITICAL_SECTION critical;	//!< クリティカルセクション
+		std::mutex mutex;			//!< 排他制御するためのもの
 
 		const Channel& channelInfo;	//!< チャンネル情報
 
@@ -48,9 +49,9 @@ namespace asio
 		template <typename FUNC>
 		void Critical(FUNC func)
 		{
-			EnterCriticalSection(&critical);
+			mutex.lock();
 			func();
-			LeaveCriticalSection(&critical);
+			mutex.unlock();
 		}
 
 
@@ -62,14 +63,10 @@ namespace asio
 			buffers[1] = info.buffers[1];
 
 			stream = StreamingVector(new std::vector<int>());
-			InitializeCriticalSection(&critical);
 		}
 
 		
-		virtual ~BufferBase()
-		{
-			DeleteCriticalSection(&critical);
-		}
+		virtual ~BufferBase() {	}
 
 
 		inline const long ChannelNumber() const { return channelNumber; }	//!< チャンネル番号
