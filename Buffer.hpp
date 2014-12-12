@@ -94,10 +94,10 @@ namespace asio
 		* @param[in,out] buffer 転送したいバッファ
 		* @param[in] bufferLength バッファの長さ
 		*/
-		void Fetch(void* buffer, const long bufferLength)
+		void Fetch(void* buffer, const unsigned long bufferLength)
 		{
 			Critical([&](){
-				long length = bufferLength;
+				unsigned long length = bufferLength;
 				if (length > stream->size())
 					length = stream->size();
 				memcpy(buffer, &stream->at(0), length * sizeof(int));
@@ -196,7 +196,7 @@ namespace asio
 		{
 			bufferInfo = std::vector<ASIOBufferInfo>(channels.size());
 
-			for (int i = 0; i < channels.size(); ++i)
+			for (unsigned int i = 0; i < channels.size(); ++i)
 			{
 				bufferInfo[i].channelNum = channels[i].channelNumber;
 				bufferInfo[i].isInput = channels[i].isInput;
@@ -208,7 +208,7 @@ namespace asio
 			auto* iasio = Driver::Get().Interface();
 			ErrorCheck(iasio->createBuffers(&bufferInfo[0], bufferInfo.size(), bufferLength, callbacks));
 
-			for (long i = 0; i < bufferInfo.size(); ++i)
+			for (unsigned long i = 0; i < bufferInfo.size(); ++i)
 			{
 				if (bufferInfo[i].isInput)
 					inputBuffers.emplace_back(bufferInfo[i], channels[i]);
