@@ -100,6 +100,7 @@ namespace asio
 			info.isInput = isInput;
 			info.channel = i;
 			ErrorCheck(iasio->getChannelInfo(&info));
+			info.type = 18;
 
 			if (isInput == 1)
 				inputs.emplace_back(info);
