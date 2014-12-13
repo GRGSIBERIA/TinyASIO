@@ -24,110 +24,123 @@ along with TinyASIO.If not, see <http://www.gnu.org/licenses/>
 namespace asio
 {
 	/**
+	* TinyASIOの例外基底クラス
+	*/
+	class TinyASIOException : public std::exception
+	{
+	public:
+		TinyASIOException(const std::string& message)
+			: exception(message.c_str()) {}
+
+		TinyASIOException(const std::wstring& message)
+			: exception(std::string(message.begin(), message.end()).c_str()) {}
+	};
+
+	/**
 	* ドライバが動かない時に呼ばれる
 	*/
-	class CantProcessException : public std::exception
+	class CantProcessException : public TinyASIOException
 	{
 	public:
 		CantProcessException(const std::string& message)
-			: exception(message.c_str()) {}
+			: TinyASIOException(message) {}
 	};
 
 
 	/**
 	* 実行中にサンプリング周波数が変更された
 	*/
-	class SampleRateDidChangeException : public std::exception
+	class SampleRateDidChangeException : public TinyASIOException
 	{
 	public:
 		SampleRateDidChangeException(const std::string& message)
-			: exception(message.c_str()) {}
+			: TinyASIOException(message) {}
 	};
 
 
 	/**
 	* チャンネルが見つからない時に呼ばれる
 	*/
-	class DontFoundChannels : public std::exception
+	class DontFoundChannels : public TinyASIOException
 	{
 	public:
 		DontFoundChannels(const std::string& message) 
-			: exception(message.c_str()) {}
+			: TinyASIOException(message) {}
 	};
 
 
 	/**
 	* ドライバのインスタンスに生成失敗すると呼ばれる
 	*/
-	class CantCreateInstance : public std::exception
+	class CantCreateInstance : public TinyASIOException
 	{
 	public:
 		CantCreateInstance(const std::string& message)
-			: exception(message.c_str()) {}
+			: TinyASIOException(message) {}
 	};
 
 
 	/**
 	* 二回以上初期化されたりなどで呼び出される
 	*/
-	class OverTwiceCallException : public std::exception
+	class OverTwiceCallException : public TinyASIOException
 	{
 	public:
 		OverTwiceCallException(const std::string& message)
-			: exception(message.c_str()) {}
+			: TinyASIOException(message) {}
 	};
 
 
 	/**
 	* ドライバのハンドルを取得できなかった
 	*/
-	class CantHandlingASIODriver : public std::exception
+	class CantHandlingASIODriver : public TinyASIOException
 	{
 	public:
 		CantHandlingASIODriver(const std::string& message)
-			: exception(message.c_str()) {}
+			: TinyASIOException(message) {}
 	};
 
 
 	/**
 	* レジストリーキーが開けない
 	*/
-	class CantOpenRegistryKey : public std::exception
+	class CantOpenRegistryKey : public TinyASIOException
 	{
 	public:
-		CantOpenRegistryKey(const std::wstring& regPath) : std::exception(("レジストリを開けません: " + std::string(regPath.begin(), regPath.end())).c_str()) { }
+		CantOpenRegistryKey(const std::wstring& regPath) : TinyASIOException(L"レジストリを開けません: " + regPath) { }
 	};
 
 
 	/**
 	* サブキーのインデックスが開けなくなっている
 	*/
-	class CantOpenSubKeyIndex : public std::exception
+	class CantOpenSubKeyIndex : public TinyASIOException
 	{
 	public:
-		CantOpenSubKeyIndex(const std::wstring& regPath) : std::exception(("サブキーのインデックスが開けません:" + std::string(regPath.begin(), regPath.end())).c_str()) {}
+		CantOpenSubKeyIndex(const std::wstring& regPath) : TinyASIOException(L"サブキーのインデックスが開けません:" + regPath) {}
 	};
 
 
 	/**
 	* ASIOのドライバーがひとつもない
 	*/
-	class DontFoundASIODrivers : public std::exception
+	class DontFoundASIODrivers : public TinyASIOException
 	{
 	public:
 		DontFoundASIODrivers(const std::wstring& message)
-			: exception(std::string(message.begin(), message.end()).c_str()) {}
+			: TinyASIOException(message) {}
 	};
 
 
 	/**
 	* 所有権が重複している
 	*/
-	class DuplicateOwnershipToken : public std::exception
+	class DuplicateOwnershipToken : public TinyASIOException
 	{
 	public:
 		DuplicateOwnershipToken(const std::wstring& message)
-			: exception(std::string(message.begin(), message.end()).c_str()) {}
+			: TinyASIOException(message) {}
 	};
 
 	void ErrorCheck(const long& error)
