@@ -11,7 +11,7 @@ using namespace std;
 #define TEST_HR(hr) if(!SUCCEEDED(hr)) return -1
 
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow)
+int main()
 {
 	HRESULT hr;
 
