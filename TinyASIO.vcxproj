@@ -72,6 +72,7 @@
     <ClInclude Include="EffectableInputBackController.hpp" />
     <ClInclude Include="Exception.hpp" />
     <ClInclude Include="InputBackController.hpp" />
+    <ClInclude Include="InputOnlyController.hpp" />
     <ClInclude Include="Interface.hpp" />
     <ClInclude Include="Option.hpp" />
     <ClInclude Include="Registry.hpp" />
