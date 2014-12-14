@@ -28,12 +28,28 @@ namespace asio
 	*/
 	class TinyASIOException : public std::exception
 	{
+		void ShowError(const std::string& message)
+		{
+			MessageBoxA(NULL, message.c_str(), "エラー", MB_OK | MB_ICONERROR);
+		}
+
+		void ShowError(const std::wstring& message)
+		{
+			MessageBoxW(NULL, message.c_str(), L"エラー", MB_OK | MB_ICONERROR);
+		}
+
 	public:
 		TinyASIOException(const std::string& message)
-			: exception(message.c_str()) {}
+			: exception(message.c_str()) 
+		{
+			ShowError(message);
+		}
 
 		TinyASIOException(const std::wstring& message)
-			: exception(std::string(message.begin(), message.end()).c_str()) {}
+			: exception(std::string(message.begin(), message.end()).c_str())
+		{
+			ShowError(message);
+		}
 	};
 
 	/**
