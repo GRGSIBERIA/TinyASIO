@@ -7,19 +7,20 @@ using namespace std;
 #include "TinyASIO.hpp"
 
 
-
-#define TEST_HR(hr) if(!SUCCEEDED(hr)) return -1
-
-
 int main()
 {
-	HRESULT hr;
+	if (!SUCCEEDED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE))) return -1;
 
-	hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+	asio::InputBackController controller("AudioBox");
 
-	TEST_HR(hr);
+	controller.Start();
 
-	auto driver = asio::Driver::Init("AudioBox");
+	while (true)
+	{
+		auto buffer = controller.Fetch();
+	}
+
+	controller.Stop();
 
 	return 0;
 }

@@ -45,9 +45,6 @@
     <ClInclude Include="InputBackController.hpp">
       <Filter>ヘッダー ファイル\Controller</Filter>
     </ClInclude>
-    <ClInclude Include="EffectableInputBackController.hpp">
-      <Filter>ヘッダー ファイル\Controller</Filter>
-    </ClInclude>
     <ClInclude Include="Channel.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

@@ -69,7 +69,6 @@
     <ClInclude Include="Channel.hpp" />
     <ClInclude Include="ControllerBase.hpp" />
     <ClInclude Include="Driver.hpp" />
-    <ClInclude Include="EffectableInputBackController.hpp" />
     <ClInclude Include="Exception.hpp" />
     <ClInclude Include="InputBackController.hpp" />
     <ClInclude Include="InputOnlyController.hpp" />

@@ -22,4 +22,5 @@ along with TinyASIO.If not, see <http://www.gnu.org/licenses/>
 
 #include "ControllerBase.hpp"
 #include "InputBackController.hpp"
+#include "InputOnlyController.hpp"
 //#include "EffectableInputBackController.hpp"

@@ -71,6 +71,11 @@ namespace asio
 			sampleRate = (long)sr;
 		}
 
+		/**
+		* コンストラクタでの呼び出しが行われない場合はダメ
+		*/
+		ControllerBase() {}
+
 	protected:
 		ControllerBase(const std::string& asioDriverName)
 		{
