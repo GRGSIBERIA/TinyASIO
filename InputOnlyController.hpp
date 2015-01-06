@@ -41,8 +41,8 @@ namespace asio
 		* 指定したチャンネルからコントローラを生成する
 		* @param[in] inputChannel 入力を受け付けるチャンネル
 		*/
-		InputOnlyController(const InputChannel& inputChannel)
-			: ControllerBase()
+		InputOnlyController(const std::string& asioDriverName, const InputChannel& inputChannel)
+			: ControllerBase(asioDriverName)
 		{
 			CreateBuffer({ inputChannel }, &BufferSwitch);
 
@@ -53,8 +53,8 @@ namespace asio
 		* 0番の入出力チャンネルからコントローラを生成する
 		* @note 0番の入出力同士をつなぐので，適当に音の出るチャンネルにジャックを挿してください
 		*/
-		InputOnlyController()
-			: ControllerBase()
+		InputOnlyController(const std::string& asioDriverName)
+			: ControllerBase(asioDriverName)
 		{
 			CreateBuffer({ channelManager->Inputs(0) }, &BufferSwitch);
 
@@ -64,7 +64,8 @@ namespace asio
 		/**
 		* チャンネル番号からコントローラを生成する
 		*/
-		InputOnlyController(const long inputNum)
+		InputOnlyController(const std::string& asioDriverName, const long inputNum)
+			: ControllerBase(asioDriverName)
 		{
 			CreateBuffer({ channelManager->Inputs(inputNum) }, &BufferSwitch);
 
