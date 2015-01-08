@@ -89,17 +89,17 @@ namespace asio
 			InitController();
 		}
 
-		static void SampleRateDidChange(ASIOSampleRate sRate)
+		static void SampleRateDidChange(ASIOSampleRate)
 		{
 			throw SampleRateDidChangeException("サンプリング周波数が変更されました");
 		}
 
-		static long AsioMessage(long selector, long value, void* message, double* opt)
+		static long AsioMessage(long, long, void*, double*)
 		{
 			return 0;
 		}
 
-		static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
+		static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long, ASIOBool)
 		{
 			return params;
 		}
