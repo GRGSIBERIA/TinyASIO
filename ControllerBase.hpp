@@ -68,17 +68,35 @@ namespace asio
 			sampleRate = (long)sr;
 		}
 
-		static void SampleRateDidChange(ASIOSampleRate)
+		/**
+		* コンストラクタでの呼び出しが行われない場合はダメ
+		*/
+		ControllerBase() {}
+
+	protected:
+		ControllerBase(const std::string& asioDriverName)
+		{
+			Driver::Init(asioDriverName);
+			InitController();
+		}
+
+		ControllerBase(const std::wstring& asioDriverName)
+		{
+			Driver::Init(asioDriverName);
+			InitController();
+		}
+
+		static void SampleRateDidChange(ASIOSampleRate sRate)
 		{
 			throw SampleRateDidChangeException("サンプリング周波数が変更されました");
 		}
 
-		static long AsioMessage(long, long, void*, double*)
+		static long AsioMessage(long selector, long value, void* message, double* opt)
 		{
 			return 0;
 		}
 
-		static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long, ASIOBool)
+		static ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess)
 		{
 			return params;
 		}
