@@ -21,13 +21,16 @@ along with TinyASIO.If not, see <http://www.gnu.org/licenses/>
 #include <memory>
 #include <vector>
 
-/**
-* UNICODE‘Îô
-*/
+namespace asio
+{
+	/**
+	* UNICODE‘Îô
+	*/
 #ifdef UNICODE
-typedef std::wstring asio_string;
+	typedef std::wstring asio_string;
 #else
-typedef std::string asio_string;
+	typedef std::string asio_string;
 #endif
 
-typedef std::shared_ptr<std::vector<int>> StreamingVector;
+	typedef std::shared_ptr<std::vector<int>> StreamingVector;
+}
