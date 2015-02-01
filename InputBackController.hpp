@@ -30,7 +30,7 @@ namespace asio
 		static OutputBuffer* output;
 
 	private:
-		static void BufferSwitch(long index, long)
+		static void BufferSwitch(long index, long directProcess)
 		{
 			void* outBuf = output->GetBuffer(index);
 			void* inBuf = input->GetBuffer(index);
@@ -40,19 +40,15 @@ namespace asio
 			input->Store(inBuf, bufferLength);	// 入力ストリームに内容を蓄積する
 		}
 
-		void ToFloat(InputChannel& input, OutputChannel& output)
-		{
-			
-		}
-
 	public:
 		/**
 		* 指定したチャンネルからコントローラを生成する
+		* @param[in] asioDriverName ASIOのドライバ名
 		* @param[in] inputChannel 入力を受け付けるチャンネル
 		* @param[in] outputChannel 入力された内容を流し込みたい出力チャンネル
 		*/
-		InputBackController(const InputChannel& inputChannel, const OutputChannel& outputChannel)
-			: ControllerBase() 
+		InputBackController(const std::string& asioDriverName, const InputChannel& inputChannel, const OutputChannel& outputChannel)
+			: ControllerBase(asioDriverName) 
 		{
 			CreateBuffer({inputChannel, outputChannel}, &BufferSwitch);
 
@@ -64,8 +60,8 @@ namespace asio
 		* 0番の入出力チャンネルからコントローラを生成する
 		* @note 0番の入出力同士をつなぐので，適当に音の出るチャンネルにジャックを挿してください
 		*/
-		InputBackController()
-			: ControllerBase()
+		InputBackController(const std::string& asioDriverName)
+			: ControllerBase(asioDriverName)
 		{
 			CreateBuffer({channelManager->Inputs(0), channelManager->Outputs(0)}, &BufferSwitch);
 
@@ -76,7 +72,8 @@ namespace asio
 		/**
 		* チャンネル番号からコントローラを生成する
 		*/
-		InputBackController(const long inputNum, const long outputNum)
+		InputBackController(const std::string& asioDriverName, const long inputNum, const long outputNum)
+			: ControllerBase(asioDriverName)
 		{
 			CreateBuffer({ channelManager->Inputs(inputNum), channelManager->Outputs(outputNum) }, &BufferSwitch);
 
