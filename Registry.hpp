@@ -259,8 +259,11 @@ namespace asio
 			if (cr != ERROR_SUCCESS)
 				return DriverList(subkeys);
 
-			DWORD index = 0;
-			while (true)
+			DWORD max_index = 0;
+
+			RegQueryInfoKey(hkey, NULL, NULL, NULL, &max_index, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+			for (DWORD index = 0; index < max_index; ++index)
 			{
 				try
 				{
@@ -272,8 +275,6 @@ namespace asio
 					// ŠJ‚¯‚È‚¢‚Ì‚Å‹A‚é
 					break;
 				}
-				
-				index++;
 			}
 
 			::RegCloseKey(hkey);
