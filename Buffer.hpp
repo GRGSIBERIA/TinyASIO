@@ -39,7 +39,7 @@ namespace asio
 		void *buffers[2];	//!< バッファ
 		long channelNumber;	//!< チャンネル番号
 
-		StreamingVector stream;		//!< ストリーミング用の変数
+		StreamPtr stream;		//!< ストリーミング用の変数
 		CRITICAL_SECTION critical;	//!< クリティカルセクション
 
 		const Channel& channelInfo;	//!< チャンネル情報
@@ -61,7 +61,7 @@ namespace asio
 			buffers[0] = info.buffers[0];
 			buffers[1] = info.buffers[1];
 
-			stream = StreamingVector(new std::vector<int>());
+			stream = StreamPtr(new Stream());
 			InitializeCriticalSection(&critical);
 		}
 
@@ -81,10 +81,10 @@ namespace asio
 		* バッファの中身を取り出す
 		* @return バッファの中身
 		*/
-		StreamingVector Fetch()
+		StreamPtr Fetch()
 		{
-			StreamingVector retval = stream;
-			Critical([&](){ stream = StreamingVector(new std::vector<int>()); });
+			StreamPtr retval = stream;
+			Critical([&](){ stream = StreamPtr(new std::vector<SampleType>()); });
 			return retval;
 		}
 
@@ -100,7 +100,7 @@ namespace asio
 				unsigned long length = bufferLength;
 				if (length > stream->size())
 					length = stream->size();
-				memcpy(buffer, &stream->at(0), length * sizeof(int));
+				memcpy(buffer, &stream->at(0), length * sizeof(SampleType));
 				stream->erase(stream->begin(), stream->begin() + length);
 			});
 		}
@@ -110,7 +110,7 @@ namespace asio
 		* バッファに値を蓄積する
 		* @param[in] store 蓄積したい値
 		*/
-		void Store(const std::vector<int>& store)
+		void Store(const Stream& store)
 		{
 			Critical([&](){stream->insert(stream->end(), store.begin(), store.end()); });
 		}
@@ -123,7 +123,7 @@ namespace asio
 		*/
 		void Store(void* buffer, const long bufferLength)
 		{
-			int* ptr = reinterpret_cast<int*>(buffer);
+			SampleType* ptr = reinterpret_cast<SampleType*>(buffer);
 			Critical([&](){ stream->insert(stream->end(), ptr, ptr + bufferLength); });
 		}
 

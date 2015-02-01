@@ -77,7 +77,7 @@ namespace asio
 		* @return 入力ストリームに蓄積されたデータ
 		* @note 入力ストリームの内容は空になる
 		*/
-		StreamingVector Fetch()
+		StreamPtr Fetch()
 		{
 			return input->Fetch();
 		}

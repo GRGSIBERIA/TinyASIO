@@ -35,7 +35,7 @@ namespace asio
 			void* outBuf = output->GetBuffer(index);
 			void* inBuf = input->GetBuffer(index);
 
-			memcpy(outBuf, inBuf, bufferLength * sizeof(int));	// 入力のバッファを出力へ移す
+			memcpy(outBuf, inBuf, bufferLength * sizeof(SampleType));	// 入力のバッファを出力へ移す
 
 			input->Store(inBuf, bufferLength);	// 入力ストリームに内容を蓄積する
 		}
@@ -86,7 +86,7 @@ namespace asio
 		* @return 入力ストリームに蓄積されたデータ
 		* @note 入力ストリームの内容は空になる
 		*/
-		StreamingVector Fetch()
+		StreamPtr Fetch()
 		{
 			return input->Fetch();
 		}

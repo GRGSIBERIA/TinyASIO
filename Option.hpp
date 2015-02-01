@@ -21,6 +21,8 @@ along with TinyASIO.If not, see <http://www.gnu.org/licenses/>
 #include <memory>
 #include <vector>
 
+#include "SDK.hpp"
+
 namespace asio
 {
 	/**
@@ -32,5 +34,10 @@ namespace asio
 	typedef std::string asio_string;
 #endif
 
-	typedef std::shared_ptr<std::vector<int>> StreamingVector;
+#define ASIO_CURRENT_SAMPLE_TYPE ASIOSTFloat32MSB	//!< 現在，ライブラリ的に強制しているサンプル型
+
+	typedef float SampleType;	//!< サンプリングした時の型
+
+	typedef std::vector<SampleType> Stream;
+	typedef std::shared_ptr<Stream> StreamPtr;	//!< バッファリングした時に取得する型
 }

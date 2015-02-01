@@ -18,6 +18,7 @@ along with TinyASIO.If not, see <http://www.gnu.org/licenses/>
 #pragma once
 #include <string>
 
+#include "Option.hpp"
 #include "Exception.hpp"
 #include "SDK.hpp"
 #include "Driver.hpp"
@@ -43,7 +44,7 @@ namespace asio
 			isActive(i.isActive > 0),
 			name(i.name),
 			channelNumber(i.channel),
-			sampleType(i.type),
+			sampleType(ASIO_CURRENT_SAMPLE_TYPE), //sampleType(i.type),
 			channelGroup(i.channelGroup),
 			isInput(i.isInput > 0) { }
 
