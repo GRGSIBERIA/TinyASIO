@@ -33,7 +33,7 @@ namespace asio
 		const bool isActive;				//!< チャンネルが有効かどうか
 		const std::string name;				//!< チャンネル名
 		const long channelNumber;			//!< チャンネル番号
-		const ASIOSampleType sampleType;	//!< サンプリングの種類
+		const ASIOSampleType sampleType;	//!< サンプリングの種類, 32bit Float強制
 		const long channelGroup;			//!< チャンネルのグループ
 		const bool isInput;
 
@@ -42,7 +42,7 @@ namespace asio
 			:
 			isActive(i.isActive > 0),
 			name(i.name),
-			channelNumber(i.channel),
+			channelNumber(ASIOSTFloat32MSB),
 			sampleType(i.type),
 			channelGroup(i.channelGroup),
 			isInput(i.isInput > 0) { }

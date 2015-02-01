@@ -61,7 +61,7 @@ namespace asio
 			buffers[0] = info.buffers[0];
 			buffers[1] = info.buffers[1];
 
-			stream = StreamingVector(new std::vector<int>());
+			stream = StreamingVector(new std::vector<float>());
 			InitializeCriticalSection(&critical);
 		}
 
@@ -84,7 +84,7 @@ namespace asio
 		StreamingVector Fetch()
 		{
 			StreamingVector retval = stream;
-			Critical([&](){ stream = StreamingVector(new std::vector<int>()); });
+			Critical([&](){ stream = StreamingVector(new std::vector<float>()); });
 			return retval;
 		}
 
@@ -100,7 +100,7 @@ namespace asio
 				unsigned long length = bufferLength;
 				if (length > stream->size())
 					length = stream->size();
-				memcpy(buffer, &stream->at(0), length * sizeof(int));
+				memcpy(buffer, &stream->at(0), length * sizeof(float));
 				stream->erase(stream->begin(), stream->begin() + length);
 			});
 		}
@@ -110,7 +110,7 @@ namespace asio
 		* バッファに値を蓄積する
 		* @param[in] store 蓄積したい値
 		*/
-		void Store(const std::vector<int>& store)
+		void Store(const std::vector<float>& store)
 		{
 			Critical([&](){stream->insert(stream->end(), store.begin(), store.end()); });
 		}
@@ -123,7 +123,7 @@ namespace asio
 		*/
 		void Store(void* buffer, const long bufferLength)
 		{
-			int* ptr = reinterpret_cast<int*>(buffer);
+			float* ptr = reinterpret_cast<float*>(buffer);
 			Critical([&](){ stream->insert(stream->end(), ptr, ptr + bufferLength); });
 		}
 

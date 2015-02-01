@@ -30,4 +30,4 @@ typedef std::wstring asio_string;
 typedef std::string asio_string;
 #endif
 
-typedef std::shared_ptr<std::vector<int>> StreamingVector;
+typedef std::shared_ptr<std::vector<float>> StreamingVector;

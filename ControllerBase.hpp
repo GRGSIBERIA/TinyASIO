@@ -46,11 +46,8 @@ namespace asio
 
 		static bool ownershipToken;		//!< 所有権
 
-	private:
-		/**
-		* コントローラの初期化
-		*/
-		void InitController()
+	protected:
+		ControllerBase()
 		{
 			if (ownershipToken)
 				throw DuplicateOwnershipToken(L"複数のコントローラが生成されています．片方を削除してください．");
@@ -69,24 +66,6 @@ namespace asio
 			ErrorCheck(iasio->getSampleRate(&sr));
 			ErrorCheck(iasio->setSampleRate(sr));
 			sampleRate = (long)sr;
-		}
-
-		/**
-		* コンストラクタでの呼び出しが行われない場合はダメ
-		*/
-		ControllerBase() {}
-
-	protected:
-		ControllerBase(const std::string& asioDriverName)
-		{
-			Driver::Init(asioDriverName);
-			InitController();
-		}
-
-		ControllerBase(const std::wstring& asioDriverName)
-		{
-			Driver::Init(asioDriverName);
-			InitController();
 		}
 
 		static void SampleRateDidChange(ASIOSampleRate)

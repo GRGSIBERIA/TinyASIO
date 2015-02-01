@@ -146,7 +146,10 @@ namespace asio
 			DWORD max_path_size = 360;
 			wchar_t *subkeyBuffer = new wchar_t[max_path_size];
 			LONG cr = RegEnumKeyExW(hkey, index, subkeyBuffer, &max_path_size, NULL, NULL, NULL, NULL);
-			if (cr != ERROR_SUCCESS)
+
+			if (cr == 259)
+				throw std::exception("正常終了");	// ループ親の例外処理で一度外へ出る
+			else if (cr != ERROR_SUCCESS)
 				throw CantOpenSubKeyIndex(ASIO_REGISTORY_PATH);	// この例外でbreakできる
 				
 			std::wstring result = subkeyBuffer;
@@ -267,7 +270,7 @@ namespace asio
 					const auto subkey = GetSubKey(hkey, index);
 					subkeys->emplace_back(ASIO_REGISTORY_PATH + L"\\" + subkey, subkey);
 				}
-				catch (CantOpenSubKeyIndex)
+				catch (std::exception)
 				{
 					// 開けないので帰る
 					break;
