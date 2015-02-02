@@ -30,7 +30,7 @@ namespace asio
 		static OutputBuffer* output;
 
 	private:
-		static void BufferSwitch(long index, long directProcess)
+		static void BufferSwitch(long index, long)
 		{
 			void* outBuf = output->GetBuffer(index);
 			void* inBuf = input->GetBuffer(index);
