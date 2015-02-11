@@ -34,7 +34,7 @@ namespace asio
 	typedef std::string asio_string;
 #endif
 
-#define ASIO_CURRENT_SAMPLE_TYPE ASIOSTInt32MSB	//!< 現在，ライブラリ的に強制しているサンプル型
+#define ASIO_CURRENT_SAMPLE_TYPE ASIOSTInt32LSB	//!< 現在，ライブラリ的に強制しているサンプル型
 
 	typedef int SampleType;	//!< サンプリングした時の型
 
