@@ -45,6 +45,12 @@ namespace asio
 
 		SubKey(const std::wstring& regPath, const std::wstring& driverName)
 			: registryPath(regPath), driverName(driverName) {}
+
+		SubKey& operator =(const SubKey& subkey)
+		{
+			const_cast<std::wstring&>(this->registryPath) = subkey.registryPath;
+			const_cast<std::wstring&>(this->driverName) = subkey.driverName;
+		}
 	};
 
 	class Registry;
