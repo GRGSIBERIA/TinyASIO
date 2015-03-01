@@ -42,7 +42,7 @@ namespace asio
 		StreamPtr stream;		//!< ストリーミング用の変数
 		CRITICAL_SECTION critical;	//!< クリティカルセクション
 
-		const Channel& channelInfo;	//!< チャンネル情報
+		Channel channelInfo;	//!< チャンネル情報
 
 
 		template <typename FUNC>
@@ -125,6 +125,14 @@ namespace asio
 		{
 			SampleType* ptr = reinterpret_cast<SampleType*>(buffer);
 			Critical([&](){ stream->insert(stream->end(), ptr, ptr + bufferLength); });
+		}
+		
+		/**
+		* バッファの中身を削除する
+		*/
+		void Clear()
+		{
+			Critical([&](){ stream->clear(); });
 		}
 
 		/**
