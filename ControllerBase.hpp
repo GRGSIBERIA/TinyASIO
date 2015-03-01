@@ -142,10 +142,19 @@ namespace asio
 		inline const long OutputLatency() const { return outputLatency; }	//!< 出力の遅延を返す
 		inline const long SampleRate() const { return sampleRate; }			//!< サンプリング周波数を返す
 
-	public:
+		/*
+		* バッファを明示的に開放する
+		*/
+		void Dispose()
+		{
+			Stop();
+			bufferManager->DisposeBuffer();
+			ownershipToken = false;
+		}
+
 		virtual ~ControllerBase() 
 		{
-			ownershipToken = false;
+			Dispose();
 		}
 	};
 
