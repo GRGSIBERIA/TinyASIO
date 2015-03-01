@@ -236,10 +236,13 @@ namespace asio
 	public:
 		void DisposeBuffer()
 		{
-			if (!disposed)
+			if (this != nullptr)	// null‚È‚Ì‚ÉDisposeBuffer‚ªŒÄ‚Î‚ê‚é‚±‚Æ‚à‚ ‚é‚ÆŽv‚¤‚Ì‚Å‰ñ”ð‚·‚é
 			{
-				Driver::Get().Interface()->disposeBuffers();
-				disposed = true;
+				if (!disposed)
+				{
+					Driver::Get().Interface()->disposeBuffers();
+					disposed = true;
+				}
 			}
 		}
 
