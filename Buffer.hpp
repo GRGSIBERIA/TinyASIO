@@ -198,6 +198,8 @@ namespace asio
 		static std::vector<InputBuffer>* inputBuffersPtr;
 		static std::vector<OutputBuffer>* outputBuffersPtr;
 
+		bool disposed;
+
 	private:
 		template <typename VECTOR_ARRAY>
 		void InitBufferInfo(const VECTOR_ARRAY& channels)
@@ -229,7 +231,22 @@ namespace asio
 		}
 
 	public:
+		void DisposeBuffer()
+		{
+			if (!disposed)
+			{
+				Driver::Get().Interface()->disposeBuffers();
+				disposed = true;
+			}
+		}
+
+		virtual ~BufferManager()
+		{
+			DisposeBuffer();
+		}
+
 		BufferManager(const std::vector<Channel>& channels, const long bufferLength, ASIOCallbacks* callbacks)
+			: disposed(false)
 		{
 			InitBufferInfo(channels);
 			InitBuffers(channels, bufferLength, callbacks);
@@ -237,6 +254,7 @@ namespace asio
 
 		template <size_t NUM>
 		BufferManager(const std::array<Channel, NUM>& channels, const long bufferLength, ASIOCallbacks* callbacks)
+			: disposed(false)
 		{
 			InitBufferInfo(channels);
 			InitBuffers(channels, bufferLength, callbacks);
