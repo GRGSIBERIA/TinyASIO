@@ -17,9 +17,10 @@ along with TinyASIO.If not, see <http://www.gnu.org/licenses/>
 
 #pragma once
 #include <vector>
-#include <Windows.h>
+//#include <Windows.h>
 #include <algorithm>
 #include <array>
+#include <mutex>
 
 #include "Option.hpp"
 #include "SDK.hpp"
@@ -40,7 +41,8 @@ namespace asio
 		long channelNumber;	//!< チャンネル番号
 
 		StreamPtr stream;		//!< ストリーミング用の変数
-		CRITICAL_SECTION critical;	//!< クリティカルセクション
+		
+		static std::mutex critical;	//!< 共有資源を守ってるつもり
 
 		Channel channelInfo;	//!< チャンネル情報
 
@@ -48,9 +50,9 @@ namespace asio
 		template <typename FUNC>
 		void Critical(FUNC func)
 		{
-			EnterCriticalSection(&critical);
+			critical.lock();
 			func();
-			LeaveCriticalSection(&critical);
+			critical.unlock();
 		}
 
 
@@ -62,13 +64,13 @@ namespace asio
 			buffers[1] = info.buffers[1];
 
 			stream = StreamPtr(new Stream());
-			InitializeCriticalSection(&critical);
+			//InitializeCriticalSection(&critical);
 		}
 
 		
 		virtual ~BufferBase()
 		{
-			DeleteCriticalSection(&critical);
+			//DeleteCriticalSection(&critical);
 		}
 
 
@@ -160,6 +162,7 @@ namespace asio
 		}
 	};
 
+	std::mutex BufferBase::critical;
 
 	/**
 	* 入力バッファ, ギターやマイクなどの入力を扱う
