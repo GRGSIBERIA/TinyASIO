@@ -91,7 +91,7 @@ namespace asio
 
 		static void SampleRateDidChange(ASIOSampleRate)
 		{
-			throw SampleRateDidChangeException("サンプリング周波数が変更されました");
+			throw SampleRateDidChangeException("サンプリング周波数の変更を検知しました。\n変更しないでください");
 		}
 
 		static long AsioMessage(long, long, void*, double*)
