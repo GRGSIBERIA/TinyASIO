@@ -87,5 +87,10 @@ namespace asio
 		* @return ドライバのCOMインターフェース
 		*/
 		IASIO* IASIO() { return iasio; }
+
+		/**
+		* インターフェースを解放
+		*/
+		void Release() { iasio->Release(); }
 	};
 }

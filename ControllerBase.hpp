@@ -145,16 +145,15 @@ namespace asio
 		/*
 		* バッファを明示的に開放する
 		*/
-		void Dispose()
+		void DisposeBuffer()
 		{
 			Stop();
 			bufferManager->DisposeBuffer();
-			ownershipToken = false;
 		}
 
 		virtual ~ControllerBase() 
 		{
-			Dispose();
+			DisposeBuffer();
 		}
 	};
 

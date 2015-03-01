@@ -111,16 +111,26 @@ namespace asio
 		*/
 		static Driver& Get() { return *driver; }
 
+		/**
+		* ドライバの解放
+		*/
+		static void Dispose()
+		{
+			// driver.reset();
+		}
 
 		/**
 		* ドライバの解放など
 		*/
-		~Driver() { }
+		~Driver() 
+		{
+			// iasio.Release();
+		}
 
-		const std::vector<InputChannel>& InputChannels() const { return channelManager->Inputs(); }		//!< 入力チャンネルを返す
+		const std::vector<InputChannel>& InputChannels() const { return channelManager->Inputs(); }			//!< 入力チャンネルを返す
 		const std::vector<OutputChannel>& OutputChannels() const { return channelManager->Outputs(); }		//!< 出力チャンネルを返す
-		const InputChannel& InputChannels(const long i) const { return channelManager->Inputs(i); }	//!< 添字iに対応した入力チャンネルを返す
-		const OutputChannel& OutputChannels(const long i) const { return channelManager->Outputs(i); }	//!< 添字iに対応して出力チャンネルを返す
+		const InputChannel& InputChannels(const long i) const { return channelManager->Inputs(i); }			//!< 添字iに対応した入力チャンネルを返す
+		const OutputChannel& OutputChannels(const long i) const { return channelManager->Outputs(i); }		//!< 添字iに対応して出力チャンネルを返す
 	};
 
 	std::shared_ptr<Driver> Driver::driver;
