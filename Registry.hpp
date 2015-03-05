@@ -40,8 +40,8 @@ namespace asio
 	struct SubKey
 	{
 	public:
-		const std::wstring registryPath;	/*!< レジストリのパス */
-		const std::wstring driverName;		/*!< ドライバ名 */
+		std::wstring registryPath;	/*!< レジストリのパス */
+		std::wstring driverName;	/*!< ドライバ名 */
 
 		SubKey(const std::wstring& regPath, const std::wstring& driverName)
 			: registryPath(regPath), driverName(driverName) {}
