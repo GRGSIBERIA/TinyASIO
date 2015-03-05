@@ -109,7 +109,11 @@ namespace asio
 		/**
 		* ドライバの取得
 		*/
-		static Driver& Get() { return *driver; }
+		static Driver& Get() { 
+			if (driver == nullptr)
+				throw std::exception("ドライバがnullです");
+			return *driver; 
+		}
 
 		/**
 		* ドライバの解放
