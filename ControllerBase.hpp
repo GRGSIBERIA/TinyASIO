@@ -131,7 +131,8 @@ namespace asio
 		virtual void Start() { driver->Interface()->start(); }	//!< バッファリング開始
 		virtual void Stop() { driver->Interface()->stop(); }	//!< バッファリング終了
 		
-		inline const long BufferSize() const { return bufferLength * sizeof(int); }		//!< バッファの容量（バイト）を返す
+		static const size_t BufferSize() { return bufferLength * sizeof(asio::SampleType); }		//!< バッファの容量（バイト）を返す
+
 		inline const long BufferLength() const { return bufferLength; }		//!< バッファの長さを返す
 		inline const long InputLatency() const { return inputLatency; }		//!< 入力の遅延を返す
 		inline const long OutputLatency() const { return outputLatency; }	//!< 出力の遅延を返す
