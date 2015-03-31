@@ -128,8 +128,19 @@ namespace asio
 		}
 
 	public:
-		virtual void Start() { driver->Interface()->start(); }	//!< バッファリング開始
-		virtual void Stop() { driver->Interface()->stop(); }	//!< バッファリング終了
+		//!< バッファリング開始
+		virtual void Start() 
+		{ 
+			bufferManager->StartBuffers();
+			driver->Interface()->start(); 
+		}
+
+		//!< バッファリング終了
+		virtual void Stop() 
+		{ 
+			bufferManager->StopBuffers();
+			driver->Interface()->stop(); 
+		}	
 		
 		static const size_t BufferSize() { return bufferLength * sizeof(asio::SampleType); }		//!< バッファの容量（バイト）を返す
 		static const long BufferLength() { return bufferLength; }		//!< バッファの長さを返す
