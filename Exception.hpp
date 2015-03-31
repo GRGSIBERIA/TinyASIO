@@ -179,4 +179,14 @@ namespace asio
 			throw CantProcessException("not enough memory for completing the request");
 		}
 	}
+
+	/**
+	* まだ開始していないのに，特定の処理を行ったときの例外
+	*/
+	class DontStartException : public TinyASIOException
+	{
+	public:
+		DontStartException(const std::wstring& message)
+			: TinyASIOException(message) {}
+	};
 }
