@@ -72,11 +72,11 @@ namespace asio
 			//InitializeCriticalSection(&critical);
 		}
 
-		
-		virtual ~BufferBase()
-		{
-			//DeleteCriticalSection(&critical);
-		}
+		// ‚±‚ê‚ğ‘‚­‚Æ‰ğ•ú‚É—‚¿‚é‚Ì‚Å‚Â‚ç‚¢
+		//virtual ~BufferBase()
+		//{
+		//	DeleteCriticalSection(&critical);
+		//}
 
 
 		inline const long ChannelNumber() const { return channelNumber; }	//!< ƒ`ƒƒƒ“ƒlƒ‹”Ô†
