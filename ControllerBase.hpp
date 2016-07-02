@@ -71,11 +71,6 @@ namespace asio
 			sampleRate = (long)sr;
 		}
 
-		/**
-		* コンストラクタでの呼び出しが行われない場合はダメ
-		*/
-		ControllerBase() {}
-
 	protected:
 		ControllerBase(const std::string& asioDriverName)
 		{
@@ -91,7 +86,7 @@ namespace asio
 
 		static void SampleRateDidChange(ASIOSampleRate)
 		{
-			throw SampleRateDidChangeException("サンプリング周波数が変更されました");
+			throw SampleRateDidChangeException("サンプリング周波数の変更を検知しました。\n変更しないでください");
 		}
 
 		static long AsioMessage(long, long, void*, double*)
@@ -133,19 +128,39 @@ namespace asio
 		}
 
 	public:
-		inline void Start() { driver->Interface()->start(); }	//!< バッファリング開始
-		inline void Stop() { driver->Interface()->stop(); }	//!< バッファリング終了
+		//!< バッファリング開始
+		virtual void Start() 
+		{ 
+			bufferManager->StartBuffers();
+			driver->Interface()->start(); 
+		}
+
+		//!< バッファリング終了
+		virtual void Stop() 
+		{ 
+			bufferManager->StopBuffers();
+			driver->Interface()->stop(); 
+		}	
 		
-		inline const long BufferSize() const { return bufferLength * sizeof(int); }		//!< バッファの容量（バイト）を返す
-		inline const long BufferLength() const { return bufferLength; }		//!< バッファの長さを返す
+		static const size_t BufferSize() { return bufferLength * sizeof(asio::SampleType); }		//!< バッファの容量（バイト）を返す
+		static const long BufferLength() { return bufferLength; }		//!< バッファの長さを返す
+
 		inline const long InputLatency() const { return inputLatency; }		//!< 入力の遅延を返す
 		inline const long OutputLatency() const { return outputLatency; }	//!< 出力の遅延を返す
 		inline const long SampleRate() const { return sampleRate; }			//!< サンプリング周波数を返す
 
-	public:
+		/*
+		* バッファを明示的に開放する
+		*/
+		void DisposeBuffer()
+		{
+			Stop();
+			bufferManager->DisposeBuffer();
+		}
+
 		virtual ~ControllerBase() 
 		{
-			ownershipToken = false;
+			DisposeBuffer();
 		}
 	};
 

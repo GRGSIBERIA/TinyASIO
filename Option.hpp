@@ -21,13 +21,23 @@ along with TinyASIO.If not, see <http://www.gnu.org/licenses/>
 #include <memory>
 #include <vector>
 
-/**
-* UNICODE対策
-*/
+#include "SDK.hpp"
+
+namespace asio
+{
+	/**
+	* UNICODE対策
+	*/
 #ifdef UNICODE
-typedef std::wstring asio_string;
+	typedef std::wstring asio_string;
 #else
-typedef std::string asio_string;
+	typedef std::string asio_string;
 #endif
 
-typedef std::shared_ptr<std::vector<int>> StreamingVector;
+#define ASIO_CURRENT_SAMPLE_TYPE ASIOSTInt32LSB	//!< 現在，ライブラリ的に強制しているサンプル型
+
+	typedef int SampleType;	//!< サンプリングした時の型
+
+	typedef std::vector<SampleType> Stream;
+	typedef std::shared_ptr<Stream> StreamPtr;	//!< バッファリングした時に取得する型
+}

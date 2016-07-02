@@ -17,9 +17,10 @@ along with TinyASIO.If not, see <http://www.gnu.org/licenses/>
 
 #pragma once
 #include <vector>
-#include <Windows.h>
+//#include <Windows.h>
 #include <algorithm>
 #include <array>
+#include <mutex>
 
 #include "Option.hpp"
 #include "SDK.hpp"
@@ -28,7 +29,7 @@ along with TinyASIO.If not, see <http://www.gnu.org/licenses/>
 
 namespace asio
 {
-	
+	class BufferManager;
 
 	/**
 	* バッファ用のクラス
@@ -39,36 +40,42 @@ namespace asio
 		void *buffers[2];	//!< バッファ
 		long channelNumber;	//!< チャンネル番号
 
-		StreamingVector stream;		//!< ストリーミング用の変数
-		CRITICAL_SECTION critical;	//!< クリティカルセクション
+		StreamPtr stream;		//!< ストリーミング用の変数
+		
+		static std::mutex critical;	//!< 共有資源を守ってるつもり
 
-		const Channel& channelInfo;	//!< チャンネル情報
+		Channel channelInfo;	//!< チャンネル情報
+		bool isStart;			//!< バッファリングしてるかどうかの有無
 
 
 		template <typename FUNC>
 		void Critical(FUNC func)
 		{
-			EnterCriticalSection(&critical);
+			critical.lock();
 			func();
-			LeaveCriticalSection(&critical);
+			critical.unlock();
 		}
+
+		friend BufferManager;
+		void StartBuffering() { isStart = true; }
+		void StopBuffering() { isStart = false; }
 
 
 	public:
 		BufferBase(const ASIOBufferInfo& info, const Channel& channel)
-			: channelNumber(info.channelNum), channelInfo(channel)
+			: channelNumber(info.channelNum), channelInfo(channel), isStart(false)
 		{
 			buffers[0] = info.buffers[0];
 			buffers[1] = info.buffers[1];
 
-			stream = StreamingVector(new std::vector<int>());
-			InitializeCriticalSection(&critical);
+			stream = StreamPtr(new Stream());
+			//InitializeCriticalSection(&critical);
 		}
 
 		
 		virtual ~BufferBase()
 		{
-			DeleteCriticalSection(&critical);
+			//DeleteCriticalSection(&critical);
 		}
 
 
@@ -81,10 +88,11 @@ namespace asio
 		* バッファの中身を取り出す
 		* @return バッファの中身
 		*/
-		StreamingVector Fetch()
+		StreamPtr Fetch()
 		{
-			StreamingVector retval = stream;
-			Critical([&](){ stream = StreamingVector(new std::vector<int>()); });
+			if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにFetchが呼び出された");
+			StreamPtr retval = stream;
+			Critical([&](){ stream = StreamPtr(new std::vector<SampleType>()); });
 			return retval;
 		}
 
@@ -96,11 +104,12 @@ namespace asio
 		*/
 		void Fetch(void* buffer, const unsigned long bufferLength)
 		{
+			if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにFetchが呼び出された");
 			Critical([&](){
 				unsigned long length = bufferLength;
 				if (length > stream->size())
 					length = stream->size();
-				memcpy(buffer, &stream->at(0), length * sizeof(int));
+				memcpy(buffer, &stream->at(0), length * sizeof(SampleType));
 				stream->erase(stream->begin(), stream->begin() + length);
 			});
 		}
@@ -110,8 +119,9 @@ namespace asio
 		* バッファに値を蓄積する
 		* @param[in] store 蓄積したい値
 		*/
-		void Store(const std::vector<int>& store)
+		void Store(const Stream& store)
 		{
+			if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにStoreが呼び出された");
 			Critical([&](){stream->insert(stream->end(), store.begin(), store.end()); });
 		}
 
@@ -123,8 +133,17 @@ namespace asio
 		*/
 		void Store(void* buffer, const long bufferLength)
 		{
-			int* ptr = reinterpret_cast<int*>(buffer);
+			if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにStoreが呼び出された");
+			SampleType* ptr = reinterpret_cast<SampleType*>(buffer);
 			Critical([&](){ stream->insert(stream->end(), ptr, ptr + bufferLength); });
+		}
+		
+		/**
+		* バッファの中身を削除する
+		*/
+		void Clear()
+		{
+			Critical([&](){ stream->clear(); });
 		}
 
 		/**
@@ -152,6 +171,7 @@ namespace asio
 		}
 	};
 
+	std::mutex BufferBase::critical;
 
 	/**
 	* 入力バッファ, ギターやマイクなどの入力を扱う
@@ -174,6 +194,7 @@ namespace asio
 			: BufferBase(info, channel) {}
 	};
 
+	class ControllerBase;
 
 	/**
 	* バッファの管理クラス
@@ -182,13 +203,17 @@ namespace asio
 	{
 		std::vector<ASIOBufferInfo> bufferInfo;
 
-		std::vector<BufferBase> buffers;
+		std::vector<BufferBase*> buffers;
 		std::vector<InputBuffer> inputBuffers;
 		std::vector<OutputBuffer> outputBuffers;
 
 		static std::vector<BufferBase>* buffersPtr;			//!< コールバック関数から使えるようにするためのポインタ
 		static std::vector<InputBuffer>* inputBuffersPtr;
 		static std::vector<OutputBuffer>* outputBuffersPtr;
+
+		bool disposed;
+
+		friend ControllerBase;
 
 	private:
 		template <typename VECTOR_ARRAY>
@@ -210,18 +235,56 @@ namespace asio
 
 			for (unsigned long i = 0; i < bufferInfo.size(); ++i)
 			{
+				BufferBase* ptr;
 				if (bufferInfo[i].isInput)
+				{
 					inputBuffers.emplace_back(bufferInfo[i], channels[i]);
+					ptr = &inputBuffers.back();
+				}
 				else
+				{
 					outputBuffers.emplace_back(bufferInfo[i], channels[i]);
+					ptr = &outputBuffers.back();
+				}
+				buffers.push_back(ptr);
 			}
 
 			inputBuffersPtr = &inputBuffers;
 			outputBuffersPtr = &outputBuffers;
 		}
 
+		void StartBuffers()
+		{
+			for (auto& buffer : buffers)
+				buffer->StartBuffering();
+		}
+
+		void StopBuffers()
+		{
+			for (auto& buffer : buffers)
+				buffer->StopBuffering();
+		}
+
 	public:
+		void DisposeBuffer()
+		{
+			if (this != nullptr)	// nullなのにDisposeBufferが呼ばれることもあると思うので回避する
+			{
+				if (!disposed)
+				{
+					Driver::Get().Interface()->disposeBuffers();
+					disposed = true;
+				}
+			}
+		}
+
+		virtual ~BufferManager()
+		{
+			DisposeBuffer();
+		}
+
 		BufferManager(const std::vector<Channel>& channels, const long bufferLength, ASIOCallbacks* callbacks)
+			: disposed(false)
 		{
 			InitBufferInfo(channels);
 			InitBuffers(channels, bufferLength, callbacks);
@@ -229,6 +292,7 @@ namespace asio
 
 		template <size_t NUM>
 		BufferManager(const std::array<Channel, NUM>& channels, const long bufferLength, ASIOCallbacks* callbacks)
+			: disposed(false)
 		{
 			InitBufferInfo(channels);
 			InitBuffers(channels, bufferLength, callbacks);

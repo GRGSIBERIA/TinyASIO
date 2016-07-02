@@ -40,8 +40,8 @@ namespace asio
 	struct SubKey
 	{
 	public:
-		const std::wstring registryPath;	/*!< レジストリのパス */
-		const std::wstring driverName;		/*!< ドライバ名 */
+		std::wstring registryPath;	/*!< レジストリのパス */
+		std::wstring driverName;	/*!< ドライバ名 */
 
 		SubKey(const std::wstring& regPath, const std::wstring& driverName)
 			: registryPath(regPath), driverName(driverName) {}
@@ -100,6 +100,11 @@ namespace asio
 			std::wstring str(findName.begin(), findName.end());
 			return Find(str);
 		}
+		
+		/*
+		* 中身が空のドライバリスト
+		*/
+		DriverList() {}
 	};
 
 
@@ -271,8 +276,11 @@ namespace asio
 			if (cr != ERROR_SUCCESS)
 				return DriverList(subkeys);		// 何らかの理由でレジストリを開くのに失敗した
 
-			DWORD index = 0;
-			while (true)
+			DWORD max_index = 0;
+
+			RegQueryInfoKey(hkey, NULL, NULL, NULL, &max_index, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+			for (DWORD index = 0; index < max_index; ++index)
 			{
 				try
 				{
@@ -284,8 +292,6 @@ namespace asio
 					// 開けないので帰る
 					break;
 				}
-				
-				index++;
 			}
 
 			::RegCloseKey(hkey);
