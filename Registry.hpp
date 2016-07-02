@@ -128,7 +128,7 @@ namespace asio
 	private:
 		static LONG WrappedRegOpenKey(HKEY mainKey, const std::wstring& regPath, HKEY& hkey)
 		{
-			return RegOpenKeyEx(mainKey, (LPCTSTR)regPath.c_str(), 0, KEY_QUERY_VALUE, &hkey);
+			return RegOpenKeyEx(mainKey, (LPCTSTR)regPath.c_str(), 0, KEY_ALL_ACCESS, &hkey);
 		}
 
 
