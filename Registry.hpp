@@ -123,7 +123,7 @@ namespace asio
 	private:
 		static LONG WrappedRegOpenKey(HKEY mainKey, const std::wstring& regPath, HKEY& hkey)
 		{
-			return RegOpenKeyEx(mainKey, (LPCTSTR)regPath.c_str(), 0, KEY_ALL_ACCESS, &hkey);
+			return RegOpenKeyEx(mainKey, (LPCTSTR)regPath.c_str(), 0, KEY_QUERY_VALUE, &hkey);
 		}
 
 
@@ -140,14 +140,25 @@ namespace asio
 			return true;
 		}
 
+		static inline void OutputMessage(DWORD dwMessageId)
+		{
+			LPTSTR lpBuffer = NULL;
+			FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+				NULL, GetLastError(), LANG_USER_DEFAULT,
+				(LPTSTR)&lpBuffer, 0, NULL);
+			MessageBox(NULL, lpBuffer, TEXT("Last Error Message"), MB_ICONHAND | MB_OK);
+			LocalFree(lpBuffer);
+		}
+
 		static const std::wstring GetSubKey(HKEY& hkey, const DWORD index)
 		{
 			// RegEnumKeyExに失敗したら例外を発生させておく
 			DWORD max_path_size = 360;
 			wchar_t *subkeyBuffer = new wchar_t[max_path_size];
 			LONG cr = RegEnumKeyExW(hkey, index, subkeyBuffer, &max_path_size, NULL, NULL, NULL, NULL);
-			if (cr != ERROR_SUCCESS)
+			if (cr != ERROR_SUCCESS) {
 				throw CantOpenSubKeyIndex(ASIO_REGISTORY_PATH);	// この例外でbreakできる
+			}
 				
 			std::wstring result = subkeyBuffer;
 			delete[] subkeyBuffer;		// 正直，こういうことやりたくない
@@ -256,8 +267,9 @@ namespace asio
 
 			HKEY hkey;
 			LONG cr = WrappedRegOpenKey(HKEY_LOCAL_MACHINE, ASIO_REGISTORY_PATH, hkey);
+
 			if (cr != ERROR_SUCCESS)
-				return DriverList(subkeys);
+				return DriverList(subkeys);		// 何らかの理由でレジストリを開くのに失敗した
 
 			DWORD index = 0;
 			while (true)
