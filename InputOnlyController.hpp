@@ -26,14 +26,12 @@ namespace asio
 	*/
 	class InputOnlyController : public ControllerBase
 	{
-		static InputBuffer* input;
-
 	private:
 		static void BufferSwitch(long index, long)
 		{
-			void* inBuf = input->GetBuffer(index);
+			void* inBuf = GetInputMemory(0, index);
 
-			input->Store(inBuf, bufferLength);	// 入力ストリームに内容を蓄積する
+			Input(0).Store(inBuf, bufferLength);	// 入力ストリームに内容を蓄積する
 		}
 
 	public:
@@ -45,8 +43,6 @@ namespace asio
 			: ControllerBase(asioDriverName)
 		{
 			CreateBuffer({ inputChannel }, &BufferSwitch);
-
-			input = &bufferManager->Input(0);
 		}
 
 		/**
@@ -57,8 +53,6 @@ namespace asio
 			: ControllerBase(asioDriverName)
 		{
 			CreateBuffer({ channelManager->Inputs(0) }, &BufferSwitch);
-
-			input = &bufferManager->Input(0);
 		}
 
 		/**
@@ -68,8 +62,6 @@ namespace asio
 			: ControllerBase(asioDriverName)
 		{
 			CreateBuffer({ channelManager->Inputs(inputNum) }, &BufferSwitch);
-
-			input = &bufferManager->Input(0);
 		}
 
 		/**
@@ -79,14 +71,12 @@ namespace asio
 		*/
 		StreamPtr Fetch()
 		{
-			return input->Fetch();
+			return Input(0).Fetch();
 		}
 
 		/**
 		* ストリームの現在の長さを得る
 		*/
-		const long StreamLength() const { return input->StreamLength(); }
+		const long StreamLength() const { return Input(0).StreamLength(); }
 	};
-
-	InputBuffer* InputOnlyController::input = nullptr;
 }
