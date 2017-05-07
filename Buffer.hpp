@@ -122,8 +122,7 @@ namespace asio
 		void Store(const Stream& store)
 		{
 			//if (!isStart) throw DontStartException(L"StartŠÖ”‚ªŒÄ‚Î‚ê‚Ä‚¢‚È‚¢‚Ì‚ÉStore‚ªŒÄ‚Ño‚³‚ê‚½");
-			if (isStart)
-				Critical([&](){stream->insert(stream->end(), store.begin(), store.end()); });
+			Critical([&](){stream->insert(stream->end(), store.begin(), store.end()); });
 		}
 
 
@@ -135,11 +134,8 @@ namespace asio
 		void Store(void* buffer, const long bufferLength)
 		{
 			//if (!isStart) throw DontStartException(L"StartŠÖ”‚ªŒÄ‚Î‚ê‚Ä‚¢‚È‚¢‚Ì‚ÉStore‚ªŒÄ‚Ño‚³‚ê‚½");
-			if (isStart)
-			{
-				SampleType* ptr = reinterpret_cast<SampleType*>(buffer);
-				Critical([&]() { stream->insert(stream->end(), ptr, ptr + bufferLength); });
-			}
+			SampleType* ptr = reinterpret_cast<SampleType*>(buffer);
+			Critical([&]() { stream->insert(stream->end(), ptr, ptr + bufferLength); });
 		}
 		
 		/**
