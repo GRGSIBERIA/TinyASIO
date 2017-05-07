@@ -331,7 +331,28 @@ namespace asio
 			});
 		}
 
+		/**
+		* BufferSwitchから入力バッファを得るための関数
+		*/
+		static InputBuffer& Input(const size_t index) { return inputPtr->at(index); }
 
+		/**
+		* 入力バッファの総数
+		*/
+		static const size_t InputSize() { return inputPtr->size(); }
+
+		/**
+		* BufferSwitchから出力バッファを得るための関数
+		*/
+		static OutputBuffer& Output(const size_t index) { return outputPtr->at(index); }
+		
+		/**
+		* 出力バッファの総数
+		*/
+		static const size_t OutputSize() { return outputPtr->size(); }
+
+		static std::vector<InputBuffer>& Inputs() { return *inputPtr; }		// 入力バッファ配列を得る
+		static std::vector<OutputBuffer>& Outputs() { return *outputPtr; }	// 出力バッファ配列を得る
 	};
 
 	std::vector<InputBuffer>* BufferManager::inputPtr = nullptr;

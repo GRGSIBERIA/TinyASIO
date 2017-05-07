@@ -46,7 +46,7 @@ namespace asio
 		{
 			CreateBuffer({ inputChannel }, &BufferSwitch);
 
-			input = &bufferManager->Inputs(0);
+			input = &bufferManager->Input(0);
 		}
 
 		/**
@@ -58,7 +58,7 @@ namespace asio
 		{
 			CreateBuffer({ channelManager->Inputs(0) }, &BufferSwitch);
 
-			input = &bufferManager->Inputs(0);
+			input = &bufferManager->Input(0);
 		}
 
 		/**
@@ -69,7 +69,7 @@ namespace asio
 		{
 			CreateBuffer({ channelManager->Inputs(inputNum) }, &BufferSwitch);
 
-			input = &bufferManager->Inputs(0);
+			input = &bufferManager->Input(0);
 		}
 
 		/**
