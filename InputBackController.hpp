@@ -26,18 +26,15 @@ namespace asio
 	 */
 	class InputBackController : public ControllerBase
 	{
-		static InputBuffer* input;
-		static OutputBuffer* output;
-
 	private:
 		static void BufferSwitch(long index, long)
 		{
-			void* outBuf = output->GetBuffer(index);
-			void* inBuf = input->GetBuffer(index);
+			void* outBuf = GetOutputMemory(0, index);
+			void* inBuf = GetInputMemory(0, index);
 
-			memcpy(outBuf, inBuf, bufferLength * sizeof(SampleType));	// 入力のバッファを出力へ移す
-
-			input->Store(inBuf, bufferLength);	// 入力ストリームに内容を蓄積する
+			// 入力バッファの内容を出力バッファに書き換えたあと，
+			// 入力バッファの内容を入力ストリームに転送する
+			TransferMemoryAsStored(Input(0), inBuf, outBuf);
 		}
 
 	public:
@@ -51,9 +48,6 @@ namespace asio
 			: ControllerBase(asioDriverName) 
 		{
 			CreateBuffer({inputChannel, outputChannel}, &BufferSwitch);
-
-			input = &bufferManager->Inputs(0);
-			output = &bufferManager->Outputs(0);
 		}
 
 		/**
@@ -64,9 +58,6 @@ namespace asio
 			: ControllerBase(asioDriverName)
 		{
 			CreateBuffer({channelManager->Inputs(0), channelManager->Outputs(0)}, &BufferSwitch);
-
-			input = &bufferManager->Inputs(0);
-			output = &bufferManager->Outputs(0);
 		}
 
 		/**
@@ -76,9 +67,6 @@ namespace asio
 			: ControllerBase(asioDriverName)
 		{
 			CreateBuffer({ channelManager->Inputs(inputNum), channelManager->Outputs(outputNum) }, &BufferSwitch);
-
-			input = &bufferManager->Inputs(0);
-			output = &bufferManager->Outputs(0);
 		}
 
 		/**
@@ -88,15 +76,12 @@ namespace asio
 		*/
 		StreamPtr Fetch()
 		{
-			return input->Fetch();
+			return Input(0).Fetch();
 		}
 
 		/**
 		* ストリームの現在の長さを得る
 		*/
-		const long StreamLength() const { return input->StreamLength(); }
+		const long StreamLength() const { return Input(0).StreamLength();}
 	};
-
-	InputBuffer* InputBackController::input = nullptr;
-	OutputBuffer* InputBackController::output = nullptr;
 }

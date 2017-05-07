@@ -90,7 +90,7 @@ namespace asio
 		*/
 		StreamPtr Fetch()
 		{
-			if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにFetchが呼び出された");
+			//if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにFetchが呼び出された");
 			StreamPtr retval = stream;
 			Critical([&](){ stream = StreamPtr(new std::vector<SampleType>()); });
 			return retval;
@@ -104,7 +104,7 @@ namespace asio
 		*/
 		void Fetch(void* buffer, const unsigned long bufferLength)
 		{
-			if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにFetchが呼び出された");
+			//if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにFetchが呼び出された");
 			Critical([&](){
 				unsigned long length = bufferLength;
 				if (length > stream->size())
@@ -121,8 +121,9 @@ namespace asio
 		*/
 		void Store(const Stream& store)
 		{
-			if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにStoreが呼び出された");
-			Critical([&](){stream->insert(stream->end(), store.begin(), store.end()); });
+			//if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにStoreが呼び出された");
+			if (isStart)
+				Critical([&](){stream->insert(stream->end(), store.begin(), store.end()); });
 		}
 
 
@@ -133,9 +134,12 @@ namespace asio
 		*/
 		void Store(void* buffer, const long bufferLength)
 		{
-			if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにStoreが呼び出された");
-			SampleType* ptr = reinterpret_cast<SampleType*>(buffer);
-			Critical([&](){ stream->insert(stream->end(), ptr, ptr + bufferLength); });
+			//if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにStoreが呼び出された");
+			if (isStart)
+			{
+				SampleType* ptr = reinterpret_cast<SampleType*>(buffer);
+				Critical([&]() { stream->insert(stream->end(), ptr, ptr + bufferLength); });
+			}
 		}
 		
 		/**
@@ -149,9 +153,9 @@ namespace asio
 		/**
 		* チャンネル番号で比較する
 		*/
-		inline const bool IsChannelNumber(const long channelNumber) const
+		inline const bool IsChannelNumber(const long chNumber) const
 		{
-			return this->channelNumber == channelNumber;
+			return this->channelNumber == chNumber;
 		}
 
 		/**
@@ -207,13 +211,14 @@ namespace asio
 		std::vector<InputBuffer> inputBuffers;
 		std::vector<OutputBuffer> outputBuffers;
 
-		static std::vector<BufferBase>* buffersPtr;			//!< コールバック関数から使えるようにするためのポインタ
-		static std::vector<InputBuffer>* inputBuffersPtr;
-		static std::vector<OutputBuffer>* outputBuffersPtr;
+		static std::vector<InputBuffer>* inputPtr;
+		static std::vector<OutputBuffer>* outputPtr;
 
 		bool disposed;
 
 		friend ControllerBase;
+
+		
 
 	private:
 		template <typename VECTOR_ARRAY>
@@ -249,8 +254,8 @@ namespace asio
 				buffers.push_back(ptr);
 			}
 
-			inputBuffersPtr = &inputBuffers;
-			outputBuffersPtr = &outputBuffers;
+			inputPtr = &inputBuffers;
+			outputPtr = &outputBuffers;
 		}
 
 		void StartBuffers()
@@ -274,6 +279,8 @@ namespace asio
 				{
 					Driver::Get().Interface()->disposeBuffers();
 					disposed = true;
+					inputPtr = nullptr;
+					outputPtr = nullptr;
 				}
 			}
 		}
@@ -324,13 +331,30 @@ namespace asio
 			});
 		}
 
-		static std::vector<InputBuffer>* Inputs() { return inputBuffersPtr; }		//!< 公開されている入力バッファを得る
-		static std::vector<OutputBuffer>* Outputs() { return outputBuffersPtr; }	//!< 公開されている出力バッファを得る
-		static InputBuffer& Inputs(const size_t i) { return inputBuffersPtr->at(i); }		//!< 添字から入力バッファを得る
-		static OutputBuffer& Outputs(const size_t i) { return outputBuffersPtr->at(i); }	//!< 添字から出力バッファを得る
+		/**
+		* BufferSwitchから入力バッファを得るための関数
+		*/
+		static InputBuffer& Input(const size_t index) { return inputPtr->at(index); }
+
+		/**
+		* 入力バッファの総数
+		*/
+		static const size_t InputSize() { return inputPtr->size(); }
+
+		/**
+		* BufferSwitchから出力バッファを得るための関数
+		*/
+		static OutputBuffer& Output(const size_t index) { return outputPtr->at(index); }
+		
+		/**
+		* 出力バッファの総数
+		*/
+		static const size_t OutputSize() { return outputPtr->size(); }
+
+		static std::vector<InputBuffer>& Inputs() { return *inputPtr; }		// 入力バッファ配列を得る
+		static std::vector<OutputBuffer>& Outputs() { return *outputPtr; }	// 出力バッファ配列を得る
 	};
 
-	std::vector<BufferBase>* BufferManager::buffersPtr = nullptr;
-	std::vector<InputBuffer>* BufferManager::inputBuffersPtr = nullptr;
-	std::vector<OutputBuffer>* BufferManager::outputBuffersPtr = nullptr;
+	std::vector<InputBuffer>* BufferManager::inputPtr = nullptr;
+	std::vector<OutputBuffer>* BufferManager::outputPtr = nullptr;
 }

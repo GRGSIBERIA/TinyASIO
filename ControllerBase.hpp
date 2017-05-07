@@ -99,6 +99,10 @@ namespace asio
 			return params;
 		}
 
+		static InputBuffer& Input(const size_t index) { return bufferManager->Input(index); }
+
+		static OutputBuffer& Output(const size_t index) { return bufferManager->Output(index); }
+
 		/**
 		* コールバック関数を生成する
 		*/
@@ -113,9 +117,9 @@ namespace asio
 		/*
 		* バッファ生成関数の呼び出しは子クラスに移譲する
 		*/
-		void CreateBuffer(const std::vector<Channel>& channels, ASIOCallbacks* callbacks)
+		void CreateBuffer(const std::vector<Channel>& channels, ASIOCallbacks* callbackMethod)
 		{
-			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(channels, bufferLength, callbacks));
+			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(channels, bufferLength, callbackMethod));
 		}
 
 		/*
@@ -161,6 +165,35 @@ namespace asio
 		virtual ~ControllerBase() 
 		{
 			DisposeBuffer();
+		}
+
+		/**
+		* 入力から出力に転送したあと，バッファにストアする
+		*/
+		static void TransferMemoryAsStored(InputBuffer& inBuffer, void* inPtr, void* outPtr)
+		{
+			memcpy(outPtr, inPtr, bufferLength * sizeof(asio::SampleType));
+			inBuffer.Store(inPtr, bufferLength);
+		}
+
+		/**
+		* 入力バッファのメモリアドレスを得る
+		* @param channelIndex チャンネルID
+		* @param bufferIndex ダブルバッファID
+		*/
+		static void* GetInputMemory(const size_t channelIndex, const long bufferIndex)
+		{
+			return bufferManager->Input(channelIndex).GetBuffer(bufferIndex);
+		}
+
+		/**
+		* 出力バッファのメモリアドレスを得る
+		* @param channelIndex チャンネルID
+		* @param bufferIndex ダブルバッファID
+		*/
+		static void* GetOutputMemory(const size_t channelIndex, const long bufferIndex)
+		{
+			return bufferManager->Output(channelIndex).GetBuffer(bufferIndex);
 		}
 	};
 
