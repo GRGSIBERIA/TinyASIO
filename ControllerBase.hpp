@@ -164,10 +164,10 @@ namespace asio
 		}
 
 		//*< 入力から出力に転送したあと，バッファにストアする
-		static void TransferMemoryAsStored(InputBuffer* inBuffer, void* inPtr, void* outPtr)
+		static void TransferMemoryAsStored(InputBuffer& inBuffer, void* inPtr, void* outPtr)
 		{
 			memcpy(outPtr, inPtr, bufferLength * sizeof(asio::SampleType));
-			inBuffer->Store(inPtr, bufferLength);
+			inBuffer.Store(inPtr, bufferLength);
 		}
 	};
 
