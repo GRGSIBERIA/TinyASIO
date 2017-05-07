@@ -211,13 +211,14 @@ namespace asio
 		std::vector<InputBuffer> inputBuffers;
 		std::vector<OutputBuffer> outputBuffers;
 
-		static std::vector<BufferBase>* buffersPtr;			//!< コールバック関数から使えるようにするためのポインタ
-		static std::vector<InputBuffer>* inputBuffersPtr;
-		static std::vector<OutputBuffer>* outputBuffersPtr;
+		static std::vector<InputBuffer>* inputPtr;
+		static std::vector<OutputBuffer>* outputPtr;
 
 		bool disposed;
 
 		friend ControllerBase;
+
+		
 
 	private:
 		template <typename VECTOR_ARRAY>
@@ -253,8 +254,8 @@ namespace asio
 				buffers.push_back(ptr);
 			}
 
-			inputBuffersPtr = &inputBuffers;
-			outputBuffersPtr = &outputBuffers;
+			inputPtr = &inputBuffers;
+			outputPtr = &outputBuffers;
 		}
 
 		void StartBuffers()
@@ -278,6 +279,8 @@ namespace asio
 				{
 					Driver::Get().Interface()->disposeBuffers();
 					disposed = true;
+					inputPtr = nullptr;
+					outputPtr = nullptr;
 				}
 			}
 		}
@@ -328,13 +331,9 @@ namespace asio
 			});
 		}
 
-		static std::vector<InputBuffer>* Inputs() { return inputBuffersPtr; }		//!< 公開されている入力バッファを得る
-		static std::vector<OutputBuffer>* Outputs() { return outputBuffersPtr; }	//!< 公開されている出力バッファを得る
-		static InputBuffer& Inputs(const size_t i) { return inputBuffersPtr->at(i); }		//!< 添字から入力バッファを得る
-		static OutputBuffer& Outputs(const size_t i) { return outputBuffersPtr->at(i); }	//!< 添字から出力バッファを得る
+
 	};
 
-	std::vector<BufferBase>* BufferManager::buffersPtr = nullptr;
-	std::vector<InputBuffer>* BufferManager::inputBuffersPtr = nullptr;
-	std::vector<OutputBuffer>* BufferManager::outputBuffersPtr = nullptr;
+	std::vector<InputBuffer>* BufferManager::inputPtr = nullptr;
+	std::vector<OutputBuffer>* BufferManager::outputPtr = nullptr;
 }
