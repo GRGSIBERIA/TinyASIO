@@ -45,7 +45,6 @@ namespace asio
 		static std::mutex critical;	//!< 共有資源を守ってるつもり
 
 		Channel channelInfo;	//!< チャンネル情報
-		bool isStart;			//!< バッファリングしてるかどうかの有無
 
 
 		template <typename FUNC>
@@ -57,13 +56,11 @@ namespace asio
 		}
 
 		friend BufferManager;
-		void StartBuffering() { isStart = true; }
-		void StopBuffering() { isStart = false; }
 
 
 	public:
 		BufferBase(const ASIOBufferInfo& info, const Channel& channel)
-			: channelNumber(info.channelNum), channelInfo(channel), isStart(false)
+			: channelNumber(info.channelNum), channelInfo(channel)
 		{
 			buffers[0] = info.buffers[0];
 			buffers[1] = info.buffers[1];
@@ -90,7 +87,6 @@ namespace asio
 		*/
 		StreamPtr Fetch()
 		{
-			//if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにFetchが呼び出された");
 			StreamPtr retval = stream;
 			Critical([&](){ stream = StreamPtr(new std::vector<SampleType>()); });
 			return retval;
@@ -104,7 +100,6 @@ namespace asio
 		*/
 		void Fetch(void* buffer, const unsigned long bufferLength)
 		{
-			//if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにFetchが呼び出された");
 			Critical([&](){
 				unsigned long length = bufferLength;
 				if (length > stream->size())
@@ -121,7 +116,6 @@ namespace asio
 		*/
 		void Store(const Stream& store)
 		{
-			//if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにStoreが呼び出された");
 			Critical([&](){stream->insert(stream->end(), store.begin(), store.end()); });
 		}
 
@@ -133,7 +127,6 @@ namespace asio
 		*/
 		void Store(void* buffer, const long bufferLength)
 		{
-			//if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにStoreが呼び出された");
 			SampleType* ptr = reinterpret_cast<SampleType*>(buffer);
 			Critical([&]() { stream->insert(stream->end(), ptr, ptr + bufferLength); });
 		}
@@ -252,18 +245,6 @@ namespace asio
 
 			inputPtr = &inputBuffers;
 			outputPtr = &outputBuffers;
-		}
-
-		void StartBuffers()
-		{
-			for (auto& buffer : buffers)
-				buffer->StartBuffering();
-		}
-
-		void StopBuffers()
-		{
-			for (auto& buffer : buffers)
-				buffer->StopBuffering();
 		}
 
 	public:
