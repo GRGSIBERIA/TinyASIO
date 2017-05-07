@@ -91,7 +91,8 @@ namespace asio
 		long numberOfOutput;		//!< 出力チャンネル数
 		std::shared_ptr<ASIOChannelInfo> inPtr;		//!< 入力チャンネル情報
 		std::shared_ptr<ASIOChannelInfo> outPtr;	//!< 出力チャンネル情報
-		
+
+
 	private:
 		//!< あるチャンネルの初期化
 		void InitOneChannel(ASIOChannelInfo& info, const long i, const ASIOBool isInput)

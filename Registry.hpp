@@ -145,7 +145,7 @@ namespace asio
 			return true;
 		}
 
-		static inline void OutputMessage(DWORD dwMessageId)
+		static inline void OutputMessage(DWORD)
 		{
 			LPTSTR lpBuffer = NULL;
 			FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,

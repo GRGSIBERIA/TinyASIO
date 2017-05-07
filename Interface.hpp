@@ -31,10 +31,10 @@ namespace asio
 		long driverVersion;		//!< ドライバのバージョン
 
 	private:
-		void RetryCreateInstance(const CLSID& clsid, const SubKey& subkey)
+		void RetryCreateInstance(const CLSID& clsid, const SubKey& subkeyData)
 		{
 			// デフォルトだとThreadingModelがSTAなので，STA/MTA（Both）に変更して再試行する
-			if (Registry::ChangeTheadingModel(subkey) != ERROR_SUCCESS)
+			if (Registry::ChangeTheadingModel(subkeyData) != ERROR_SUCCESS)
 				throw CantCreateInstance("ドライバのインスタンス生成に失敗しました");
 
 			HRESULT hr = CoCreateInstance(clsid, 0, CLSCTX_INPROC_SERVER, clsid, (LPVOID*)&iasio);
