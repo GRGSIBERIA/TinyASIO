@@ -45,7 +45,7 @@ namespace asio
 		static std::mutex critical;	//!< 共有資源を守ってるつもり
 
 		Channel channelInfo;	//!< チャンネル情報
-		//bool isStart;			//!< バッファリングしてるかどうかの有無
+		bool isStart;			//!< バッファリングしてるかどうかの有無
 
 
 		template <typename FUNC>
@@ -57,13 +57,13 @@ namespace asio
 		}
 
 		friend BufferManager;
-		//void StartBuffering() { isStart = true; }
-		//void StopBuffering() { isStart = false; }
+		void StartBuffering() { isStart = true; }
+		void StopBuffering() { isStart = false; }
 
 
 	public:
 		BufferBase(const ASIOBufferInfo& info, const Channel& channel)
-			: channelNumber(info.channelNum), channelInfo(channel)//, isStart(false)
+			: channelNumber(info.channelNum), channelInfo(channel), isStart(false)
 		{
 			buffers[0] = info.buffers[0];
 			buffers[1] = info.buffers[1];
@@ -122,7 +122,8 @@ namespace asio
 		void Store(const Stream& store)
 		{
 			//if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにStoreが呼び出された");
-			Critical([&](){stream->insert(stream->end(), store.begin(), store.end()); });
+			if (isStart)
+				Critical([&](){stream->insert(stream->end(), store.begin(), store.end()); });
 		}
 
 
@@ -134,8 +135,11 @@ namespace asio
 		void Store(void* buffer, const long bufferLength)
 		{
 			//if (!isStart) throw DontStartException(L"Start関数が呼ばれていないのにStoreが呼び出された");
-			SampleType* ptr = reinterpret_cast<SampleType*>(buffer);
-			Critical([&](){ stream->insert(stream->end(), ptr, ptr + bufferLength); });
+			if (isStart)
+			{
+				SampleType* ptr = reinterpret_cast<SampleType*>(buffer);
+				Critical([&]() { stream->insert(stream->end(), ptr, ptr + bufferLength); });
+			}
 		}
 		
 		/**
@@ -255,14 +259,14 @@ namespace asio
 
 		void StartBuffers()
 		{
-			//for (auto& buffer : buffers)
-			//	buffer->StartBuffering();
+			for (auto& buffer : buffers)
+				buffer->StartBuffering();
 		}
 
 		void StopBuffers()
 		{
-			//for (auto& buffer : buffers)
-			//	buffer->StopBuffering();
+			for (auto& buffer : buffers)
+				buffer->StopBuffering();
 		}
 
 	public:
