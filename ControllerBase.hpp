@@ -113,9 +113,9 @@ namespace asio
 		/*
 		* バッファ生成関数の呼び出しは子クラスに移譲する
 		*/
-		void CreateBuffer(const std::vector<Channel>& channels, ASIOCallbacks* callbacks)
+		void CreateBuffer(const std::vector<Channel>& channels, ASIOCallbacks* callbackMethod)
 		{
-			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(channels, bufferLength, callbacks));
+			bufferManager = std::shared_ptr<BufferManager>(new BufferManager(channels, bufferLength, callbackMethod));
 		}
 
 		/*
@@ -161,6 +161,13 @@ namespace asio
 		virtual ~ControllerBase() 
 		{
 			DisposeBuffer();
+		}
+
+		//*< 入力から出力に転送したあと，バッファにストアする
+		static void TransferMemoryAsStored(InputBuffer* inBuffer, void* inPtr, void* outPtr)
+		{
+			memcpy(outPtr, inPtr, bufferLength * sizeof(asio::SampleType));
+			inBuffer->Store(inPtr, bufferLength);
 		}
 	};
 
