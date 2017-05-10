@@ -45,7 +45,7 @@ namespace asio
 		static std::mutex critical;	//!< 共有資源を守ってるつもり
 
 		Channel channelInfo;	//!< チャンネル情報
-
+		bool isStart = false;
 
 		template <typename FUNC>
 		void Critical(FUNC func)
@@ -73,7 +73,12 @@ namespace asio
 		virtual ~BufferBase()
 		{
 			//DeleteCriticalSection(&critical);
+			stream = nullptr;
 		}
+
+
+		void StartBuffering() { isStart = true; }
+		void StopBuffering() { isStart = false; }
 
 
 		inline const long ChannelNumber() const { return channelNumber; }	//!< チャンネル番号
@@ -116,6 +121,7 @@ namespace asio
 		*/
 		void Store(const Stream& store)
 		{
+			if (!isStart) return;
 			Critical([&](){stream->insert(stream->end(), store.begin(), store.end()); });
 		}
 
@@ -127,6 +133,7 @@ namespace asio
 		*/
 		void Store(void* buffer, const long bufferLength)
 		{
+			if (!isStart) return;
 			SampleType* ptr = reinterpret_cast<SampleType*>(buffer);
 			Critical([&]() { stream->insert(stream->end(), ptr, ptr + bufferLength); });
 		}
@@ -306,6 +313,22 @@ namespace asio
 				[](const BufferBase& buffer) -> bool {
 				return buffer.IsEnabledBuffer();
 			});
+		}
+
+		void StartBuffering()
+		{
+			for (auto& in : inputBuffers)
+				in.StartBuffering();
+			for (auto& out : outputBuffers)
+				out.StartBuffering();
+		}
+
+		void StopBuffering()
+		{
+			for (auto& in : inputBuffers)
+				in.StopBuffering();
+			for (auto& out : outputBuffers)
+				out.StopBuffering();
 		}
 
 		/**

@@ -135,12 +135,14 @@ namespace asio
 		//!< バッファリング開始
 		virtual void Start() 
 		{ 
+			bufferManager->StartBuffering();
 			driver->Interface()->start(); 
 		}
 
 		//!< バッファリング終了
 		virtual void Stop() 
 		{ 
+			bufferManager->StopBuffering();
 			driver->Interface()->stop(); 
 		}	
 		
