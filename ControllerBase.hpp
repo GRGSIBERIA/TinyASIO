@@ -159,7 +159,15 @@ namespace asio
 		void DisposeBuffer()
 		{
 			Stop();
-			bufferManager->DisposeBuffer();
+			try
+			{
+				bufferManager->DisposeBuffer();
+			}
+			catch (char* e)
+			{
+				// access violation error
+				std::cout << "Exeption Caught: " << e << std::endl;
+			}
 		}
 
 		virtual ~ControllerBase() 

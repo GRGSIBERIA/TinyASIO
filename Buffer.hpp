@@ -325,10 +325,20 @@ namespace asio
 
 		void StopBuffering()
 		{
-			for (auto& in : inputBuffers)
-				in.StopBuffering();
-			for (auto& out : outputBuffers)
-				out.StopBuffering();
+			if (this == nullptr) return;
+
+			try
+			{
+				for (auto& in : inputBuffers)
+					in.StopBuffering();
+				for (auto& out : outputBuffers)
+					out.StopBuffering();
+			}
+			catch (...)
+			{
+				// access violation error
+				std::cout << "Exeption Caught: " << std::endl;
+			}
 		}
 
 		/**
